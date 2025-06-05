@@ -134,7 +134,32 @@ export const serverEquipment: Equipment[] = [
       expansion: 'PCIeスロット×6'
     },
     mountingNotes: '大型・重量機器。設置前に床耐荷重要確認。'
-  }
+  },
+{ 
+      id: 'blade-chassis', 
+      name: 'ブレードシャーシ', 
+      height: 10, 
+      depth: 800, 
+      power: 2000, 
+      heat: 6826, 
+      weight: 80, 
+      type: 'server', 
+      color: '#1E1B4B', 
+      dualPower: true, 
+      needsRails: true, 
+      airflow: 'front-to-rear', 
+      cfm: 450, 
+      heatGeneration: 6826,
+      description: '高密度仮想化環境用。最大16枚のブレードサーバーを収容可能。共有電源・冷却システムで効率的な運用を実現。',
+      specifications: {
+        blades: '最大16枚',
+        power: '冗長電源×6',
+        cooling: '可変速ファン×8',
+        network: '内蔵スイッチ対応',
+        management: '統合管理コンソール'
+      },
+      mountingNotes: '専用レール必須。設置前配線計画要検討。'
+    },
 ];
 
 // ネットワーク機器
