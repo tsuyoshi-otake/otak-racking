@@ -189,6 +189,31 @@ export const networkEquipment: Equipment[] = [
     },
     mountingNotes: '軽量のため簡易取り付け可能。前面アクセス要確保。'
   },
+{ 
+      id: 'core-switch', 
+      name: 'コアスイッチ', 
+      height: 3, 
+      depth: 500, 
+      power: 400, 
+      heat: 1365, 
+      weight: 20, 
+      type: 'network', 
+      color: '#047857', 
+      dualPower: true, 
+      needsRails: false, 
+      airflow: 'front-to-rear', 
+      cfm: 150, 
+      heatGeneration: 1365,
+      description: 'データセンターコア用高性能スイッチ。高スループットと低遅延を実現。モジュラー設計で柔軟な拡張が可能。',
+      specifications: {
+        capacity: '最大3.2Tbps',
+        ports: '10GbE×48, 40GbE×8',
+        latency: '1μs未満',
+        redundancy: '冗長電源・制御部',
+        modules: '拡張モジュール対応'
+      },
+      mountingNotes: '重要機器につき耐震対策必須。'
+    },
   { 
     id: 'firewall', 
     name: 'ファイアウォール', 
@@ -212,7 +237,7 @@ export const networkEquipment: Equipment[] = [
       vpn: 'SSL-VPN/IPsec対応',
       management: '統合管理コンソール'
     },
-    mountingNotes: 'セキュリティ機器につき物理アクセス制限要検討。'
+    mountingNotes: 'セキュリティ機器につき物理アクセス制限要検討。',
   }
 ];
 
@@ -242,7 +267,32 @@ export const storageEquipment: Equipment[] = [
       controller: '冗長コントローラー'
     },
     mountingNotes: 'ドライブ交換頻度を考慮し前面アクセス確保。'
-  }
+  },
+{ 
+      id: 'storage-4u', 
+      name: '4Uストレージ', 
+      height: 4, 
+      depth: 750, 
+      power: 600, 
+      heat: 2048, 
+      weight: 50, 
+      type: 'storage', 
+      color: '#1D4ED8', 
+      dualPower: true, 
+      needsRails: true, 
+      airflow: 'front-to-rear', 
+      cfm: 180, 
+      heatGeneration: 2048,
+      description: '大容量ストレージシステム。3.5インチドライブ24本搭載で最大容量を実現。',
+      specifications: {
+        drives: '3.5インチSAS×24',
+        capacity: '最大480TB',
+        raid: '全RAIDレベル対応',
+        snapshot: 'スナップショット機能',
+        replication: 'リモートレプリケーション'
+      },
+      mountingNotes: '大容量・重量機器。床荷重要確認。'
+    },
 ];
 
 // 電源機器
@@ -297,8 +347,35 @@ export const powerEquipment: Equipment[] = [
       battery: 'シール鉛蓄電池',
       monitoring: 'SNMP/USB監視'
     },
-    mountingNotes: 'バッテリー交換要スペース確保。'
-  }
+    mountingNotes: 'バッテリー交換要スペース確保。',
+  },
+{ 
+      id: 'pdu-vertical-smart', 
+      name: '縦型スマートPDU', 
+      height: 0, 
+      depth: 100, 
+      power: 0, 
+      heat: 0, 
+      weight: 7, 
+      type: 'pdu', 
+      color: '#B91C1C', 
+      dualPower: false, 
+      system: 'A', 
+      needsRails: false, 
+      airflow: 'natural', 
+      cfm: 0, 
+      heatGeneration: 0,
+      description: 'ネットワーク監視機能付き縦型PDU。リモートでの電力監視・制御が可能。',
+      specifications: {
+        outlets: 'C13×16, C19×6',
+        input: '単相100V 20A',
+        monitoring: 'アウトレット別監視',
+        network: 'SNMP/Web管理',
+        control: 'リモート電源制御'
+      },
+      mountingNotes: 'ネットワーク配線必要。管理用IPアドレス要設定。',
+      pduType: 'vertical-smart'
+    },
 ];
 
 // 取り付け部品

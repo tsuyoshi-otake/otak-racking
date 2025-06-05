@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Moon, Sun } from 'lucide-react';
+import { Moon, Sun, Maximize } from 'lucide-react';
 import { Equipment } from './types';
 import { useRackState } from './hooks/useRackState';
 import { useDragAndDrop } from './hooks/useDragAndDrop';
@@ -111,6 +111,37 @@ function App() {
       [mode]: !prev[mode]
     }));
   };
+const handleZoomFit = () => {
+    const sidebarWidth = 320; // サイドバーの幅 (w-80)
+    const headerHeight = 80;  // ヘッダーの高さ
+    const margin = 40; // ビューポート計算時の余裕マージン
+
+    if (selectedRack === 'all') {
+      const rackIds = Object.keys(racks);
+      // calculateLayoutDimensions は window.innerWidth を内部で参照するため、
+      // ここで渡す必要はありません。
+      const layout = calculateLayoutDimensions(rackIds.length);
+      const viewportWidth = window.innerWidth - sidebarWidth - margin;
+      const viewportHeight = window.innerHeight - headerHeight - margin;
+      
+      const referenceRackHeight = (42 * 32) + 100; // 42Uラックの高さ + パディング等
+
+      const widthBasedZoom = Math.floor((viewportWidth / layout.totalContentWidth) * 100);
+      const heightBasedZoom = Math.floor((viewportHeight / referenceRackHeight) * 100);
+      
+      // ズームレベルが極端に小さくならないように最小値を設定 (例: 20%)
+      // また、大きくなりすぎないように最大値も設定 (例: 75%)
+      const optimalZoom = Math.min(75, Math.max(20, Math.min(widthBasedZoom, heightBasedZoom)));
+      setZoomLevel(optimalZoom);
+    } else if (currentRack) {
+      const viewportHeight = window.innerHeight - headerHeight - margin;
+      const rackContentHeight = (currentRack.units * 32) + 100; // ラックのコンテンツ高さ + パディング等
+      
+      // こちらも最小・最大値を設定 (例: 20% - 100%)
+      const optimalZoom = Math.min(100, Math.max(20, Math.floor((viewportHeight / rackContentHeight) * 100)));
+      setZoomLevel(optimalZoom);
+    }
+  };
 
   // 機器クリック処理
   const handleEquipmentClick = (equipment: Equipment) => {
@@ -119,6 +150,15 @@ function App() {
   };
 
   // 機器削除処理
+<button
+              onClick={handleZoomFit}
+              className={`p-2 rounded transition-colors ${
+                darkMode ? 'text-gray-400 hover:bg-gray-700' : 'text-gray-600 hover:bg-gray-200'
+              }`}
+              title="画面にフィット"
+            >
+              <Maximize size={18} />
+            </button>
   const handleEquipmentRemove = (unit: number) => {
     if (window.confirm('この機器を削除しますか？\n関連する設定もすべて削除されます。')) {
       removeEquipment(selectedRack, unit);
