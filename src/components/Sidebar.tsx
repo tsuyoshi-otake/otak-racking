@@ -120,7 +120,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   ];
 
   return (
-    <div className={`w-80 border-r overflow-y-auto ${sidebarStyle}`}>
+    <div className={`w-80 border-r overflow-y-auto custom-scrollbar ${sidebarStyle}`}>
       <div className="p-4 space-y-4">
         {/* ラック選択・操作 */}
         <div>

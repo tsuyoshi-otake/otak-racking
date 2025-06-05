@@ -23,3 +23,115 @@ code {
 html, body, #root {
   height: 100%;
 }
+
+/* ライトテーマ用スクロールバー */
+:root {
+  --scrollbar-width: 8px;
+  --scrollbar-thumb-light: #cbd5e1;
+  --scrollbar-thumb-hover-light: #94a3b8;
+  --scrollbar-track-light: #f8fafc;
+  
+  --scrollbar-thumb-dark: #475569;
+  --scrollbar-thumb-hover-dark: #64748b;
+  --scrollbar-track-dark: #1e293b;
+}
+
+/* WebKit based browsers (Chrome, Safari, Edge) */
+::-webkit-scrollbar {
+  width: var(--scrollbar-width);
+  height: var(--scrollbar-width);
+}
+
+/* ライトテーマのスクロールバー */
+::-webkit-scrollbar-track {
+  background: var(--scrollbar-track-light);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb-light);
+  border-radius: 4px;
+  transition: background-color 0.2s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-thumb-hover-light);
+}
+
+::-webkit-scrollbar-corner {
+  background: var(--scrollbar-track-light);
+}
+
+/* ダークテーマのスクロールバー */
+.dark ::-webkit-scrollbar-track {
+  background: var(--scrollbar-track-dark);
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb-dark);
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-thumb-hover-dark);
+}
+
+.dark ::-webkit-scrollbar-corner {
+  background: var(--scrollbar-track-dark);
+}
+
+/* Firefox */
+html {
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-thumb-light) var(--scrollbar-track-light);
+}
+
+.dark html {
+  scrollbar-color: var(--scrollbar-thumb-dark) var(--scrollbar-track-dark);
+}
+
+/* より滑らかなスクロール */
+html {
+  scroll-behavior: smooth;
+}
+
+/* カスタムスクロール領域 */
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-thumb-light) var(--scrollbar-track-light);
+}
+
+.dark .custom-scrollbar {
+  scrollbar-color: var(--scrollbar-thumb-dark) var(--scrollbar-track-dark);
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: var(--scrollbar-width);
+  height: var(--scrollbar-width);
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: var(--scrollbar-track-light);
+  border-radius: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb-light);
+  border-radius: 4px;
+  transition: background-color 0.2s ease;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-thumb-hover-light);
+}
+
+.dark .custom-scrollbar::-webkit-scrollbar-track {
+  background: var(--scrollbar-track-dark);
+}
+
+.dark .custom-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb-dark);
+}
+
+.dark .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-thumb-hover-dark);
+}

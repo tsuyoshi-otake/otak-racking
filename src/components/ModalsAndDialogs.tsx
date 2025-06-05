@@ -165,7 +165,7 @@ export const ModalsAndDialogs: React.FC<ModalsAndDialogsProps> = ({
         </div>
 
         {/* コンテンツ */}
-        <div className="p-4 max-h-96 overflow-y-auto">
+        <div className="p-4 max-h-96 overflow-y-auto custom-scrollbar">
           {activeTab === 'info' && (
             <div className="space-y-3">
               <div>
@@ -457,7 +457,7 @@ export const ModalsAndDialogs: React.FC<ModalsAndDialogsProps> = ({
             </button>
           </div>
 
-          <div className="p-4 max-h-96 overflow-y-auto">
+          <div className="p-4 max-h-96 overflow-y-auto custom-scrollbar">
             <div className="space-y-4">
               <div className="flex justify-between items-center">
                 <h4 className="font-medium">登録ラック一覧</h4>

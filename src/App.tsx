@@ -132,7 +132,7 @@ function App() {
   const containerStyle = getContainerStyle(darkMode);
 
   return (
-    <div className={`min-h-screen ${containerStyle}`}>
+    <div className={`min-h-screen ${containerStyle} ${darkMode ? 'dark' : ''}`}>
       {/* ヘッダー */}
       <header className={`border-b p-4 ${
         darkMode ? 'border-gray-600 bg-gray-800' : 'border-gray-300 bg-white'
@@ -191,7 +191,7 @@ function App() {
         />
 
         {/* ラック表示エリア */}
-        <main className="flex-1 overflow-auto p-4">
+        <main className="flex-1 overflow-auto p-4 custom-scrollbar">
           {selectedRack === 'all' ? (
             // 全体表示
             <div className="space-y-6">
@@ -204,9 +204,9 @@ function App() {
                 </p>
               </div>
               
-              <div 
+              <div
                 className={`flex gap-8 ${
-                  layoutDimensions.needsScroll ? 'overflow-x-auto pb-4' : 'justify-center'
+                  layoutDimensions.needsScroll ? 'overflow-x-auto pb-4 custom-scrollbar' : 'justify-center'
                 }`}
                 style={{ minWidth: layoutDimensions.needsScroll ? `${layoutDimensions.totalContentWidth}px` : 'auto' }}
               >
