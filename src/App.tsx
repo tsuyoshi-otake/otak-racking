@@ -3,7 +3,8 @@ import { Moon, Sun, Maximize } from 'lucide-react';
 import { Equipment } from './types';
 import { useRackState } from './hooks/useRackState';
 import { useDragAndDrop, DraggedItem } from './hooks/useDragAndDrop';
-import { Sidebar } from './components/Sidebar';
+import { LeftSidebar } from './components/LeftSidebar'; // Sidebar を LeftSidebar に変更
+import { RightSidebar } from './components/RightSidebar'; // RightSidebar を追加
 import { RackView } from './components/RackView';
 import { ModalsAndDialogs, InfoModalProps, ConfirmModalProps } from './components/ModalsAndDialogs';
 import { calculateLayoutDimensions, getContainerStyle } from './utils';
@@ -141,7 +142,9 @@ const [rackViewPerspective, setRackViewPerspective] = useState<RackViewPerspecti
   };
 
 const handleZoomFit = () => {
-    const sidebarWidth = 320; // サイドバーの幅 (w-80)
+    const leftSidebarWidth = 320; // 左サイドバーの幅 (w-80)
+    const rightSidebarWidth = 320; // 右サイドバーの幅 (w-80)
+    const totalSidebarWidth = leftSidebarWidth + rightSidebarWidth;
     const headerHeight = 80;  // ヘッダーの高さ
     const margin = 40; // ビューポート計算時の余裕マージン
 
@@ -150,7 +153,7 @@ const handleZoomFit = () => {
       // calculateLayoutDimensions は window.innerWidth を内部で参照するため、
       // ここで渡す必要はありません。
       const layout = calculateLayoutDimensions(rackIds.length);
-      const viewportWidth = window.innerWidth - sidebarWidth - margin;
+      const viewportWidth = window.innerWidth - totalSidebarWidth - margin; // sidebarWidth を totalSidebarWidth に変更
       const viewportHeight = window.innerHeight - headerHeight - margin;
       
       const referenceRackHeight = (42 * 32) + 100; // 42Uラックの高さ + パディング等
@@ -235,27 +238,14 @@ const handleZoomFit = () => {
 
       {/* メインコンテンツ */}
       <div className="flex h-[calc(100vh-80px)]">
-        {/* サイドバー */}
-        <Sidebar
-          racks={racks}
-          selectedRack={selectedRack}
+        {/* 左サイドバー */}
+        <LeftSidebar
           darkMode={darkMode}
           zoomLevel={zoomLevel}
-          // viewModes={viewModes} // 古いpropsを削除
-          activeViewMode={activeViewMode} // 新しいpropsを追加
-          floorSettings={floorSettings}
-          onRackSelect={setSelectedRack}
-          onAddRack={addRack}
-          onRemoveRack={removeRack}
-          onDuplicateRack={duplicateRack}
+          activeViewMode={activeViewMode}
           onZoomChange={setZoomLevel}
-          // onViewModeToggle={handleViewModeToggle} // 古いpropsを削除
-          onActiveViewModeChange={handleActiveViewModeChange} // 新しいpropsを追加
+          onActiveViewModeChange={handleActiveViewModeChange}
           onDragStart={handleDragStart}
-          onShowRackManager={() => setShowRackManager(true)}
-          onShowFloorSettings={() => setShowFloorSettings(true)}
-          onShowCoolingConfig={() => setShowCoolingConfig(true)}
-          onShowPowerConfig={() => setShowPowerConfig(true)}
           currentPerspective={rackViewPerspective}
           onPerspectiveChange={setRackViewPerspective}
         />
@@ -330,6 +320,22 @@ const handleZoomFit = () => {
             )
           )}
         </main>
+
+        {/* 右サイドバー */}
+        <RightSidebar
+          racks={racks}
+          selectedRack={selectedRack}
+          darkMode={darkMode}
+          floorSettings={floorSettings}
+          onRackSelect={setSelectedRack}
+          onAddRack={addRack}
+          onRemoveRack={removeRack}
+          onDuplicateRack={duplicateRack}
+          onShowRackManager={() => setShowRackManager(true)}
+          onShowFloorSettings={() => setShowFloorSettings(true)}
+          onShowCoolingConfig={() => setShowCoolingConfig(true)}
+          onShowPowerConfig={() => setShowPowerConfig(true)}
+        />
       </div>
 
       {/* モーダル・ダイアログ */}
