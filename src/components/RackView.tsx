@@ -214,8 +214,8 @@ export const RackView: React.FC<RackViewProps> = ({
     });
   };
 
-  // 詳細なナット・レール表現
-  const renderMountingHoles = (unit: number) => {
+  // 前面用ナット・レール表現
+  const renderFrontMountingHoles = (unit: number) => {
     const cageNuts = rack.cageNuts[unit] || {
       frontLeft: { top: null, bottom: null },
       frontRight: { top: null, bottom: null },
@@ -443,64 +443,235 @@ export const RackView: React.FC<RackViewProps> = ({
             </div>
           )}
         </div>
+      </>
+    );
+  };
 
-        {/* 背面表示（詳細化） */}
+  // 背面用ナット・レール表現
+  const renderRearMountingHoles = (unit: number) => {
+    const cageNuts = rack.cageNuts[unit] || {
+      frontLeft: { top: null, bottom: null },
+      frontRight: { top: null, bottom: null },
+      rearLeft: { top: null, bottom: null },
+      rearRight: { top: null, bottom: null }
+    };
+
+    const railInstallation = rack.railInstallations?.[unit];
+    const holeSize = Math.max(13, unitHeight * 0.38);
+    
+    return (
+      <>
+        {/* レール表現 */}
+        {railInstallation && railInstallation.installed && (
+          <>
+            {/* 左レール */}
+            <div
+              className="absolute bg-gradient-to-r from-gray-400 to-gray-600 border border-gray-500 opacity-90"
+              style={{
+                width: `3px`,
+                height: `${unitHeight - 4}px`,
+                left: `-8px`,
+                top: `2px`,
+                borderRadius: '1px'
+              }}
+              title={`左レール: ${railInstallation.type}`}
+            >
+              <div className="w-full h-full flex flex-col justify-around">
+                {Array.from({ length: 3 }, (_, i) => (
+                  <div key={i} className="w-full h-0.5 bg-gray-700" />
+                ))}
+              </div>
+            </div>
+            
+            {/* 右レール */}
+            <div
+              className="absolute bg-gradient-to-r from-gray-400 to-gray-600 border border-gray-500 opacity-90"
+              style={{
+                width: `3px`,
+                height: `${unitHeight - 4}px`,
+                right: `-8px`,
+                top: `2px`,
+                borderRadius: '1px'
+              }}
+              title={`右レール: ${railInstallation.type}`}
+            >
+              <div className="w-full h-full flex flex-col justify-around">
+                {Array.from({ length: 3 }, (_, i) => (
+                  <div key={i} className="w-full h-0.5 bg-gray-700" />
+                ))}
+              </div>
+            </div>
+          </>
+        )}
+
+        {/* 背面左ラック柱 - 上穴 */}
         <div
-          className={`absolute border cursor-pointer hover:scale-110 transition-transform opacity-70 ${
-            cageNuts.rearLeft?.top || cageNuts.rearLeft?.bottom ? 'bg-green-400 border-green-500' : darkMode ? 'bg-gray-500 border-gray-400' : 'bg-gray-200 border-gray-300'
+          className={`absolute border cursor-pointer ${
+            cageNuts.rearLeft?.top
+              ? 'bg-gradient-to-br from-gray-600 via-gray-700 to-gray-800 border-gray-500'
+              : darkMode
+                ? 'bg-gradient-to-br from-gray-800 via-gray-900 to-black border-gray-700'
+                : 'bg-gradient-to-br from-gray-100 via-gray-200 to-gray-300 border-gray-400'
           }`}
           style={{
-            width: `${Math.max(3, holeSize * 0.7)}px`,
-            height: `${unitHeight - 4}px`,
-            left: `${holeSize + 4}px`,
+            width: `${holeSize}px`,
+            height: `${holeSize}px`,
+            left: `-${holeSize + 2}px`,
             top: `2px`,
-            borderRadius: '1px'
+            borderRadius: '2px',
+            boxShadow: cageNuts.rearLeft?.top
+              ? 'inset 0 2px 4px rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.2)'
+              : 'inset 0 2px 4px rgba(0,0,0,0.1)'
           }}
-          title={`背面左: ${(cageNuts.rearLeft?.top || cageNuts.rearLeft?.bottom) ? 'ナット設置済み' : '未設置'}`}
+          title={cageNuts.rearLeft?.top ? `背面左上: ${cageNuts.rearLeft.top.toUpperCase()}ナット` : '背面左上: 空き穴'}
           onClick={(e) => {
             e.stopPropagation();
-            if (cageNuts.rearLeft?.top || cageNuts.rearLeft?.bottom) {
+            if (cageNuts.rearLeft?.top) {
               onCageNutRemove?.(unit, 'rearLeft', 'top');
-              onCageNutRemove?.(unit, 'rearLeft', 'bottom');
             } else {
               onCageNutInstall?.(unit, 'rearLeft', 'top', 'm6');
-              onCageNutInstall?.(unit, 'rearLeft', 'bottom', 'm6');
             }
           }}
         >
-          {(cageNuts.rearLeft?.top || cageNuts.rearLeft?.bottom) && (
+          {cageNuts.rearLeft?.top && (
             <div className="w-full h-full flex items-center justify-center">
-              <Minus size={Math.max(2, holeSize * 0.3)} className="text-white" />
+              <div
+                className="bg-gradient-to-br from-zinc-300 to-zinc-500 rounded-full"
+                style={{
+                  width: `${Math.max(6, holeSize * 0.4)}px`,
+                  height: `${Math.max(6, holeSize * 0.4)}px`,
+                  boxShadow: 'inset 0 1px 2px rgba(0,0,0,0.2)'
+                }}
+              />
             </div>
           )}
         </div>
 
+        {/* 背面左ラック柱 - 下穴 */}
         <div
-          className={`absolute border cursor-pointer hover:scale-110 transition-transform opacity-70 ${
-            cageNuts.rearRight?.top || cageNuts.rearRight?.bottom ? 'bg-green-400 border-green-500' : darkMode ? 'bg-gray-500 border-gray-400' : 'bg-gray-200 border-gray-300'
+          className={`absolute border cursor-pointer ${
+            cageNuts.rearLeft?.bottom
+              ? 'bg-gradient-to-br from-gray-600 via-gray-700 to-gray-800 border-gray-500'
+              : darkMode
+                ? 'bg-gradient-to-br from-gray-800 via-gray-900 to-black border-gray-700'
+                : 'bg-gradient-to-br from-gray-100 via-gray-200 to-gray-300 border-gray-400'
           }`}
           style={{
-            width: `${Math.max(3, holeSize * 0.7)}px`,
-            height: `${unitHeight - 4}px`,
-            right: `${holeSize + 4}px`,
-            top: `2px`,
-            borderRadius: '1px'
+            width: `${holeSize}px`,
+            height: `${holeSize}px`,
+            left: `-${holeSize + 2}px`,
+            bottom: `2px`,
+            borderRadius: '2px',
+            boxShadow: cageNuts.rearLeft?.bottom
+              ? 'inset 0 2px 4px rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.2)'
+              : 'inset 0 2px 4px rgba(0,0,0,0.1)'
           }}
-          title={`背面右: ${(cageNuts.rearRight?.top || cageNuts.rearRight?.bottom) ? 'ナット設置済み' : '未設置'}`}
+          title={cageNuts.rearLeft?.bottom ? `背面左下: ${cageNuts.rearLeft.bottom.toUpperCase()}ナット` : '背面左下: 空き穴'}
           onClick={(e) => {
             e.stopPropagation();
-            if (cageNuts.rearRight?.top || cageNuts.rearRight?.bottom) {
+            if (cageNuts.rearLeft?.bottom) {
+              onCageNutRemove?.(unit, 'rearLeft', 'bottom');
+            } else {
+              onCageNutInstall?.(unit, 'rearLeft', 'bottom', 'm6');
+            }
+          }}
+        >
+          {cageNuts.rearLeft?.bottom && (
+            <div className="w-full h-full flex items-center justify-center">
+              <div
+                className="bg-gradient-to-br from-zinc-300 to-zinc-500 rounded-full"
+                style={{
+                  width: `${Math.max(6, holeSize * 0.4)}px`,
+                  height: `${Math.max(6, holeSize * 0.4)}px`,
+                  boxShadow: 'inset 0 1px 2px rgba(0,0,0,0.2)'
+                }}
+              />
+            </div>
+          )}
+        </div>
+
+        {/* 背面右ラック柱 - 上穴 */}
+        <div
+          className={`absolute border cursor-pointer ${
+            cageNuts.rearRight?.top
+              ? 'bg-gradient-to-br from-gray-600 via-gray-700 to-gray-800 border-gray-500'
+              : darkMode
+                ? 'bg-gradient-to-br from-gray-800 via-gray-900 to-black border-gray-700'
+                : 'bg-gradient-to-br from-gray-100 via-gray-200 to-gray-300 border-gray-400'
+          }`}
+          style={{
+            width: `${holeSize}px`,
+            height: `${holeSize}px`,
+            right: `-${holeSize + 2}px`,
+            top: `2px`,
+            borderRadius: '2px',
+            boxShadow: cageNuts.rearRight?.top
+              ? 'inset 0 2px 4px rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.2)'
+              : 'inset 0 2px 4px rgba(0,0,0,0.1)'
+          }}
+          title={cageNuts.rearRight?.top ? `背面右上: ${cageNuts.rearRight.top.toUpperCase()}ナット` : '背面右上: 空き穴'}
+          onClick={(e) => {
+            e.stopPropagation();
+            if (cageNuts.rearRight?.top) {
               onCageNutRemove?.(unit, 'rearRight', 'top');
-              onCageNutRemove?.(unit, 'rearRight', 'bottom');
             } else {
               onCageNutInstall?.(unit, 'rearRight', 'top', 'm6');
+            }
+          }}
+        >
+          {cageNuts.rearRight?.top && (
+            <div className="w-full h-full flex items-center justify-center">
+              <div
+                className="bg-gradient-to-br from-zinc-300 to-zinc-500 rounded-full"
+                style={{
+                  width: `${Math.max(6, holeSize * 0.4)}px`,
+                  height: `${Math.max(6, holeSize * 0.4)}px`,
+                  boxShadow: 'inset 0 1px 2px rgba(0,0,0,0.2)'
+                }}
+              />
+            </div>
+          )}
+        </div>
+
+        {/* 背面右ラック柱 - 下穴 */}
+        <div
+          className={`absolute border cursor-pointer ${
+            cageNuts.rearRight?.bottom
+              ? 'bg-gradient-to-br from-gray-600 via-gray-700 to-gray-800 border-gray-500'
+              : darkMode
+                ? 'bg-gradient-to-br from-gray-800 via-gray-900 to-black border-gray-700'
+                : 'bg-gradient-to-br from-gray-100 via-gray-200 to-gray-300 border-gray-400'
+          }`}
+          style={{
+            width: `${holeSize}px`,
+            height: `${holeSize}px`,
+            right: `-${holeSize + 2}px`,
+            bottom: `2px`,
+            borderRadius: '2px',
+            boxShadow: cageNuts.rearRight?.bottom
+              ? 'inset 0 2px 4px rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.2)'
+              : 'inset 0 2px 4px rgba(0,0,0,0.1)'
+          }}
+          title={cageNuts.rearRight?.bottom ? `背面右下: ${cageNuts.rearRight.bottom.toUpperCase()}ナット` : '背面右下: 空き穴'}
+          onClick={(e) => {
+            e.stopPropagation();
+            if (cageNuts.rearRight?.bottom) {
+              onCageNutRemove?.(unit, 'rearRight', 'bottom');
+            } else {
               onCageNutInstall?.(unit, 'rearRight', 'bottom', 'm6');
             }
           }}
         >
-          {(cageNuts.rearRight?.top || cageNuts.rearRight?.bottom) && (
+          {cageNuts.rearRight?.bottom && (
             <div className="w-full h-full flex items-center justify-center">
-              <Minus size={Math.max(2, holeSize * 0.3)} className="text-white" />
+              <div
+                className="bg-gradient-to-br from-zinc-300 to-zinc-500 rounded-full"
+                style={{
+                  width: `${Math.max(6, holeSize * 0.4)}px`,
+                  height: `${Math.max(6, holeSize * 0.4)}px`,
+                  boxShadow: 'inset 0 1px 2px rgba(0,0,0,0.2)'
+                }}
+              />
             </div>
           )}
         </div>
@@ -650,7 +821,7 @@ export const RackView: React.FC<RackViewProps> = ({
         </div>
 
         {/* ラック柱の取り付け穴 */}
-        {(activeViewMode === 'showCageNutView' || isEmpty || (item && !isMainUnit)) && renderMountingHoles(unit)}
+        {(activeViewMode === 'showCageNutView' || isEmpty || (item && !isMainUnit)) && renderFrontMountingHoles(unit)}
         
         {item && isMainUnit && (
           <div
@@ -710,29 +881,112 @@ export const RackView: React.FC<RackViewProps> = ({
       </div>
     );
   } else if (perspective === 'rear') {
-    // TODO: 背面ビューの詳細実装 (ゲージナット表示の切り替えなど)
+    // 背面ビューの詳細実装
     return (
-      <div className="flex flex-col">
+      <div className="flex flex-col relative">
+        {/* ラックヘッダー (背面) */}
         <div className={`mb-2 p-2 border rounded-t-lg ${darkMode ? 'bg-gray-800 border-gray-600' : 'bg-gray-100 border-gray-300'}`}>
           <h3 className="font-bold text-center">{rack.name} (背面)</h3>
           <div className={`text-xs text-center ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
             {rack.units}U / {rack.width}mm幅 × {rack.depth}mm奥行
           </div>
         </div>
-        <div className={`border rounded-b-lg overflow-hidden p-4 ${darkMode ? 'bg-gray-700 border-gray-600' : 'bg-gray-50 border-gray-300'}`} style={{ height: `${rack.units * Math.max(16, (32 * zoomLevel) / 100)}px` }}>
-          {/* <p className="p-4 text-center">背面ユニット表示 (実装中)</p> */}
-          {/* 背面もユニットごとに描画するが、renderRackUnit を背面用に調整するか、新しい関数を作る */}
-          {Array.from({ length: rack.units }, (_, i) => rack.units - i).map(unit => (
-            <div
-              key={`rear-unit-${unit}`}
-              className={`relative border flex items-center justify-between px-2 ${getUnitBorderClass(darkMode)} ${getEmptyUnitClass(darkMode)}`}
-              style={{ height: `${getZoomedUnitHeight(zoomLevel)}px`, fontSize: `${getZoomedFontSize(zoomLevel)}px` }}
-            >
-              <span className={`font-mono ${getUnitNumClass(darkMode)}`}>{unit}</span>
-              {/* TODO: 背面ゲージナットと機器の背面表示 */}
-              <span className="text-xs text-gray-500">機器背面 (仮)</span>
-            </div>
-          ))}
+        {/* ラックユニット (背面) */}
+        <div className={`border rounded-b-lg overflow-visible relative ${darkMode ? 'border-gray-600' : 'border-gray-300'}`}>
+          {/* ラックユニット */}
+          {Array.from({ length: rack.units }, (_, i) => rack.units - i).map(unit => {
+            const item = rack.equipment[unit];
+            const isEmpty = !item;
+            const isMainUnit = item?.isMainUnit;
+            const cageNutStatus = getCageNutStatus(unit, rack);
+            
+            let displayName = '';
+            
+            if (item && isMainUnit) {
+              displayName = getEquipmentDisplayName(item, rack.labels) + ' (背面)';
+            }
+
+            const unitBorderClass = getUnitBorderClass(darkMode);
+            const emptyUnitClass = getEmptyUnitClass(darkMode);
+            const unitNumClass = getUnitNumClass(darkMode);
+
+            return (
+              <div
+                key={unit}
+                className={`relative border flex items-center justify-between px-2 ${unitBorderClass} ${
+                  isEmpty ? emptyUnitClass : ''
+                } ${
+                  item && !isMainUnit ? `border-t-0 ${emptyUnitClass}` : ''
+                }`}
+                style={{
+                  height: `${unitHeight}px`,
+                  fontSize: `${fontSize}px`
+                }}
+                onDragOver={(isEmpty || (item && !isMainUnit)) && selectedRack !== 'all' ? onDragOver : undefined}
+                onDrop={(isEmpty || (item && !isMainUnit)) && selectedRack !== 'all' ? (e) => onDrop?.(e, unit) : undefined}
+                onContextMenu={(e) => {
+                  if (selectedRack !== 'all' && (isEmpty || (item && !isMainUnit)) && showConfirmModal && onAutoInstallCageNuts) {
+                    e.preventDefault();
+                    showConfirmModal(
+                      'ゲージナット一括設置',
+                      `${unit}Uのすべての取り付け穴（前面4箇所・背面4箇所）にM6ゲージナットを設置しますか？`,
+                      () => {
+                        onAutoInstallCageNuts(unit, 'm6');
+                      },
+                      '設置する',
+                      'キャンセル'
+                    );
+                  }
+                }}
+              >
+                <div className="flex items-center gap-1">
+                  <span className={`font-mono ${unitNumClass}`}>{unit}</span>
+                  {/* 背面ゲージナット状態表示 */}
+                  {activeViewMode === 'showCageNutView' && (
+                    <div className="flex gap-0.5">
+                      <div className="flex flex-col gap-0.5" title={`背面ゲージナット: ${Math.min(4, Math.max(0, cageNutStatus.installed - 4))}/4`}>
+                        <div className="flex gap-0.5">
+                          {/* 背面4穴の状態表示 */}
+                          {[4, 5, 6, 7].map((i) => (
+                            <div
+                              key={i}
+                              className={`w-1 h-1 rounded-full ${
+                                cageNutStatus.installed > i ? 'bg-green-400' : 'bg-gray-300 dark:bg-gray-600'
+                              }`}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* 背面ラック柱の取り付け穴 */}
+                {(activeViewMode === 'showCageNutView' || isEmpty || (item && !isMainUnit)) && renderRearMountingHoles(unit)}
+                
+                {item && isMainUnit && (
+                  <div
+                    className={`absolute inset-0 flex items-center justify-between px-2 ${
+                      ['showPowerView', 'showMountingView', 'showLabelView', 'showCablingView', 'showCageNutView'].includes(activeViewMode ?? '') ? 'border-2 border-dashed border-blue-400' : ''
+                    }`}
+                    style={{
+                      backgroundColor: item.color,
+                      height: `${item.height * unitHeight}px`,
+                      zIndex: 10,
+                      opacity: 0.8 // 背面は少し薄く表示
+                    }}
+                  >
+                    <div className="text-white font-medium truncate flex-1 text-center flex items-center justify-center gap-1">
+                      <span>{displayName}</span>
+                    </div>
+                    <div className="flex gap-1 items-center">
+                      {getEquipmentIcon(item.type, Math.max(10, fontSize))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            );
+          })}
         </div>
       </div>
     );
