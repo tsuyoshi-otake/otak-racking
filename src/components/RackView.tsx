@@ -404,17 +404,16 @@ export const RackView: React.FC<RackViewProps> = ({
         className={`relative border flex items-center justify-between px-2 ${unitBorderClass} ${
           isEmpty ? emptyUnitClass : ''
         } ${
-          item && !isMainUnit ? 'border-t-0' : ''
+          item && !isMainUnit ? `border-t-0 ${emptyUnitClass}` : ''
         }`}
         style={{
           height: `${unitHeight}px`,
-          fontSize: `${fontSize}px`,
-          backgroundColor: item && !isMainUnit ? `${item.color}40` : undefined // 透明度40%で背景色を適用
+          fontSize: `${fontSize}px`
         }}
-        onDragOver={isEmpty && selectedRack !== 'all' ? onDragOver : undefined}
-        onDrop={isEmpty && selectedRack !== 'all' ? (e) => onDrop?.(e, unit) : undefined}
+        onDragOver={(isEmpty || (item && !isMainUnit)) && selectedRack !== 'all' ? onDragOver : undefined}
+        onDrop={(isEmpty || (item && !isMainUnit)) && selectedRack !== 'all' ? (e) => onDrop?.(e, unit) : undefined}
         onContextMenu={(e) => {
-          if (selectedRack !== 'all' && isEmpty && showConfirmModal && onAutoInstallCageNuts) {
+          if (selectedRack !== 'all' && (isEmpty || (item && !isMainUnit)) && showConfirmModal && onAutoInstallCageNuts) {
             e.preventDefault();
             showConfirmModal(
               'ゲージナット一括設置',
@@ -428,24 +427,14 @@ export const RackView: React.FC<RackViewProps> = ({
           }
         }}
         onClick={() => {
-          if (item && selectedRack !== 'all') {
-            onEquipmentClick?.(mainEquipment || item);
+          if (item && isMainUnit && selectedRack !== 'all') {
+            onEquipmentClick?.(item);
           }
         }}
       >
         <div className="flex items-center gap-1">
           <span className={`font-mono ${unitNumClass}`}>{unit}</span>
-          {item && !isMainUnit && mainEquipment && (
-            <span className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-              ↑{mainEquipment.name}の一部
-            </span>
-          )}
-          {/* デバッグ用：35Uの状態を表示 */}
-          {unit === 35 && item && (
-            <span className="text-xs text-red-500">
-              [DEBUG: 35U occupied - ID:{item.id}, Start:{item.startUnit}, End:{item.endUnit}, Main:{item.isMainUnit}]
-            </span>
-          )}
+          {/* 拡張ユニットは何も表示しない（空きユニットと同じ見た目） */}
           {activeViewMode === 'showCageNutView' && (
             <div className="flex gap-0.5">
               <div className="flex flex-col gap-0.5" title={`ゲージナット: ${cageNutStatus.installed}/8`}>
@@ -477,7 +466,7 @@ export const RackView: React.FC<RackViewProps> = ({
         </div>
 
         {/* ラック柱の取り付け穴 */}
-        {(activeViewMode === 'showCageNutView' || isEmpty) && renderMountingHoles(unit)}
+        {(activeViewMode === 'showCageNutView' || isEmpty || (item && !isMainUnit)) && renderMountingHoles(unit)}
         
         {item && isMainUnit && (
           <div
