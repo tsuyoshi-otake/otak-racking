@@ -1,0 +1,190 @@
+# OTAK Racking System - Code Definitions
+
+## src/App.tsx
+
+- **Function Component:** `function App()`
+  - **Interface:** `interface FloorSettings`
+  - **Type Alias:** `export type RackViewPerspective = 'front' | 'rear' | 'left' | 'right';`
+  - **Function:** `const showInfoModal = (title: string, message: string)`
+  - **Function:** `const showConfirmModal = (title: string, message: string, onConfirmAction: () => void, confirmText?: string, cancelText?: string)`
+  - **Function:** `const handleActiveViewModeChange = (mode: string | null)`
+  - **Function:** `const handleZoomFit = ()()`
+  - **Function:** `const handleEquipmentClick = (equipment: Equipment)`
+  - **Function:** `const handleEquipmentRemove = (unit: number)`
+
+## src/constants.ts
+
+- **Constant:** `export const rackTypes: Record<string, RackType>`
+- **Constant:** `export const serverEquipment: Equipment[]`
+- **Constant:** `export const networkEquipment: Equipment[]`
+- **Constant:** `export const storageEquipment: Equipment[]`
+- **Constant:** `export const powerEquipment: Equipment[]`
+- **Constant:** `export const mountingEquipment: Equipment[]`
+- **Constant:** `export const otherEquipment: Equipment[]`
+- **Constant:** `export const equipmentLibrary: Equipment[]`
+- **Constant:** `export const zoomLevels = [50, 75, 100];`
+- **Constant:** `export const airflowIcons: { 'front-to-rear': string; 'rear-to-front': string; 'side-to-side': string; intake: string; exhaust: string; blocking: string; natural: string; }`
+- **Constant:** `export const equipmentTypeIcons: { server: string; network: string; security: string; storage: string; pdu: string; ups: string; power: string; console: string; monitoring: string; cooling: string; shelf: string; spiritual: string; cable: string; mounting: string; panel: string; other: string; }`
+
+## src/index.tsx
+
+- (エントリーポイントのため、主要なコンポーネントやロジック定義はなし)
+
+## src/types.ts
+
+- **Interface:** `export interface Equipment`
+- **Interface:** `export interface RackType`
+- **Interface:** `export interface CageNutPosition`
+- **Interface:** `export interface CageNutConfig`
+- **Interface:** `export interface PowerConnection`
+- **Interface:** `export interface MountingOption`
+- **Interface:** `export interface Label`
+- **Interface:** `export interface Position`
+- **Interface:** `export interface CablingConfig`
+- **Interface:** `export interface HousingConfig`
+- **Interface:** `export interface EnvironmentConfig`
+- **Interface:** `export interface FanConfig`
+- **Interface:** `export interface Rack`
+- **Interface:** `export interface FloorSettings`
+- **Interface:** `export interface RackStats`
+- **Interface:** `export interface TotalStats extends RackStats`
+- **Interface:** `export interface CoolingStats`
+- **Interface:** `export interface CageNutStatus`
+- **Interface:** `export interface PowerSources`
+- **Interface:** `export interface LayoutDimensions`
+- **Type Alias:** `export type EquipmentType = 'server' | 'network' | 'security' | 'storage' | 'pdu' | 'ups' | 'power' | 'console' | 'monitoring' | 'cooling' | 'shelf' | 'spiritual' | 'cable' | 'mounting' | 'panel' | 'other';`
+- **Type Alias:** `export type AirflowDirection = 'front-to-rear' | 'rear-to-front' | 'side-to-side' | 'intake' | 'exhaust' | 'blocking' | 'natural';`
+- **Type Alias:** `export type ViewMode = 'power' | 'mounting' | 'label' | 'airflow' | 'temperature' | 'cabling' | 'floor' | 'cagenut';`
+
+## src/utils.ts
+
+- **Function:** `export const calculateRackStats = (rack: Rack): RackStats`
+- **Function:** `export const calculateTotalStats = (racks: Record<string, Rack>): TotalStats`
+- **Function:** `export const calculateCoolingStats = (rack: Rack): CoolingStats`
+- **Function:** `export const getCageNutStatus = (unit: number, rack: Rack): CageNutStatus`
+- **Function:** `export const getPowerSources = (rack: Rack): PowerSources`
+- **Function:** `export const calculateLayoutDimensions = (rackCount: number, windowWidth?: number)`
+- **Function:** `export const getZoomedUnitHeight = (zoomLevel: number): number`
+- **Function:** `export const getZoomedFontSize = (zoomLevel: number): number`
+- **Function:** `export const canPlaceEquipment = (rack: Rack, startUnit: number, equipment: Equipment): { canPlace: boolean; reason?: string }`
+- **Function:** `export const autoInstallCageNuts = (unit: number, nutType?: string)`
+- **Function:** `export const getContainerStyle = (darkMode: boolean): string`
+- **Function:** `export const getSidebarStyle = (darkMode: boolean): string`
+- **Function:** `export const getButtonStyle = (darkMode: boolean, isActive?: boolean): string`
+- **Function:** `export const getUnitBorderClass = (darkMode: boolean): string`
+- **Function:** `export const getEmptyUnitClass = (darkMode: boolean): string`
+- **Function:** `export const getUnitNumClass = (darkMode: boolean): string`
+- **Function:** `export const getPowerStatus = (equipment: Equipment, powerConnections: any)`
+- **Function:** `export const getEquipmentDisplayName = (equipment: Equipment, labels: any): string`
+- **Function:** `export const debounce = <T extends (...args: any[]) => any>(func: T, wait: number): ((...args: Parameters<T>) => void)`
+- **Function:** `export const deepCopy = <T>(obj: T): T`
+
+## src/__tests__/2uServerIssue.test.ts
+
+- **Describe Block:** `describe('2Uサーバー設置問題の調査', () => { ... })`
+  - **Function:** `const createTestRack = (): Rack`
+  - **Function:** `const create2UServer = (): Equipment`
+  - **Function:** `const create1UServer = (): Equipment`
+  - **Describe Block:** `describe('シナリオ1: 2Uサーバーを設置後の前方配置', () => { ... })`
+    - **Test Case:** `it('ケース1: 3-4Uに2Uサーバー設置後、1-2Uに設置可能か', () => { ... })`
+    - **Test Case:** `it('ケース2: 2-3Uに2Uサーバー設置後、1Uに1Uサーバー設置可能か', () => { ... })`
+    - **Test Case:** `it('ケース3: 1-2Uに2Uサーバー設置後、その前（0U?）には設置できない', () => { ... })`
+  - **Describe Block:** `describe('シナリオ2: ラック番号付けの確認', () => { ... })`
+    - **Test Case:** `it('ラック番号は下から上に1, 2, 3...42の順番', () => { ... })`
+  - **Describe Block:** `describe('シナリオ3: 実際の配置確認', () => { ... })`
+    - **Test Case:** `it('段階的な機器配置テスト', () => { ... })`
+
+## src/__tests__/equipmentPlacement.test.ts
+
+- **Describe Block:** `describe('機器配置ロジック', () => { ... })`
+  - **Function:** `const createTestRack = (): Rack`
+  - **Function:** `const create2UServer = (): Equipment`
+  - **Function:** `const create1UServer = (): Equipment`
+  - **Describe Block:** `describe('2Uサーバーの配置テスト', () => { ... })`
+    - **Test Case:** `it('空のラックに2Uサーバーを1Uに配置できる', () => { ... })`
+    - **Test Case:** `it('空のラックに2Uサーバーを42Uに配置できない（ラック容量オーバー）', () => { ... })`
+    - **Test Case:** `it('1Uに1Uサーバーがある場合、2Uに2Uサーバーを配置できる', () => { ... })`
+    - **Test Case:** `it('1Uに2Uサーバーがある場合、1Uより前に機器を配置できない', () => { ... })`
+    - **Test Case:** `it('3-4Uに2Uサーバーがある場合、1-2Uに2Uサーバーを配置できる', () => { ... })`
+    - **Test Case:** `it('1-2Uに2Uサーバーがある場合、2Uに1Uサーバーを配置できない', () => { ... })`
+    - **Test Case:** `it('連続する複数ユニットの占有チェック', () => { ... })`
+  - **Describe Block:** `describe('エッジケーステスト', () => { ... })`
+    - **Test Case:** `it('ラック上限近くでの配置チェック', () => { ... })`
+    - **Test Case:** `it('ラック容量を超える配置チェック', () => { ... })`
+  - **Describe Block:** `describe('特殊機器の配置テスト', () => { ... })`
+    - **Test Case:** `it('神棚は棚板の上にのみ設置可能', () => { ... })`
+
+## src/__tests__/utils.test.ts
+
+- **Describe Block:** `describe('ラック統計計算', () => { ... })`
+  - **Test Case:** `it('個別ラック統計を正しく計算する', () => { ... })`
+  - **Test Case:** `it('冷却統計を正しく計算する', () => { ... })`
+  - **Test Case:** `it('ゲージナット状態を正しく取得する', () => { ... })`
+- **Describe Block:** `describe('全体統計計算', () => { ... })`
+  - **Test Case:** `it('全体統計を正しく計算する', () => { ... })`
+
+## src/components/EquipmentLibrary.tsx
+
+- **Function Component:** `export const EquipmentLibrary: React.FC<EquipmentLibraryProps> = ({ darkMode, onDragStart })`
+  - **Interface:** `interface EquipmentLibraryProps`
+  - **Function:** `const renderEquipmentCard = (item: Equipment)`
+  - **Function:** `const getEquipmentIcon = (type: string, darkMode: boolean)`
+
+## src/components/ModalsAndDialogs.tsx
+
+- **Function Component:** `export const ModalsAndDialogs: React.FC<ModalsAndDialogsProps> = ({ darkMode, currentRack, selectedEquipment, showEquipmentModal, onCloseEquipmentModal, onUpdateLabel, onUpdatePowerConnection, onUpdateMountingOption, racks, showRackManager, onCloseRackManager, onAddRack, onRemoveRack, onDuplicateRack, floorSettings, showFloorSettings, onCloseFloorSettings, onUpdateFloorSettings, showCoolingConfig, onCloseCoolingConfig, showPowerConfig, onClosePowerConfig, infoModal, confirmModal })`
+  - **Interface:** `export interface InfoModalProps`
+  - **Interface:** `export interface ConfirmModalProps extends InfoModalProps`
+  - **Interface:** `interface FloorSettings` (ローカル定義)
+  - **Interface:** `interface ModalsAndDialogsProps`
+  - **Function:** `const renderEquipmentModal = ()`
+  - **Function:** `const renderRackManagerModal = ()`
+  - **Function:** `const renderFloorSettingsModal = ()`
+  - **Function:** `const renderCoolingConfigModal = ()`
+  - **Function:** `const renderPowerConfigModal = ()`
+  - **Function:** `const renderInfoModal = ()`
+  - **Function:** `const renderConfirmModal = ()`
+
+## src/components/RackView.tsx
+
+- **Function Component:** `export const RackView: React.FC<RackViewProps> = ({ rack, darkMode, zoomLevel, selectedRack, activeViewMode, onDragOver, onDrop, onEquipmentClick, onEquipmentRemove, onCageNutInstall, onCageNutRemove, onAutoInstallCageNuts, perspective, draggedItem, showConfirmModal })`
+  - **Interface:** `interface RackViewProps`
+  - **Function:** `const getEquipmentIcon = (type: string, size: number)`
+  - **Function:** `const getAirflowIcon = (airflow: string, size: number)`
+  - **Function:** `const getMountingIcon = (mountingType: string, needsRails: boolean, size: number)`
+  - **Function:** `const renderMountingHoles = (unit: number)`
+  - **Function:** `const renderRackUnit = (unit: number)`
+
+## src/components/Sidebar.tsx
+
+- **Function Component:** `export const Sidebar: React.FC<SidebarProps> = ({ racks, selectedRack, darkMode, zoomLevel, activeViewMode, floorSettings, onRackSelect, onAddRack, onRemoveRack, onDuplicateRack, onZoomChange, onActiveViewModeChange, onDragStart, onShowRackManager, onShowFloorSettings, onShowCoolingConfig, onShowPowerConfig, currentPerspective, onPerspectiveChange })`
+  - **Interface:** `interface FloorSettings` (ローカル定義)
+  - **Interface:** `interface SidebarProps`
+
+## src/hooks/useDragAndDrop.ts
+
+- **Type Alias:** `export type DraggedItem = Equipment | null;`
+- **Function:** `export const useDragAndDrop = (currentRack: any, addEquipment: (rackId: string, startUnit: number, equipment: Equipment) => void, autoInstallCageNutsForUnit: (rackId: string, unit: number, nutType: string) => void, selectedRack: string, showInfoModal: (title: string, message: string) => void, showConfirmModal: (title: string, message: string, onConfirm: () => void) => void)`
+  - **Function:** `const handleDragStart = useCallback((e: React.DragEvent, item: Equipment) => { ... }, [])`
+  - **Function:** `const handleDragOver = useCallback((e: React.DragEvent) => { ... }, [])`
+  - **Function:** `const handleDrop = useCallback((e: React.DragEvent, startUnit: number) => { ... }, [draggedItem, currentRack, selectedRack, addEquipment, autoInstallCageNutsForUnit, showInfoModal, showConfirmModal])`
+  - **Function:** `const handleDragEnd = useCallback(() => { ... }, [])`
+
+## src/hooks/useRackState.ts
+
+- **Function:** `const createInitialRack = (id: string, name: string, rackCount: number): Rack`
+- **Constant:** `const initialFloorSettings: FloorSettings`
+- **Function:** `export const useRackState = ()`
+  - **Function:** `const addRack = useCallback(() => { ... }, [racks])`
+  - **Function:** `const removeRack = useCallback((rackId: string) => { ... }, [racks, selectedRack])`
+  - **Function:** `const duplicateRack = useCallback((rackId: string) => { ... }, [racks])`
+  - **Function:** `const updateRack = useCallback((rackId: string, updates: Partial<Rack>) => { ... }, [])`
+  - **Function:** `const addEquipment = useCallback((rackId: string, startUnit: number, equipment: Equipment) => { ... }, [])`
+  - **Function:** `const removeEquipment = useCallback((rackId: string, unit: number) => { ... }, [])`
+  - **Function:** `const updateLabel = useCallback((rackId: string, equipmentId: string, field: string, value: string) => { ... }, [])`
+  - **Function:** `const updatePowerConnection = useCallback((rackId: string, equipmentId: string, field: string, value: any) => { ... }, [])`
+  - **Function:** `const updateMountingOption = useCallback((rackId: string, equipmentId: string, field: string, value: any) => { ... }, [])`
+  - **Function:** `const installCageNut = useCallback((rackId: string, unit: number, side: string, position: string, nutType?: string) => { ... }, [])`
+  - **Function:** `const removeCageNut = useCallback((rackId: string, unit: number, side: string, position: string) => { ... }, [])`
+  - **Function:** `const autoInstallCageNutsForUnit = useCallback((rackId: string, unit: number, nutType?: string) => { ... }, [])`
+  - **Function:** `const updateEnvironment = useCallback((rackId: string, field: string, value: number) => { ... }, [])`
