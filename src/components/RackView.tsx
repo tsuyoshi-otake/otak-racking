@@ -224,7 +224,7 @@ export const RackView: React.FC<RackViewProps> = ({
     };
 
     const railInstallation = rack.railInstallations?.[unit];
-    const holeSize = Math.max(4, unitHeight * 0.12);
+    const holeSize = Math.max(13, unitHeight * 0.38);
     
     return (
       <>
@@ -274,15 +274,22 @@ export const RackView: React.FC<RackViewProps> = ({
 
         {/* 前面左ラック柱 - 上穴 */}
         <div
-          className={`absolute border cursor-pointer hover:scale-110 transition-transform ${
-            cageNuts.frontLeft?.top ? 'bg-green-500 border-green-600 shadow-inner' : darkMode ? 'bg-gray-600 border-gray-500' : 'bg-gray-300 border-gray-400'
+          className={`absolute border cursor-pointer ${
+            cageNuts.frontLeft?.top
+              ? 'bg-gradient-to-br from-gray-600 via-gray-700 to-gray-800 border-gray-500'
+              : darkMode
+                ? 'bg-gradient-to-br from-gray-800 via-gray-900 to-black border-gray-700'
+                : 'bg-gradient-to-br from-gray-100 via-gray-200 to-gray-300 border-gray-400'
           }`}
           style={{
             width: `${holeSize}px`,
             height: `${holeSize}px`,
             left: `-${holeSize + 2}px`,
             top: `2px`,
-            borderRadius: '1px'
+            borderRadius: '2px',
+            boxShadow: cageNuts.frontLeft?.top
+              ? 'inset 0 2px 4px rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.2)'
+              : 'inset 0 2px 4px rgba(0,0,0,0.1)'
           }}
           title={cageNuts.frontLeft?.top ? `前面左上: ${cageNuts.frontLeft.top.toUpperCase()}ナット` : '前面左上: 空き穴'}
           onClick={(e) => {
@@ -296,22 +303,36 @@ export const RackView: React.FC<RackViewProps> = ({
         >
           {cageNuts.frontLeft?.top && (
             <div className="w-full h-full flex items-center justify-center">
-              <Circle size={holeSize * 0.4} className="text-white fill-current" />
+              <div
+                className="bg-gradient-to-br from-zinc-300 to-zinc-500 rounded-full"
+                style={{
+                  width: `${Math.max(6, holeSize * 0.4)}px`,
+                  height: `${Math.max(6, holeSize * 0.4)}px`,
+                  boxShadow: 'inset 0 1px 2px rgba(0,0,0,0.2)'
+                }}
+              />
             </div>
           )}
         </div>
 
         {/* 前面左ラック柱 - 下穴 */}
         <div
-          className={`absolute border cursor-pointer hover:scale-110 transition-transform ${
-            cageNuts.frontLeft?.bottom ? 'bg-green-500 border-green-600 shadow-inner' : darkMode ? 'bg-gray-600 border-gray-500' : 'bg-gray-300 border-gray-400'
+          className={`absolute border cursor-pointer ${
+            cageNuts.frontLeft?.bottom
+              ? 'bg-gradient-to-br from-gray-600 via-gray-700 to-gray-800 border-gray-500'
+              : darkMode
+                ? 'bg-gradient-to-br from-gray-800 via-gray-900 to-black border-gray-700'
+                : 'bg-gradient-to-br from-gray-100 via-gray-200 to-gray-300 border-gray-400'
           }`}
           style={{
             width: `${holeSize}px`,
             height: `${holeSize}px`,
             left: `-${holeSize + 2}px`,
             bottom: `2px`,
-            borderRadius: '1px'
+            borderRadius: '2px',
+            boxShadow: cageNuts.frontLeft?.bottom
+              ? 'inset 0 2px 4px rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.2)'
+              : 'inset 0 2px 4px rgba(0,0,0,0.1)'
           }}
           title={cageNuts.frontLeft?.bottom ? `前面左下: ${cageNuts.frontLeft.bottom.toUpperCase()}ナット` : '前面左下: 空き穴'}
           onClick={(e) => {
@@ -325,22 +346,36 @@ export const RackView: React.FC<RackViewProps> = ({
         >
           {cageNuts.frontLeft?.bottom && (
             <div className="w-full h-full flex items-center justify-center">
-              <Circle size={holeSize * 0.4} className="text-white fill-current" />
+              <div
+                className="bg-gradient-to-br from-zinc-300 to-zinc-500 rounded-full"
+                style={{
+                  width: `${Math.max(6, holeSize * 0.4)}px`,
+                  height: `${Math.max(6, holeSize * 0.4)}px`,
+                  boxShadow: 'inset 0 1px 2px rgba(0,0,0,0.2)'
+                }}
+              />
             </div>
           )}
         </div>
 
         {/* 前面右ラック柱 - 上穴 */}
         <div
-          className={`absolute border cursor-pointer hover:scale-110 transition-transform ${
-            cageNuts.frontRight?.top ? 'bg-green-500 border-green-600 shadow-inner' : darkMode ? 'bg-gray-600 border-gray-500' : 'bg-gray-300 border-gray-400'
+          className={`absolute border cursor-pointer ${
+            cageNuts.frontRight?.top
+              ? 'bg-gradient-to-br from-gray-600 via-gray-700 to-gray-800 border-gray-500'
+              : darkMode
+                ? 'bg-gradient-to-br from-gray-800 via-gray-900 to-black border-gray-700'
+                : 'bg-gradient-to-br from-gray-100 via-gray-200 to-gray-300 border-gray-400'
           }`}
           style={{
             width: `${holeSize}px`,
             height: `${holeSize}px`,
             right: `-${holeSize + 2}px`,
             top: `2px`,
-            borderRadius: '1px'
+            borderRadius: '2px',
+            boxShadow: cageNuts.frontRight?.top
+              ? 'inset 0 2px 4px rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.2)'
+              : 'inset 0 2px 4px rgba(0,0,0,0.1)'
           }}
           title={cageNuts.frontRight?.top ? `前面右上: ${cageNuts.frontRight.top.toUpperCase()}ナット` : '前面右上: 空き穴'}
           onClick={(e) => {
@@ -354,22 +389,36 @@ export const RackView: React.FC<RackViewProps> = ({
         >
           {cageNuts.frontRight?.top && (
             <div className="w-full h-full flex items-center justify-center">
-              <Circle size={holeSize * 0.4} className="text-white fill-current" />
+              <div
+                className="bg-gradient-to-br from-zinc-300 to-zinc-500 rounded-full"
+                style={{
+                  width: `${Math.max(6, holeSize * 0.4)}px`,
+                  height: `${Math.max(6, holeSize * 0.4)}px`,
+                  boxShadow: 'inset 0 1px 2px rgba(0,0,0,0.2)'
+                }}
+              />
             </div>
           )}
         </div>
 
         {/* 前面右ラック柱 - 下穴 */}
         <div
-          className={`absolute border cursor-pointer hover:scale-110 transition-transform ${
-            cageNuts.frontRight?.bottom ? 'bg-green-500 border-green-600 shadow-inner' : darkMode ? 'bg-gray-600 border-gray-500' : 'bg-gray-300 border-gray-400'
+          className={`absolute border cursor-pointer ${
+            cageNuts.frontRight?.bottom
+              ? 'bg-gradient-to-br from-gray-600 via-gray-700 to-gray-800 border-gray-500'
+              : darkMode
+                ? 'bg-gradient-to-br from-gray-800 via-gray-900 to-black border-gray-700'
+                : 'bg-gradient-to-br from-gray-100 via-gray-200 to-gray-300 border-gray-400'
           }`}
           style={{
             width: `${holeSize}px`,
             height: `${holeSize}px`,
             right: `-${holeSize + 2}px`,
             bottom: `2px`,
-            borderRadius: '1px'
+            borderRadius: '2px',
+            boxShadow: cageNuts.frontRight?.bottom
+              ? 'inset 0 2px 4px rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.2)'
+              : 'inset 0 2px 4px rgba(0,0,0,0.1)'
           }}
           title={cageNuts.frontRight?.bottom ? `前面右下: ${cageNuts.frontRight.bottom.toUpperCase()}ナット` : '前面右下: 空き穴'}
           onClick={(e) => {
@@ -383,7 +432,14 @@ export const RackView: React.FC<RackViewProps> = ({
         >
           {cageNuts.frontRight?.bottom && (
             <div className="w-full h-full flex items-center justify-center">
-              <Circle size={holeSize * 0.4} className="text-white fill-current" />
+              <div
+                className="bg-gradient-to-br from-zinc-300 to-zinc-500 rounded-full"
+                style={{
+                  width: `${Math.max(6, holeSize * 0.4)}px`,
+                  height: `${Math.max(6, holeSize * 0.4)}px`,
+                  boxShadow: 'inset 0 1px 2px rgba(0,0,0,0.2)'
+                }}
+              />
             </div>
           )}
         </div>
