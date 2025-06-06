@@ -17,6 +17,23 @@ import {
 import { Equipment, Rack } from '../types';
 import { getPowerSources } from '../utils';
 
+// +++ 新しい InfoModal 用の Props (簡易版) +++
+export interface InfoModalProps { // export を追加
+  isOpen: boolean;
+  title: string;
+  message: string;
+  onClose: () => void;
+  darkMode: boolean;
+}
+
+// +++ 新しい ConfirmModal 用の Props (簡易版) +++
+export interface ConfirmModalProps extends InfoModalProps { // export を追加
+  onConfirm: () => void;
+  confirmText?: string;
+  cancelText?: string;
+}
+
+
 interface FloorSettings {
   hasAccessFloor: boolean;
   floorHeight: number;
@@ -58,6 +75,10 @@ interface ModalsAndDialogsProps {
   
   showPowerConfig?: boolean;
   onClosePowerConfig?: () => void;
+
+  // +++ InfoModal と ConfirmModal 用の Props を ModalsAndDialogsProps に追加 +++
+  infoModal?: InfoModalProps | null;
+  confirmModal?: ConfirmModalProps | null;
 }
 
 export const ModalsAndDialogs: React.FC<ModalsAndDialogsProps> = ({
@@ -87,7 +108,11 @@ export const ModalsAndDialogs: React.FC<ModalsAndDialogsProps> = ({
   onCloseCoolingConfig,
   
   showPowerConfig,
-  onClosePowerConfig
+  onClosePowerConfig,
+
+  // +++ props を展開 +++
+  infoModal,
+  confirmModal
 }) => {
   const [activeTab, setActiveTab] = useState<'info' | 'power' | 'mounting' | 'label'>('info');
   const [tempFloorSettings, setTempFloorSettings] = useState<FloorSettings | null>(null);
@@ -784,6 +809,83 @@ export const ModalsAndDialogs: React.FC<ModalsAndDialogsProps> = ({
     );
   };
 
+  // +++ InfoModal レンダリング関数 +++
+  const renderInfoModal = () => {
+    if (!infoModal || !infoModal.isOpen) return null;
+    const modalBg = darkMode ? 'bg-gray-800 text-white' : 'bg-white text-gray-900';
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div className={`${modalBg} rounded-lg shadow-xl w-full max-w-md`}>
+          <div className={`p-4 border-b flex items-center justify-between ${darkMode ? 'border-gray-600' : 'border-gray-200'}`}>
+            <h3 className="text-lg font-bold flex items-center gap-2">
+              <Info size={20} className={darkMode ? 'text-blue-400' : 'text-blue-600'} />
+              {infoModal.title}
+            </h3>
+            <button onClick={infoModal.onClose} className={`p-1 rounded hover:bg-opacity-10 hover:bg-gray-500`}>
+              <X size={20} />
+            </button>
+          </div>
+          <div className="p-6 text-sm">
+            {infoModal.message.split('\n').map((line, index) => (
+              <p key={index}>{line}</p>
+            ))}
+          </div>
+          <div className={`p-4 border-t flex justify-end ${darkMode ? 'border-gray-600' : 'border-gray-200'}`}>
+            <button
+              onClick={infoModal.onClose}
+              className={`px-4 py-2 rounded text-sm font-medium ${darkMode ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'bg-blue-500 hover:bg-blue-600 text-white'}`}
+            >
+              OK
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  // +++ ConfirmModal レンダリング関数 +++
+  const renderConfirmModal = () => {
+    if (!confirmModal || !confirmModal.isOpen) return null;
+    const modalBg = darkMode ? 'bg-gray-800 text-white' : 'bg-white text-gray-900';
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div className={`${modalBg} rounded-lg shadow-xl w-full max-w-md`}>
+          <div className={`p-4 border-b flex items-center justify-between ${darkMode ? 'border-gray-600' : 'border-gray-200'}`}>
+            <h3 className="text-lg font-bold flex items-center gap-2">
+              <AlertTriangle size={20} className={darkMode ? 'text-yellow-400' : 'text-yellow-500'} />
+              {confirmModal.title}
+            </h3>
+             {/* <button onClick={confirmModal.onClose} className={`p-1 rounded hover:bg-opacity-10 hover:bg-gray-500`}>
+              <X size={20} />
+            </button> */}
+          </div>
+          <div className="p-6 text-sm">
+            {confirmModal.message.split('\n').map((line, index) => (
+              <p key={index}>{line}</p>
+            ))}
+          </div>
+          <div className={`p-4 border-t flex justify-end gap-3 ${darkMode ? 'border-gray-600' : 'border-gray-200'}`}>
+            <button
+              onClick={confirmModal.onClose}
+              className={`px-4 py-2 rounded text-sm font-medium ${darkMode ? 'bg-gray-600 hover:bg-gray-700 text-gray-300' : 'bg-gray-200 hover:bg-gray-300 text-gray-700'}`}
+            >
+              {confirmModal.cancelText || 'キャンセル'}
+            </button>
+            <button
+              onClick={() => {
+                confirmModal.onConfirm();
+                confirmModal.onClose(); // 確認後も閉じる
+              }}
+              className={`px-4 py-2 rounded text-sm font-medium ${darkMode ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'bg-blue-500 hover:bg-blue-600 text-white'}`}
+            >
+              {confirmModal.confirmText || 'OK'}
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   // すべてのモーダルをレンダリング
   return (
     <>
@@ -792,6 +894,8 @@ export const ModalsAndDialogs: React.FC<ModalsAndDialogsProps> = ({
       {renderFloorSettingsModal()}
       {renderCoolingConfigModal()}
       {renderPowerConfigModal()}
+      {renderInfoModal()}
+      {renderConfirmModal()}
     </>
   );
 };

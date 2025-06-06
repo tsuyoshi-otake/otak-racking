@@ -64,7 +64,8 @@ interface RackViewProps {
   onCageNutInstall?: (unit: number, side: string, position: string, nutType: string) => void;
   onCageNutRemove?: (unit: number, side: string, position: string) => void;
   onAutoInstallCageNuts?: (unit: number, nutType: string) => void;
-  perspective: RackViewPerspective; // perspective prop を追加
+  perspective: RackViewPerspective;
+  showConfirmModal?: (title: string, message: string, onConfirm: () => void, confirmText?: string, cancelText?: string) => void; // 追加
 }
 
 export const RackView: React.FC<RackViewProps> = ({
@@ -80,8 +81,9 @@ export const RackView: React.FC<RackViewProps> = ({
   onCageNutInstall,
   onCageNutRemove,
   onAutoInstallCageNuts,
-  perspective, // perspective を分割代入に追加
-  draggedItem // draggedItem を分割代入に追加
+  perspective,
+  draggedItem,
+  showConfirmModal // 追加
 }) => {
   const unitHeight = getZoomedUnitHeight(zoomLevel);
   const fontSize = getZoomedFontSize(zoomLevel);
@@ -407,12 +409,17 @@ export const RackView: React.FC<RackViewProps> = ({
         onDragOver={isEmpty && selectedRack !== 'all' ? onDragOver : undefined}
         onDrop={isEmpty && selectedRack !== 'all' ? (e) => onDrop?.(e, unit) : undefined}
         onContextMenu={(e) => {
-          if (selectedRack !== 'all' && isEmpty) {
+          if (selectedRack !== 'all' && isEmpty && showConfirmModal && onAutoInstallCageNuts) {
             e.preventDefault();
-            const action = window.confirm(`${unit}Uにゲージナットを設置しますか？\n（前面4穴・背面4穴、計8個のM6ナット）`);
-            if (action) {
-              onAutoInstallCageNuts?.(unit, 'm6');
-            }
+            showConfirmModal(
+              'ゲージナット一括設置',
+              `${unit}Uのすべての取り付け穴（前面4箇所・背面4箇所）にM6ゲージナットを設置しますか？`,
+              () => {
+                onAutoInstallCageNuts(unit, 'm6');
+              },
+              '設置する',
+              'キャンセル'
+            );
           }
         }}
         onClick={() => {

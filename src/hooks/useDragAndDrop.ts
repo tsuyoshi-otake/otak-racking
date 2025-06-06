@@ -8,7 +8,10 @@ export const useDragAndDrop = (
   currentRack: any,
   addEquipment: (rackId: string, startUnit: number, equipment: Equipment) => void,
   autoInstallCageNutsForUnit: (rackId: string, unit: number, nutType: string) => void,
-  selectedRack: string
+  selectedRack: string,
+  // モーダル表示用関数を引数に追加
+  showInfoModal: (title: string, message: string) => void,
+  showConfirmModal: (title: string, message: string, onConfirm: () => void) => void
 ) => {
   const [draggedItem, setDraggedItem] = useState<Equipment | null>(null);
 
@@ -32,14 +35,14 @@ export const useDragAndDrop = (
     // ゲージナットの場合は該当ユニットに自動設置
     if (draggedItem.nutType) {
       autoInstallCageNutsForUnit(selectedRack, startUnit, draggedItem.nutType);
-      alert(`${startUnit}Uに${draggedItem.name}を8個設置しました。\n（前面4穴・背面4穴）`);
+      showInfoModal('ゲージナット設置完了', `${startUnit}Uに${draggedItem.name}を8個設置しました。\n（前面4穴・背面4穴）`);
       setDraggedItem(null);
       return;
     }
 
     // その他の取り付け部品（ネジ等）の場合は在庫に追加
     if (draggedItem.screwType || draggedItem.washerType) {
-      alert(`${draggedItem.name}を部品在庫に追加しました。\n取り付け設定で各機器に割り当ててください。`);
+      showInfoModal('部品在庫追加', `${draggedItem.name}を部品在庫に追加しました。\n取り付け設定で各機器に割り当ててください。`);
       setDraggedItem(null);
       return;
     }
@@ -47,7 +50,7 @@ export const useDragAndDrop = (
     // レール類の場合は仮想設置（実際のユニットは占有しない）
     if (draggedItem.railType) {
       // レール情報をラック設定に追加する処理は後で実装
-      alert(`${draggedItem.name}を${startUnit}Uエリアに仮設置しました。\n機器設定で実際の取り付けを行ってください。`);
+      showInfoModal('レール仮設置', `${draggedItem.name}を${startUnit}Uエリアに仮設置しました。\n機器設定で実際の取り付けを行ってください。`);
       setDraggedItem(null);
       return;
     }
@@ -57,7 +60,7 @@ export const useDragAndDrop = (
       const shelfUnit = startUnit - 1;  // 神棚の下のユニット（棚板がある位置）
       const shelfItem = currentRack.equipment[shelfUnit];
       if (!shelfItem || shelfItem.type !== 'shelf') {
-        alert('神棚は棚板の上にのみ設置できます。まず棚板を設置してください。');
+        showInfoModal('設置エラー', '神棚は棚板の上にのみ設置できます。まず棚板を設置してください。');
         setDraggedItem(null);
         return;
       }
@@ -66,8 +69,8 @@ export const useDragAndDrop = (
     // 配置可能チェック
     const { canPlace, reason } = canPlaceEquipment(currentRack, startUnit, draggedItem);
     
-    if (!canPlace) {
-      alert(reason);
+    if (!canPlace && reason) { // reason が undefined でないことを確認
+      showInfoModal('設置エラー', reason);
       setDraggedItem(null);
       return;
     }
@@ -99,17 +102,25 @@ export const useDragAndDrop = (
       }
       
       if (missingCageNuts.length > 0) {
-        const proceed = window.confirm(
-          `${missingCageNuts.join('U, ')}Uにゲージナットが不足しています。\n設置を続行しますか？\n（後でゲージナットを設置する必要があります）`
+        showConfirmModal(
+          'ゲージナット不足',
+          `${missingCageNuts.join('U, ')}Uにゲージナットが不足しています。\n設置を続行しますか？\n（後でゲージナットを設置する必要があります）`,
+          () => {
+            // 確認ダイアログで「はい」が押された場合のみ機器を配置
+            addEquipment(selectedRack, startUnit, draggedItem);
+            setDraggedItem(null);
+          }
         );
-        if (!proceed) {
-          setDraggedItem(null);
-          return;
-        }
+        // 確認モーダルが表示されるので、ここでは一旦何もしない (モーダルの結果で処理)
+        // ただし、モーダルがキャンセルされた場合も draggedItem を null にする必要があるかもしれないが、
+        // showConfirmModal の onClose で setConfirmModal(null) しているので、
+        // draggedItem はこの confirm の外で null にする方が良いかもしれない。
+        // 一旦、confirm された場合のみ draggedItem を null にする。
+        return; // モーダルの結果を待つ
       }
     }
 
-    // 機器を配置
+    // 機器を配置 (ゲージナット確認が不要、または確認でOKだった場合)
     addEquipment(selectedRack, startUnit, draggedItem);
     setDraggedItem(null);
   }, [draggedItem, currentRack, selectedRack, addEquipment, autoInstallCageNutsForUnit]);

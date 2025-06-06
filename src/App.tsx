@@ -5,7 +5,7 @@ import { useRackState } from './hooks/useRackState';
 import { useDragAndDrop, DraggedItem } from './hooks/useDragAndDrop';
 import { Sidebar } from './components/Sidebar';
 import { RackView } from './components/RackView';
-import { ModalsAndDialogs } from './components/ModalsAndDialogs';
+import { ModalsAndDialogs, InfoModalProps, ConfirmModalProps } from './components/ModalsAndDialogs';
 import { calculateLayoutDimensions, getContainerStyle } from './utils';
 
 // ViewModes インターフェースは Sidebar で定義されているものを使用するため、ここでは削除またはコメントアウト
@@ -70,6 +70,10 @@ const [rackViewPerspective, setRackViewPerspective] = useState<RackViewPerspecti
   const [showCoolingConfig, setShowCoolingConfig] = useState(false);
   const [showPowerConfig, setShowPowerConfig] = useState(false);
 
+  // 通知・確認モーダル用 state
+  const [infoModal, setInfoModal] = useState<InfoModalProps | null>(null);
+  const [confirmModal, setConfirmModal] = useState<ConfirmModalProps | null>(null);
+
   // ラック状態管理
   const {
     racks,
@@ -88,6 +92,32 @@ const [rackViewPerspective, setRackViewPerspective] = useState<RackViewPerspecti
     installCageNut,
     removeCageNut
   } = useRackState();
+// モーダル表示関数
+  const showInfoModal = (title: string, message: string) => {
+    setInfoModal({ isOpen: true, title, message, onClose: () => setInfoModal(null), darkMode });
+  };
+
+  const showConfirmModal = (
+    title: string,
+    message: string,
+    onConfirmAction: () => void,
+    confirmText?: string,
+    cancelText?: string
+  ) => {
+    setConfirmModal({
+      isOpen: true,
+      title,
+      message,
+      onConfirm: () => {
+        onConfirmAction();
+        setConfirmModal(null); // 確認後も閉じる
+      },
+      onClose: () => setConfirmModal(null),
+      darkMode,
+      confirmText,
+      cancelText
+    });
+  };
 
   // ドラッグ&ドロップ
   const {
@@ -100,7 +130,9 @@ const [rackViewPerspective, setRackViewPerspective] = useState<RackViewPerspecti
     currentRack,
     addEquipment,
     autoInstallCageNutsForUnit,
-    selectedRack
+    selectedRack,
+    showInfoModal,
+    showConfirmModal
   );
 
   // アクティブなビューモード変更
@@ -148,9 +180,15 @@ const handleZoomFit = () => {
 
   // 機器削除処理
   const handleEquipmentRemove = (unit: number) => {
-    if (window.confirm('この機器を削除しますか？\n関連する設定もすべて削除されます。')) {
-      removeEquipment(selectedRack, unit);
-    }
+    showConfirmModal(
+      '機器の削除',
+      'この機器を削除しますか？\n関連する設定もすべて削除されます。',
+      () => {
+        removeEquipment(selectedRack, unit);
+      },
+      '削除する',
+      'キャンセル'
+    );
   };
 
   // レイアウト計算
@@ -253,6 +291,7 @@ const handleZoomFit = () => {
                       activeViewMode={activeViewMode} // 新しいpropsを追加
                       onEquipmentClick={handleEquipmentClick}
                       perspective={rackViewPerspective}
+                      showConfirmModal={showConfirmModal}
                     />
                   </div>
                 ))}
@@ -268,7 +307,7 @@ const handleZoomFit = () => {
                     darkMode={darkMode}
                     zoomLevel={zoomLevel}
                     selectedRack={selectedRack}
-                    viewModes={viewModes}
+                    activeViewMode={activeViewMode}
                     onDragOver={handleDragOver}
                     onDrop={handleDrop}
                     onEquipmentClick={handleEquipmentClick}
@@ -284,6 +323,7 @@ const handleZoomFit = () => {
                     }
                     draggedItem={draggedItem as DraggedItem | null}
                     perspective={rackViewPerspective}
+                    showConfirmModal={showConfirmModal}
                   />
                 </div>
               </div>
@@ -330,6 +370,9 @@ const handleZoomFit = () => {
         
         showPowerConfig={showPowerConfig}
         onClosePowerConfig={() => setShowPowerConfig(false)}
+
+        infoModal={infoModal}
+        confirmModal={confirmModal}
       />
 
       {/* ドラッグ終了処理 */}
