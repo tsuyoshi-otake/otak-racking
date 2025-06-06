@@ -323,31 +323,31 @@ export const storageEquipment: Equipment[] = [
 
 // 電源機器
 export const powerEquipment: Equipment[] = [
-  { 
-    id: 'pdu-vertical-basic', 
-    name: '縦型PDU (基本)', 
-    height: 0, 
-    depth: 100, 
-    power: 0, 
-    heat: 0, 
-    weight: 5, 
-    type: 'pdu', 
-    color: '#DC2626', 
-    dualPower: false, 
-    system: 'A', 
-    needsRails: false, 
-    airflow: 'natural', 
-    cfm: 0, 
+  {
+    id: 'pdu-vertical-basic',
+    name: '縦型PDU (基本)',
+    height: 42,
+    depth: 100,
+    power: 0,
+    heat: 0,
+    weight: 5,
+    type: 'pdu',
+    color: '#DC2626',
+    dualPower: false,
+    system: 'A',
+    needsRails: false,
+    airflow: 'natural',
+    cfm: 0,
     heatGeneration: 0,
-    description: 'ラック背面縦型PDU。基本的な配電機能を提供。16A/100V対応。',
+    description: 'ラック左右・背面に設置する縦型PDU。基本的な配電機能を提供。16A/100V対応。',
     specifications: {
       outlets: 'C13×12, C19×4',
       input: '単相100V 16A',
-      mounting: 'ラック背面縦型',
+      mounting: 'ラック左右・背面縦型',
       protection: 'ブレーカー内蔵',
       monitoring: '基本電流監視'
     },
-    mountingNotes: 'ラック背面に縦型設置。ケーブル長要確認。',
+    mountingNotes: 'ラック左右または背面に縦型設置。ケーブル長要確認。',
     pduType: 'vertical-basic'
   },
   { 

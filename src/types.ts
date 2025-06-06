@@ -109,6 +109,22 @@ export interface FanConfig {
   rpm: number;
 }
 
+export interface PDUPlacement {
+  id: string;
+  equipment: Equipment;
+  position: 'left' | 'right' | 'rear';
+  offset: number; // ラック上端からのオフセット（mm）
+  orientation: 'vertical' | 'horizontal';
+}
+
+export interface RailInstallation {
+  unit: number;
+  type: 'slide' | 'fixed' | 'toolless';
+  depth: number; // レールの奥行き（mm）
+  installed: boolean;
+  equipmentId?: string; // 設置されている機器のID
+}
+
 export interface Rack {
   id: string;
   name: string;
@@ -128,6 +144,8 @@ export interface Rack {
   cabling: CablingConfig;
   housing: HousingConfig;
   environment: EnvironmentConfig;
+  pduPlacements: PDUPlacement[]; // PDU配置情報
+  railInstallations: Record<number, RailInstallation>; // レール設置情報
 }
 
 export interface FloorSettings {

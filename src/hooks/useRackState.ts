@@ -38,6 +38,60 @@ const createInitialRack = (id: string, name: string, rackCount: number): Rack =>
     ambientTemp: 22,
     humidity: 45,
     pressureDiff: 0.2
+  },
+  pduPlacements: [
+    {
+      id: 'pdu-left-1',
+      equipment: {
+        id: 'pdu-vertical-basic',
+        name: '縦型PDU (基本)',
+        height: 42,
+        depth: 100,
+        power: 0,
+        heat: 0,
+        weight: 5,
+        type: 'pdu',
+        color: '#DC2626',
+        dualPower: false,
+        needsRails: false,
+        airflow: 'natural',
+        cfm: 0,
+        heatGeneration: 0,
+        description: 'ラック左側に設置されたPDU'
+      },
+      position: 'left',
+      offset: 50,
+      orientation: 'vertical'
+    },
+    {
+      id: 'pdu-right-1',
+      equipment: {
+        id: 'pdu-vertical-smart',
+        name: 'スマートPDU',
+        height: 42,
+        depth: 100,
+        power: 0,
+        heat: 0,
+        weight: 7,
+        type: 'pdu',
+        color: '#B91C1C',
+        dualPower: false,
+        needsRails: false,
+        airflow: 'natural',
+        cfm: 0,
+        heatGeneration: 0,
+        description: 'ラック右側に設置されたスマートPDU'
+      },
+      position: 'right',
+      offset: 50,
+      orientation: 'vertical'
+    }
+  ],
+  railInstallations: {
+    1: { unit: 1, type: 'slide', depth: 700, installed: true },
+    2: { unit: 2, type: 'slide', depth: 700, installed: true },
+    5: { unit: 5, type: 'fixed', depth: 600, installed: true },
+    10: { unit: 10, type: 'toolless', depth: 650, installed: true }
   }
 });
 

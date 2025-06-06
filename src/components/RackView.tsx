@@ -24,9 +24,11 @@ import {
   ArrowDown,
   Square,
   Wind,
-  Thermometer
+  Thermometer,
+  Minus,
+  Circle
 } from 'lucide-react';
-import { Rack, Equipment } from '../types'; // ViewMode を削除
+import { Rack, Equipment, PDUPlacement, RailInstallation } from '../types'; // ViewMode を削除
 import { RackViewPerspective } from '../App'; // App.tsx から型をインポート
 import {
   getCageNutStatus,
@@ -149,7 +151,70 @@ export const RackView: React.FC<RackViewProps> = ({
     }
   };
 
-  // ラック柱の取り付け穴を描画
+  // PDU描画機能
+  const renderPDUs = () => {
+    if (!rack.pduPlacements || rack.pduPlacements.length === 0) return null;
+
+    return rack.pduPlacements.map((pdu, index) => {
+      const pduWidth = 20; // PDUの幅
+      const pduHeight = Math.min(rack.units * unitHeight * 0.8, pdu.equipment.height * unitHeight || rack.units * unitHeight * 0.6);
+      
+      let positionStyle: React.CSSProperties = {};
+      
+      switch (pdu.position) {
+        case 'left':
+          positionStyle = {
+            left: `-${pduWidth + 10}px`,
+            top: `${pdu.offset}px`,
+            width: `${pduWidth}px`,
+            height: `${pduHeight}px`
+          };
+          break;
+        case 'right':
+          positionStyle = {
+            right: `-${pduWidth + 10}px`,
+            top: `${pdu.offset}px`,
+            width: `${pduWidth}px`,
+            height: `${pduHeight}px`
+          };
+          break;
+        case 'rear':
+          positionStyle = {
+            left: '50%',
+            transform: 'translateX(-50%)',
+            top: `${pdu.offset}px`,
+            width: `${pduWidth * 0.7}px`,
+            height: `${pduHeight}px`,
+            zIndex: 1
+          };
+          break;
+      }
+
+      return (
+        <div
+          key={`pdu-${index}`}
+          className={`absolute border-2 border-red-500 bg-red-600 opacity-80 hover:opacity-100 transition-opacity cursor-pointer`}
+          style={positionStyle}
+          title={`${pdu.equipment.name} (${pdu.position})`}
+        >
+          <div className="w-full h-full flex flex-col items-center justify-center text-white text-xs">
+            <Zap size={Math.max(8, pduWidth * 0.4)} />
+            <span className="writing-vertical-rl text-vertical transform rotate-180 mt-1 truncate">
+              {pdu.equipment.name.substring(0, 8)}
+            </span>
+          </div>
+          {/* PDUコンセント表現 */}
+          <div className="absolute right-0 top-2 bottom-2 w-1 flex flex-col justify-around">
+            {Array.from({ length: Math.floor(pduHeight / 20) }, (_, i) => (
+              <div key={i} className="w-1 h-1 bg-yellow-400 rounded-full" />
+            ))}
+          </div>
+        </div>
+      );
+    });
+  };
+
+  // 詳細なナット・レール表現
   const renderMountingHoles = (unit: number) => {
     const cageNuts = rack.cageNuts[unit] || {
       frontLeft: { top: null, bottom: null },
@@ -158,22 +223,68 @@ export const RackView: React.FC<RackViewProps> = ({
       rearRight: { top: null, bottom: null }
     };
 
+    const railInstallation = rack.railInstallations[unit];
     const holeSize = Math.max(4, unitHeight * 0.12);
     
     return (
       <>
+        {/* レール表現 */}
+        {railInstallation && railInstallation.installed && (
+          <>
+            {/* 左レール */}
+            <div
+              className="absolute bg-gradient-to-r from-gray-400 to-gray-600 border border-gray-500 opacity-90"
+              style={{
+                width: `3px`,
+                height: `${unitHeight - 4}px`,
+                left: `-8px`,
+                top: `2px`,
+                borderRadius: '1px'
+              }}
+              title={`左レール: ${railInstallation.type}`}
+            >
+              {/* レールの溝表現 */}
+              <div className="w-full h-full flex flex-col justify-around">
+                {Array.from({ length: 3 }, (_, i) => (
+                  <div key={i} className="w-full h-0.5 bg-gray-700" />
+                ))}
+              </div>
+            </div>
+            
+            {/* 右レール */}
+            <div
+              className="absolute bg-gradient-to-r from-gray-400 to-gray-600 border border-gray-500 opacity-90"
+              style={{
+                width: `3px`,
+                height: `${unitHeight - 4}px`,
+                right: `-8px`,
+                top: `2px`,
+                borderRadius: '1px'
+              }}
+              title={`右レール: ${railInstallation.type}`}
+            >
+              <div className="w-full h-full flex flex-col justify-around">
+                {Array.from({ length: 3 }, (_, i) => (
+                  <div key={i} className="w-full h-0.5 bg-gray-700" />
+                ))}
+              </div>
+            </div>
+          </>
+        )}
+
         {/* 前面左ラック柱 - 上穴 */}
-        <div 
+        <div
           className={`absolute border cursor-pointer hover:scale-110 transition-transform ${
-            cageNuts.frontLeft?.top ? 'bg-green-500 border-green-600' : darkMode ? 'bg-gray-600 border-gray-500' : 'bg-gray-300 border-gray-400'
+            cageNuts.frontLeft?.top ? 'bg-green-500 border-green-600 shadow-inner' : darkMode ? 'bg-gray-600 border-gray-500' : 'bg-gray-300 border-gray-400'
           }`}
-          style={{ 
-            width: `${holeSize}px`, 
+          style={{
+            width: `${holeSize}px`,
             height: `${holeSize}px`,
             left: `-${holeSize + 2}px`,
-            top: `2px`
+            top: `2px`,
+            borderRadius: '1px'
           }}
-          title={cageNuts.frontLeft?.top ? `前面左上: ${cageNuts.frontLeft.top.toUpperCase()}` : '前面左上: 空き穴'}
+          title={cageNuts.frontLeft?.top ? `前面左上: ${cageNuts.frontLeft.top.toUpperCase()}ナット` : '前面左上: 空き穴'}
           onClick={(e) => {
             e.stopPropagation();
             if (cageNuts.frontLeft?.top) {
@@ -185,23 +296,24 @@ export const RackView: React.FC<RackViewProps> = ({
         >
           {cageNuts.frontLeft?.top && (
             <div className="w-full h-full flex items-center justify-center">
-              <div className={`w-1 h-1 bg-white rounded-full ${holeSize < 6 ? 'hidden' : ''}`}></div>
+              <Circle size={holeSize * 0.4} className="text-white fill-current" />
             </div>
           )}
         </div>
 
         {/* 前面左ラック柱 - 下穴 */}
-        <div 
+        <div
           className={`absolute border cursor-pointer hover:scale-110 transition-transform ${
-            cageNuts.frontLeft?.bottom ? 'bg-green-500 border-green-600' : darkMode ? 'bg-gray-600 border-gray-500' : 'bg-gray-300 border-gray-400'
+            cageNuts.frontLeft?.bottom ? 'bg-green-500 border-green-600 shadow-inner' : darkMode ? 'bg-gray-600 border-gray-500' : 'bg-gray-300 border-gray-400'
           }`}
-          style={{ 
-            width: `${holeSize}px`, 
+          style={{
+            width: `${holeSize}px`,
             height: `${holeSize}px`,
             left: `-${holeSize + 2}px`,
-            bottom: `2px`
+            bottom: `2px`,
+            borderRadius: '1px'
           }}
-          title={cageNuts.frontLeft?.bottom ? `前面左下: ${cageNuts.frontLeft.bottom.toUpperCase()}` : '前面左下: 空き穴'}
+          title={cageNuts.frontLeft?.bottom ? `前面左下: ${cageNuts.frontLeft.bottom.toUpperCase()}ナット` : '前面左下: 空き穴'}
           onClick={(e) => {
             e.stopPropagation();
             if (cageNuts.frontLeft?.bottom) {
@@ -213,23 +325,24 @@ export const RackView: React.FC<RackViewProps> = ({
         >
           {cageNuts.frontLeft?.bottom && (
             <div className="w-full h-full flex items-center justify-center">
-              <div className={`w-1 h-1 bg-white rounded-full ${holeSize < 6 ? 'hidden' : ''}`}></div>
+              <Circle size={holeSize * 0.4} className="text-white fill-current" />
             </div>
           )}
         </div>
 
         {/* 前面右ラック柱 - 上穴 */}
-        <div 
+        <div
           className={`absolute border cursor-pointer hover:scale-110 transition-transform ${
-            cageNuts.frontRight?.top ? 'bg-green-500 border-green-600' : darkMode ? 'bg-gray-600 border-gray-500' : 'bg-gray-300 border-gray-400'
+            cageNuts.frontRight?.top ? 'bg-green-500 border-green-600 shadow-inner' : darkMode ? 'bg-gray-600 border-gray-500' : 'bg-gray-300 border-gray-400'
           }`}
-          style={{ 
-            width: `${holeSize}px`, 
+          style={{
+            width: `${holeSize}px`,
             height: `${holeSize}px`,
             right: `-${holeSize + 2}px`,
-            top: `2px`
+            top: `2px`,
+            borderRadius: '1px'
           }}
-          title={cageNuts.frontRight?.top ? `前面右上: ${cageNuts.frontRight.top.toUpperCase()}` : '前面右上: 空き穴'}
+          title={cageNuts.frontRight?.top ? `前面右上: ${cageNuts.frontRight.top.toUpperCase()}ナット` : '前面右上: 空き穴'}
           onClick={(e) => {
             e.stopPropagation();
             if (cageNuts.frontRight?.top) {
@@ -241,23 +354,24 @@ export const RackView: React.FC<RackViewProps> = ({
         >
           {cageNuts.frontRight?.top && (
             <div className="w-full h-full flex items-center justify-center">
-              <div className={`w-1 h-1 bg-white rounded-full ${holeSize < 6 ? 'hidden' : ''}`}></div>
+              <Circle size={holeSize * 0.4} className="text-white fill-current" />
             </div>
           )}
         </div>
 
         {/* 前面右ラック柱 - 下穴 */}
-        <div 
+        <div
           className={`absolute border cursor-pointer hover:scale-110 transition-transform ${
-            cageNuts.frontRight?.bottom ? 'bg-green-500 border-green-600' : darkMode ? 'bg-gray-600 border-gray-500' : 'bg-gray-300 border-gray-400'
+            cageNuts.frontRight?.bottom ? 'bg-green-500 border-green-600 shadow-inner' : darkMode ? 'bg-gray-600 border-gray-500' : 'bg-gray-300 border-gray-400'
           }`}
-          style={{ 
-            width: `${holeSize}px`, 
+          style={{
+            width: `${holeSize}px`,
             height: `${holeSize}px`,
             right: `-${holeSize + 2}px`,
-            bottom: `2px`
+            bottom: `2px`,
+            borderRadius: '1px'
           }}
-          title={cageNuts.frontRight?.bottom ? `前面右下: ${cageNuts.frontRight.bottom.toUpperCase()}` : '前面右下: 空き穴'}
+          title={cageNuts.frontRight?.bottom ? `前面右下: ${cageNuts.frontRight.bottom.toUpperCase()}ナット` : '前面右下: 空き穴'}
           onClick={(e) => {
             e.stopPropagation();
             if (cageNuts.frontRight?.bottom) {
@@ -269,23 +383,24 @@ export const RackView: React.FC<RackViewProps> = ({
         >
           {cageNuts.frontRight?.bottom && (
             <div className="w-full h-full flex items-center justify-center">
-              <div className={`w-1 h-1 bg-white rounded-full ${holeSize < 6 ? 'hidden' : ''}`}></div>
+              <Circle size={holeSize * 0.4} className="text-white fill-current" />
             </div>
           )}
         </div>
 
-        {/* 背面表示（簡略化） */}
-        <div 
+        {/* 背面表示（詳細化） */}
+        <div
           className={`absolute border cursor-pointer hover:scale-110 transition-transform opacity-70 ${
             cageNuts.rearLeft?.top || cageNuts.rearLeft?.bottom ? 'bg-green-400 border-green-500' : darkMode ? 'bg-gray-500 border-gray-400' : 'bg-gray-200 border-gray-300'
           }`}
-          style={{ 
-            width: `${Math.max(3, holeSize * 0.7)}px`, 
+          style={{
+            width: `${Math.max(3, holeSize * 0.7)}px`,
             height: `${unitHeight - 4}px`,
             left: `${holeSize + 4}px`,
-            top: `2px`
+            top: `2px`,
+            borderRadius: '1px'
           }}
-          title={`背面左: ${(cageNuts.rearLeft?.top || cageNuts.rearLeft?.bottom) ? '設置済み' : '未設置'}`}
+          title={`背面左: ${(cageNuts.rearLeft?.top || cageNuts.rearLeft?.bottom) ? 'ナット設置済み' : '未設置'}`}
           onClick={(e) => {
             e.stopPropagation();
             if (cageNuts.rearLeft?.top || cageNuts.rearLeft?.bottom) {
@@ -296,19 +411,26 @@ export const RackView: React.FC<RackViewProps> = ({
               onCageNutInstall?.(unit, 'rearLeft', 'bottom', 'm6');
             }
           }}
-        />
+        >
+          {(cageNuts.rearLeft?.top || cageNuts.rearLeft?.bottom) && (
+            <div className="w-full h-full flex items-center justify-center">
+              <Minus size={Math.max(2, holeSize * 0.3)} className="text-white" />
+            </div>
+          )}
+        </div>
 
-        <div 
+        <div
           className={`absolute border cursor-pointer hover:scale-110 transition-transform opacity-70 ${
             cageNuts.rearRight?.top || cageNuts.rearRight?.bottom ? 'bg-green-400 border-green-500' : darkMode ? 'bg-gray-500 border-gray-400' : 'bg-gray-200 border-gray-300'
           }`}
-          style={{ 
-            width: `${Math.max(3, holeSize * 0.7)}px`, 
+          style={{
+            width: `${Math.max(3, holeSize * 0.7)}px`,
             height: `${unitHeight - 4}px`,
             right: `${holeSize + 4}px`,
-            top: `2px`
+            top: `2px`,
+            borderRadius: '1px'
           }}
-          title={`背面右: ${(cageNuts.rearRight?.top || cageNuts.rearRight?.bottom) ? '設置済み' : '未設置'}`}
+          title={`背面右: ${(cageNuts.rearRight?.top || cageNuts.rearRight?.bottom) ? 'ナット設置済み' : '未設置'}`}
           onClick={(e) => {
             e.stopPropagation();
             if (cageNuts.rearRight?.top || cageNuts.rearRight?.bottom) {
@@ -319,7 +441,13 @@ export const RackView: React.FC<RackViewProps> = ({
               onCageNutInstall?.(unit, 'rearRight', 'bottom', 'm6');
             }
           }}
-        />
+        >
+          {(cageNuts.rearRight?.top || cageNuts.rearRight?.bottom) && (
+            <div className="w-full h-full flex items-center justify-center">
+              <Minus size={Math.max(2, holeSize * 0.3)} className="text-white" />
+            </div>
+          )}
+        </div>
       </>
     );
   };
@@ -508,7 +636,7 @@ export const RackView: React.FC<RackViewProps> = ({
   // perspective に応じて描画内容を分岐
   if (perspective === 'front') {
     return (
-      <div className="flex flex-col">
+      <div className="flex flex-col relative">
         {/* ラックヘッダー (前面) */}
         <div className={`mb-2 p-2 border rounded-t-lg ${darkMode ? 'bg-gray-800 border-gray-600' : 'bg-gray-100 border-gray-300'}`}>
           <h3 className="font-bold text-center">{rack.name} (前面)</h3>
@@ -517,7 +645,10 @@ export const RackView: React.FC<RackViewProps> = ({
           </div>
         </div>
         {/* ラックユニット (前面) */}
-        <div className={`border rounded-b-lg overflow-hidden ${darkMode ? 'border-gray-600' : 'border-gray-300'}`}>
+        <div className={`border rounded-b-lg overflow-visible relative ${darkMode ? 'border-gray-600' : 'border-gray-300'}`}>
+          {/* PDU表示 */}
+          {renderPDUs()}
+          {/* ラックユニット */}
           {Array.from({ length: rack.units }, (_, i) => rack.units - i).map(unit => renderRackUnit(unit))}
         </div>
       </div>
