@@ -1,5 +1,6 @@
 import { Rack, Equipment, RackStats, TotalStats, CoolingStats, CageNutStatus, PowerSources } from './types';
 import { rackTypes } from './constants';
+import { placementManager } from './services/EquipmentPlacementManager';
 
 /**
  * 個別ラック統計計算
@@ -206,7 +207,7 @@ export const getZoomedFontSize = (zoomLevel: number): number => {
 };
 
 /**
- * 機器配置可能チェック
+ * 機器配置可能チェック（後方互換性のため同期版を維持）
  */
 export const canPlaceEquipment = (
   rack: Rack,
@@ -242,6 +243,43 @@ export const canPlaceEquipment = (
   }
   
   return { canPlace: true };
+};
+
+/**
+ * 機器配置可能チェック（新しいEquipmentPlacementManagerを使用）
+ */
+export const canPlaceEquipmentAdvanced = async (
+  rack: Rack,
+  startUnit: number,
+  equipment: Equipment
+): Promise<{ canPlace: boolean; reason?: string; warnings?: string[] }> => {
+  const result = await placementManager.placeEquipment(rack, startUnit, equipment, {
+    validateOnly: true
+  });
+  
+  if (!result.success) {
+    // エラーがある場合
+    if (result.validation.errors.length > 0) {
+      return {
+        canPlace: false,
+        reason: result.validation.errors[0].message
+      };
+    }
+    
+    // 警告のみの場合
+    if (result.validation.warnings.length > 0) {
+      return {
+        canPlace: false,
+        reason: result.validation.warnings[0].message,
+        warnings: result.validation.warnings.map(w => w.message)
+      };
+    }
+  }
+  
+  return {
+    canPlace: true,
+    warnings: result.validation.warnings.map(w => w.message)
+  };
 };
 
 /**

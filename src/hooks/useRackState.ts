@@ -2,6 +2,7 @@ import { useState, useCallback } from 'react';
 import { Rack, Equipment, FloorSettings } from '../types';
 import { deepCopy, autoInstallCageNuts } from '../utils';
 import { rackTypes } from '../constants';
+import { placementManager } from '../services/EquipmentPlacementManager';
 
 // 初期ラック設定
 const createInitialRack = (id: string, name: string, rackCount: number): Rack => ({
@@ -123,92 +124,62 @@ export const useRackState = () => {
     });
   }, []);
 
-  // 機器追加
-  const addEquipment = useCallback((rackId: string, startUnit: number, equipment: Equipment) => {
-    const endUnit = startUnit + equipment.height - 1;
-    const equipmentId = `${equipment.id}-${Date.now()}`;
-    
-    setRacks(prev => {
-      const newRack = deepCopy(prev[rackId]);
+  // 機器追加（新しいEquipmentPlacementManagerを使用）
+  const addEquipment = useCallback(async (rackId: string, startUnit: number, equipment: Equipment) => {
+    const currentRack = racks[rackId];
+    if (!currentRack) return;
+
+    try {
+      // ラックのディープコピーを作成（Reactの不変性を保つため）
+      const rackCopy = deepCopy(currentRack);
       
-      // 機器をユニットに配置
-      for (let unit = startUnit; unit <= endUnit; unit++) {
-        newRack.equipment[unit] = {
-          ...equipment,
-          id: equipmentId,
-          startUnit,
-          endUnit,
-          isMainUnit: unit === startUnit
-        };
-      }
-      
-      // 電源接続設定
-      if (equipment.dualPower) {
-        newRack.powerConnections[equipmentId] = { 
-          primarySource: null,
-          primaryType: 'pdu',
-          secondarySource: null,
-          secondaryType: 'pdu',
-          powerPath: 'redundant'
-        };
+      // 新しいEquipmentPlacementManagerを使用して配置を試行
+      const result = await placementManager.placeEquipment(rackCopy, startUnit, equipment, {
+        autoInstallCageNuts: true // デフォルトで自動設置を有効にする
+      });
+
+      if (result.success) {
+        // 配置が成功した場合、ラック状態を更新
+        setRacks(prev => ({
+          ...prev,
+          [rackId]: rackCopy // 変更されたコピーを反映
+        }));
       } else {
-        newRack.powerConnections[equipmentId] = {
-          primarySource: null,
-          primaryType: 'pdu',
-          powerPath: 'single'
-        };
+        // 配置が失敗した場合、エラーメッセージを表示
+        console.error('機器の配置に失敗しました:', result.validation.errors);
+        // TODO: ユーザーにエラーメッセージを表示する仕組みを追加
       }
-      
-      // 取り付け設定
-      newRack.mountingOptions[equipmentId] = {
-        type: equipment.needsRails ? 'none' : 'direct',
-        hasShelf: false,
-        hasCableArm: false
-      };
-      
-      // ラベル設定
-      newRack.labels[equipmentId] = {
-        customName: '',
-        ipAddress: '',
-        serialNumber: '',
-        owner: '',
-        purpose: '',
-        installDate: new Date().toISOString().split('T')[0],
-        notes: ''
-      };
-      
-      return {
-        ...prev,
-        [rackId]: newRack
-      };
-    });
-  }, []);
+    } catch (error) {
+      console.error('機器配置中にエラーが発生しました:', error);
+    }
+  }, [racks]);
 
-  // 機器削除
-  const removeEquipment = useCallback((rackId: string, unit: number) => {
-    setRacks(prev => {
-      const rack = prev[rackId];
-      const item = rack.equipment[unit];
-      if (!item) return prev;
+  // 機器削除（新しいEquipmentPlacementManagerを使用）
+  const removeEquipment = useCallback(async (rackId: string, unit: number) => {
+    const currentRack = racks[rackId];
+    if (!currentRack) return;
 
-      const newRack = deepCopy(rack);
+    try {
+      // ラックのディープコピーを作成（Reactの不変性を保つため）
+      const rackCopy = deepCopy(currentRack);
       
-      // 機器をすべてのユニットから削除
-      for (let u = item.startUnit!; u <= item.endUnit!; u++) {
-        delete newRack.equipment[u];
+      // 新しいEquipmentPlacementManagerを使用して削除を試行
+      const result = await placementManager.removeEquipment(rackCopy, unit);
+
+      if (result.success) {
+        // 削除が成功した場合、ラック状態を更新
+        setRacks(prev => ({
+          ...prev,
+          [rackId]: rackCopy // 変更されたコピーを反映
+        }));
+      } else {
+        // 削除が失敗した場合、エラーメッセージを表示
+        console.error('機器の削除に失敗しました:', result.validation.errors);
       }
-      
-      // 関連設定も削除
-      delete newRack.powerConnections[item.id];
-      delete newRack.mountingOptions[item.id];
-      delete newRack.labels[item.id];
-      
-      return {
-        ...prev,
-        [rackId]: newRack
-      };
-    });
-  }, []);
+    } catch (error) {
+      console.error('機器削除中にエラーが発生しました:', error);
+    }
+  }, [racks]);
 
   // ラベル更新
   const updateLabel = useCallback((rackId: string, equipmentId: string, field: string, value: string) => {

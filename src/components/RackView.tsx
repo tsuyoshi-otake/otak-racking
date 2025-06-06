@@ -330,6 +330,10 @@ export const RackView: React.FC<RackViewProps> = ({
     const isEmpty = !item;
     const isMainUnit = item?.isMainUnit;
     const cageNutStatus = getCageNutStatus(unit, rack);
+    
+    // 2UサーバーのmainUnitを探す（表示の整合性のため）
+    const mainEquipment = isMainUnit ? item :
+      (item ? rack.equipment[item.startUnit || unit] : null);
 
     let powerStatus = null;
     let mountingStatus = null;
@@ -400,11 +404,12 @@ export const RackView: React.FC<RackViewProps> = ({
         className={`relative border flex items-center justify-between px-2 ${unitBorderClass} ${
           isEmpty ? emptyUnitClass : ''
         } ${
-          item && !isMainUnit ? 'border-t-0 bg-opacity-50' : ''
+          item && !isMainUnit ? 'border-t-0' : ''
         }`}
-        style={{ 
+        style={{
           height: `${unitHeight}px`,
-          fontSize: `${fontSize}px`
+          fontSize: `${fontSize}px`,
+          backgroundColor: item && !isMainUnit ? `${item.color}40` : undefined // 透明度40%で背景色を適用
         }}
         onDragOver={isEmpty && selectedRack !== 'all' ? onDragOver : undefined}
         onDrop={isEmpty && selectedRack !== 'all' ? (e) => onDrop?.(e, unit) : undefined}
@@ -424,12 +429,23 @@ export const RackView: React.FC<RackViewProps> = ({
         }}
         onClick={() => {
           if (item && selectedRack !== 'all') {
-            onEquipmentClick?.(item);
+            onEquipmentClick?.(mainEquipment || item);
           }
         }}
       >
         <div className="flex items-center gap-1">
           <span className={`font-mono ${unitNumClass}`}>{unit}</span>
+          {item && !isMainUnit && mainEquipment && (
+            <span className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+              ↑{mainEquipment.name}の一部
+            </span>
+          )}
+          {/* デバッグ用：35Uの状態を表示 */}
+          {unit === 35 && item && (
+            <span className="text-xs text-red-500">
+              [DEBUG: 35U occupied - ID:{item.id}, Start:{item.startUnit}, End:{item.endUnit}, Main:{item.isMainUnit}]
+            </span>
+          )}
           {activeViewMode === 'showCageNutView' && (
             <div className="flex gap-0.5">
               <div className="flex flex-col gap-0.5" title={`ゲージナット: ${cageNutStatus.installed}/8`}>
