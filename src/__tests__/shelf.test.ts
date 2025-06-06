@@ -42,13 +42,12 @@ describe('棚板のテスト', () => {
   const getShelfEquipment = () => {
     const standardShelf = otherEquipment.find(eq => eq.id === 'shelf-1u-standard');
     const ventedShelf = otherEquipment.find(eq => eq.id === 'shelf-1u-vented');
-    const heavyShelf = otherEquipment.find(eq => eq.id === 'shelf-2u-heavy');
     
-    if (!standardShelf || !ventedShelf || !heavyShelf) {
+    if (!standardShelf || !ventedShelf) {
       throw new Error('棚板が見つかりません');
     }
     
-    return { standardShelf, ventedShelf, heavyShelf };
+    return { standardShelf, ventedShelf };
   };
 
   describe('棚板の基本仕様確認', () => {
@@ -71,17 +70,8 @@ describe('棚板のテスト', () => {
       expect(ventedShelf.airflow).toBe('intake');
     });
 
-    it('重量用2U棚板が機器ライブラリに存在する', () => {
-      const { heavyShelf } = getShelfEquipment();
-      
-      expect(heavyShelf).toBeDefined();
-      expect(heavyShelf.name).toBe('2U棚板 (重量用)');
-      expect(heavyShelf.type).toBe('shelf');
-      expect(heavyShelf.height).toBe(2);
-    });
-
     it('各棚板の仕様が正しく設定されている', () => {
-      const { standardShelf, ventedShelf, heavyShelf } = getShelfEquipment();
+      const { standardShelf, ventedShelf } = getShelfEquipment();
       
       // 標準棚板
       expect(standardShelf.specifications?.loadCapacity).toBe('20kg');
@@ -90,10 +80,6 @@ describe('棚板のテスト', () => {
       // 通気孔付き棚板
       expect(ventedShelf.specifications?.loadCapacity).toBe('15kg');
       expect(ventedShelf.specifications?.ventilation).toBe('通気孔（40%開口率）');
-      
-      // 重量用棚板
-      expect(heavyShelf.specifications?.loadCapacity).toBe('80kg');
-      expect(heavyShelf.specifications?.reinforcement).toBe('補強フレーム内蔵');
     });
   });
 
@@ -128,23 +114,6 @@ describe('棚板のテスト', () => {
       expect(stats.totalWeight).toBe(3); // 標準棚板は3kg
     });
 
-    it('重量用棚板は2Uを占有する', () => {
-      const rack = createTestRack();
-      const { heavyShelf } = getShelfEquipment();
-      
-      // 重量用棚板を1-2Uに配置
-      rack.equipment[1] = {
-        ...heavyShelf,
-        startUnit: 1,
-        endUnit: 2,
-        isMainUnit: true
-      };
-      
-      const stats = calculateRackStats(rack);
-      
-      expect(stats.usedUnits).toBe(2);
-      expect(stats.totalWeight).toBe(8); // 重量用棚板は8kg
-    });
 
     it('複数の棚板を配置できる', () => {
       const rack = createTestRack();
@@ -189,12 +158,6 @@ describe('棚板のテスト', () => {
       expect(ventedShelf.cfm).toBe(15);
     });
 
-    it('重量用棚板は自然エアフロー', () => {
-      const { heavyShelf } = getShelfEquipment();
-      
-      expect(heavyShelf.airflow).toBe('natural');
-      expect(heavyShelf.cfm).toBe(0);
-    });
   });
 
   describe('棚板の耐荷重特性', () => {
@@ -212,48 +175,35 @@ describe('棚板のテスト', () => {
       expect(ventedShelf.specifications?.loadCapacity).toBe('15kg');
     });
 
-    it('重量用棚板は80kg耐荷重', () => {
-      const { heavyShelf } = getShelfEquipment();
-      
-      expect(heavyShelf.weight).toBe(8);
-      expect(heavyShelf.specifications?.loadCapacity).toBe('80kg');
-    });
   });
 
   describe('棚板の設置要件', () => {
     it('全ての棚板はレール不要', () => {
-      const { standardShelf, ventedShelf, heavyShelf } = getShelfEquipment();
+      const { standardShelf, ventedShelf } = getShelfEquipment();
       
       expect(standardShelf.needsRails).toBe(false);
       expect(ventedShelf.needsRails).toBe(false);
-      expect(heavyShelf.needsRails).toBe(false);
     });
 
     it('全ての棚板は電力不要', () => {
-      const { standardShelf, ventedShelf, heavyShelf } = getShelfEquipment();
+      const { standardShelf, ventedShelf } = getShelfEquipment();
       
       expect(standardShelf.power).toBe(0);
       expect(standardShelf.dualPower).toBe(false);
       expect(ventedShelf.power).toBe(0);
       expect(ventedShelf.dualPower).toBe(false);
-      expect(heavyShelf.power).toBe(0);
-      expect(heavyShelf.dualPower).toBe(false);
     });
 
     it('棚板の奥行きが適切である', () => {
-      const { standardShelf, ventedShelf, heavyShelf } = getShelfEquipment();
+      const { standardShelf, ventedShelf } = getShelfEquipment();
       
       // 標準と通気孔付きは450mm
       expect(standardShelf.depth).toBe(450);
       expect(ventedShelf.depth).toBe(450);
       
-      // 重量用は600mm（より深い）
-      expect(heavyShelf.depth).toBe(600);
-      
       // 全て標準ラック奥行き1000mm以下
       expect(standardShelf.depth).toBeLessThan(1000);
       expect(ventedShelf.depth).toBeLessThan(1000);
-      expect(heavyShelf.depth).toBeLessThan(1000);
     });
   });
 });

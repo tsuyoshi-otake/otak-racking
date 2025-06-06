@@ -536,31 +536,6 @@ export const otherEquipment: Equipment[] = [
       airflow: '自然通気対応'
     },
     mountingNotes: '通気が必要な機器下部に設置。開口部清掃定期実施。'
-  },
-  {
-    id: 'shelf-2u-heavy',
-    name: '2U棚板 (重量用)',
-    height: 2,
-    depth: 600,
-    power: 0,
-    heat: 0,
-    weight: 8,
-    type: 'shelf',
-    color: '#4B5563',
-    dualPower: false,
-    needsRails: false,
-    airflow: 'natural',
-    cfm: 0,
-    heatGeneration: 0,
-    description: '重量機器対応2U棚板。大型UPSやバッテリーパック等の重量機器設置用。',
-    specifications: {
-      material: 'スチール製（補強リブ付き）',
-      loadCapacity: '80kg',
-      mounting: '前面・背面・中央3点固定',
-      reinforcement: '補強フレーム内蔵',
-      safety: '落下防止フランジ付き'
-    },
-    mountingNotes: '重量機器専用。設置前ラック耐荷重要確認。'
   }
 ];
 

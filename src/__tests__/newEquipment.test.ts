@@ -64,35 +64,9 @@ describe('新規追加機器のテスト', () => {
       ventilation: '通気スリット付き',
       mounting: '前面・背面4点固定'
     },
-    mountingNotes: '荷重制限厳守。設置物の奥行き確認必要。',
-    shelfType: 'basic'
+    mountingNotes: '荷重制限厳守。設置物の奥行き確認必要。'
   });
 
-  const createShelfHeavy = (): Equipment => ({
-    id: 'shelf-2u-heavy',
-    name: '2U棚板 (重荷重)',
-    height: 2,
-    depth: 600,
-    power: 0,
-    heat: 0,
-    weight: 5,
-    type: 'shelf',
-    color: '#4B5563',
-    dualPower: false,
-    needsRails: false,
-    airflow: 'natural',
-    cfm: 0,
-    heatGeneration: 0,
-    description: '大型機器や重量機器用の強化棚板。最大荷重50kg。UPSやモニター設置に適用。',
-    specifications: {
-      material: '強化スチール製',
-      loadCapacity: '最大50kg',
-      reinforcement: 'リブ補強構造',
-      surface: '滑り止め加工',
-      accessories: '落下防止ストッパー付き'
-    },
-    mountingNotes: '重量機器用。取り付け強度要確認。'
-  });
 
   const createLoadBalancer1U = (): Equipment => ({
     id: 'load-balancer-1u',
@@ -181,13 +155,6 @@ describe('新規追加機器のテスト', () => {
       expect(result.canPlace).toBe(true);
     });
 
-    it('空のラックに2U重荷重棚板を配置できる', () => {
-      const rack = createTestRack();
-      const shelf = createShelfHeavy();
-      
-      const result = canPlaceEquipment(rack, 1, shelf);
-      expect(result.canPlace).toBe(true);
-    });
 
     it('棚板の統計が正しく計算される', () => {
       const rack = createTestRack();
@@ -268,19 +235,6 @@ describe('新規追加機器のテスト', () => {
       expect(result.canPlace).toBe(true);
     });
 
-    it('重荷重棚板の上にモニターを設置できる', () => {
-      const rack = createTestRack();
-      const heavyShelf = createShelfHeavy();
-      const monitor = createMonitor();
-      
-      // 重荷重棚板を1-2Uに配置
-      rack.equipment[1] = { ...heavyShelf, startUnit: 1, endUnit: 2, isMainUnit: true };
-      rack.equipment[2] = { ...heavyShelf, startUnit: 1, endUnit: 2, isMainUnit: false };
-      
-      // モニターを3Uに配置（重荷重棚板の上）
-      const result = canPlaceEquipment(rack, 3, monitor);
-      expect(result.canPlace).toBe(true);
-    });
 
     it('棚板とモニターを含む混在ラックの統計計算', () => {
       const rack = createTestRack();
