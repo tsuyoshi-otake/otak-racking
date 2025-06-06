@@ -22,7 +22,7 @@ import {
   ChevronDown,
   ChevronRight
 } from 'lucide-react';
-import { Rack } from '../types'; // ViewMode を削除 (未使用のため)
+import { Rack, FloorSettings } from '../types'; // FloorSettingsを追加
 import { RackViewPerspective } from '../App'; // App.tsx から型をインポート
 import {
   calculateTotalStats,
@@ -37,19 +37,6 @@ import { EquipmentLibrary } from './EquipmentLibrary';
 // ViewModes は App.tsx で activeViewMode として管理されるため、
 // ここでの Props は activeViewMode とその更新関数になる
 // export type ViewModeKey = 'showPowerView' | 'showMountingView' | 'showLabelView' | 'showAirflowView' | 'showTemperatureView' | 'showCablingView' | 'showCageNutView' | 'showFloorView';
-
-interface FloorSettings {
-  hasAccessFloor: boolean;
-  floorHeight: number;
-  tileSize: number;
-  supportType: 'fixed' | 'adjustable';
-  loadCapacity: 'light' | 'medium' | 'heavy';
-  cableRouting: {
-    power: 'underfloor' | 'overhead' | 'side';
-    data: 'underfloor' | 'overhead' | 'side';
-    fiber: 'underfloor' | 'overhead' | 'side';
-  };
-}
 
 interface RightSidebarProps { // SidebarProps を RightSidebarProps に変更
   racks: Record<string, Rack>;

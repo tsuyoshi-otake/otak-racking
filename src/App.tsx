@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Moon, Sun, Maximize } from 'lucide-react';
-import { Equipment } from './types';
+import { Equipment, FloorSettings } from './types';
 import { useRackState } from './hooks/useRackState';
 import { useDragAndDrop, DraggedItem } from './hooks/useDragAndDrop';
 import { LeftSidebar } from './components/LeftSidebar'; // Sidebar を LeftSidebar に変更
@@ -8,6 +8,7 @@ import { RightSidebar } from './components/RightSidebar'; // RightSidebar を追
 import { RackView } from './components/RackView';
 import { ModalsAndDialogs, InfoModalProps, ConfirmModalProps } from './components/ModalsAndDialogs';
 import { calculateLayoutDimensions, getContainerStyle } from './utils';
+import { loadAppState, saveAppState } from './utils/localStorage';
 
 // ViewModes インターフェースは Sidebar で定義されているものを使用するため、ここでは削除またはコメントアウト
 // interface ViewModes {
@@ -21,48 +22,28 @@ import { calculateLayoutDimensions, getContainerStyle } from './utils';
 //   showFloorView: boolean;
 // }
 
-interface FloorSettings {
-  hasAccessFloor: boolean;
-  floorHeight: number;
-  tileSize: number;
-  supportType: 'fixed' | 'adjustable';
-  loadCapacity: 'light' | 'medium' | 'heavy';
-  cableRouting: {
-    power: 'underfloor' | 'overhead' | 'side';
-    data: 'underfloor' | 'overhead' | 'side';
-    fiber: 'underfloor' | 'overhead' | 'side';
-  };
-}
 
 export type RackViewPerspective = 'front' | 'rear' | 'left' | 'right';
 function App() {
+  // LocalStorageから初期状態を読み込み
+  const loadedState = loadAppState();
+  
   // 基本状態
-  const [darkMode, setDarkMode] = useState(false);
-  const [zoomLevel, setZoomLevel] = useState(100);
+  const [darkMode, setDarkMode] = useState(() => loadedState.darkMode ?? false);
+  const [zoomLevel, setZoomLevel] = useState(() => loadedState.zoomLevel ?? 100);
   const [selectedEquipment, setSelectedEquipment] = useState<Equipment | null>(null);
   const [showEquipmentModal, setShowEquipmentModal] = useState(false);
   
-const [rackViewPerspective, setRackViewPerspective] = useState<RackViewPerspective>('front');
+  const [rackViewPerspective, setRackViewPerspective] = useState<RackViewPerspective>(() =>
+    loadedState.rackViewPerspective ?? 'front'
+  );
   
   // アクティブなビューモードの状態 (単一選択)
-  // ViewModes のキー、または null (何も選択されていない状態)
-  // SidebarProps から ViewModes のキーの型を持ってくる必要があるかもしれない
-  // 一旦、string | null で定義し、Sidebar 側で具体的な型を使う
-  const [activeViewMode, setActiveViewMode] = useState<string | null>(null);
+  const [activeViewMode, setActiveViewMode] = useState<string | null>(() =>
+    loadedState.activeViewMode ?? null
+  );
 
-  // フリーアクセスフロア設定
-  const [floorSettings, setFloorSettings] = useState<FloorSettings>({
-    hasAccessFloor: true,
-    floorHeight: 600,
-    tileSize: 600,
-    supportType: 'adjustable',
-    loadCapacity: 'heavy',
-    cableRouting: {
-      power: 'underfloor',
-      data: 'underfloor',
-      fiber: 'overhead'
-    }
-  });
+  // フリーアクセスフロア設定（useRackStateから取得）
 
   // モーダル状態
   const [showRackManager, setShowRackManager] = useState(false);
@@ -80,7 +61,9 @@ const [rackViewPerspective, setRackViewPerspective] = useState<RackViewPerspecti
     racks,
     selectedRack,
     currentRack,
+    floorSettings,
     setSelectedRack,
+    setFloorSettings,
     addRack,
     removeRack,
     duplicateRack,
@@ -119,6 +102,20 @@ const [rackViewPerspective, setRackViewPerspective] = useState<RackViewPerspecti
       cancelText
     });
   };
+
+  // LocalStorageに状態保存
+  useEffect(() => {
+    const appState = {
+      darkMode,
+      zoomLevel,
+      selectedRack,
+      activeViewMode,
+      rackViewPerspective,
+      racks,
+      floorSettings
+    };
+    saveAppState(appState);
+  }, [darkMode, zoomLevel, selectedRack, activeViewMode, rackViewPerspective, racks, floorSettings]);
 
   // ドラッグ&ドロップ
   const {

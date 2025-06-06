@@ -14,7 +14,7 @@ import {
   Snowflake,
   Building
 } from 'lucide-react';
-import { Equipment, Rack } from '../types';
+import { Equipment, Rack, FloorSettings } from '../types';
 import { getPowerSources } from '../utils';
 
 // +++ 新しい InfoModal 用の Props (簡易版) +++
@@ -34,18 +34,6 @@ export interface ConfirmModalProps extends InfoModalProps { // export を追加
 }
 
 
-interface FloorSettings {
-  hasAccessFloor: boolean;
-  floorHeight: number;
-  tileSize: number;
-  supportType: 'fixed' | 'adjustable';
-  loadCapacity: 'light' | 'medium' | 'heavy';
-  cableRouting: {
-    power: 'underfloor' | 'overhead' | 'side';
-    data: 'underfloor' | 'overhead' | 'side';
-    fiber: 'underfloor' | 'overhead' | 'side';
-  };
-}
 
 interface ModalsAndDialogsProps {
   darkMode: boolean;

@@ -1,8 +1,9 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { Rack, Equipment, FloorSettings } from '../types';
 import { deepCopy, autoInstallCageNuts } from '../utils';
 import { rackTypes } from '../constants';
 import { placementManager } from '../services/EquipmentPlacementManager';
+import { loadAppState, saveAppState } from '../utils/localStorage';
 
 // 初期ラック設定
 const createInitialRack = (id: string, name: string, rackCount: number): Rack => ({
@@ -55,12 +56,36 @@ const initialFloorSettings: FloorSettings = {
 };
 
 export const useRackState = () => {
-  const [racks, setRacks] = useState<Record<string, Rack>>({
-    'rack-1': createInitialRack('rack-1', 'ラック #1', 0)
+  // LocalStorageから初期状態を読み込み
+  const loadedState = loadAppState();
+  
+  const [racks, setRacks] = useState<Record<string, Rack>>(() => {
+    if (loadedState.racks && Object.keys(loadedState.racks).length > 0) {
+      return loadedState.racks;
+    }
+    return { 'rack-1': createInitialRack('rack-1', 'ラック #1', 0) };
   });
   
-  const [selectedRack, setSelectedRack] = useState<string>('rack-1');
-  const [floorSettings, setFloorSettings] = useState<FloorSettings>(initialFloorSettings);
+  const [selectedRack, setSelectedRack] = useState<string>(() => {
+    if (loadedState.selectedRack && loadedState.racks && loadedState.racks[loadedState.selectedRack]) {
+      return loadedState.selectedRack;
+    }
+    return Object.keys(racks)[0] || 'rack-1';
+  });
+  
+  const [floorSettings, setFloorSettings] = useState<FloorSettings>(() => {
+    return loadedState.floorSettings || initialFloorSettings;
+  });
+
+  // 状態変更時にLocalStorageに保存
+  useEffect(() => {
+    const stateToSave = {
+      racks,
+      selectedRack,
+      floorSettings
+    };
+    saveAppState(stateToSave);
+  }, [racks, selectedRack, floorSettings]);
 
   // ラック追加
   const addRack = useCallback(() => {

@@ -137,9 +137,9 @@ export interface FloorSettings {
   supportType: 'adjustable' | 'fixed' | 'string';
   loadCapacity: 'light' | 'medium' | 'heavy';
   cableRouting: {
-    power: 'underfloor' | 'overhead' | 'wall';
-    data: 'underfloor' | 'overhead' | 'wall';
-    fiber: 'underfloor' | 'overhead' | 'wall';
+    power: 'underfloor' | 'overhead' | 'side';
+    data: 'underfloor' | 'overhead' | 'side';
+    fiber: 'underfloor' | 'overhead' | 'side';
   };
 }
 
