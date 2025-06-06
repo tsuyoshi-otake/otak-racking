@@ -550,7 +550,7 @@ export const equipmentLibrary: Equipment[] = [
 ];
 
 // ズームレベル
-export const zoomLevels = [50, 75, 100];
+export const zoomLevels = [75, 100, 125];
 
 // エアフロー方向アイコンマッピング
 export const airflowIcons = {
