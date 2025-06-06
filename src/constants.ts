@@ -406,20 +406,20 @@ export const powerEquipment: Equipment[] = [
 
 // 取り付け部品
 export const mountingEquipment: Equipment[] = [
-  { 
-    id: 'slide-rail-standard', 
-    name: 'スライドレール (標準)', 
-    height: 0, 
-    depth: 0, 
-    power: 0, 
-    heat: 0, 
-    weight: 4, 
-    type: 'mounting', 
-    color: '#6366F1', 
-    dualPower: false, 
-    needsRails: false, 
-    airflow: 'natural', 
-    cfm: 0, 
+  {
+    id: 'slide-rail-standard',
+    name: 'スライドレール (標準)',
+    height: 0,
+    depth: 700,
+    power: 0,
+    heat: 0,
+    weight: 4,
+    type: 'mounting',
+    color: '#6366F1',
+    dualPower: false,
+    needsRails: false,
+    airflow: 'natural',
+    cfm: 0,
     heatGeneration: 0,
     description: '標準的なスライドレール。サーバーやストレージの引き出し機構を提供。',
     specifications: {
@@ -430,7 +430,59 @@ export const mountingEquipment: Equipment[] = [
       compatibility: '1U-4U機器対応'
     },
     mountingNotes: 'ゲージナット事前設置必要。重量制限確認。',
-    railType: 'slide-standard'
+    railType: 'slide'
+  },
+  {
+    id: 'fixed-rail-standard',
+    name: '固定レール (標準)',
+    height: 0,
+    depth: 600,
+    power: 0,
+    heat: 0,
+    weight: 3,
+    type: 'mounting',
+    color: '#3B82F6',
+    dualPower: false,
+    needsRails: false,
+    airflow: 'natural',
+    cfm: 0,
+    heatGeneration: 0,
+    description: '固定式レール。機器を確実に固定し、引き出し機能は提供しない。',
+    specifications: {
+      depth: '600mm',
+      loadCapacity: '60kg',
+      type: '固定式',
+      mounting: '前面・背面ボルト固定',
+      compatibility: '1U-8U機器対応'
+    },
+    mountingNotes: 'ケーブル配線を考慮した設置が必要。',
+    railType: 'fixed'
+  },
+  {
+    id: 'toolless-rail-standard',
+    name: 'ツールレスレール',
+    height: 0,
+    depth: 650,
+    power: 0,
+    heat: 0,
+    weight: 3.5,
+    type: 'mounting',
+    color: '#10B981',
+    dualPower: false,
+    needsRails: false,
+    airflow: 'natural',
+    cfm: 0,
+    heatGeneration: 0,
+    description: 'ツール不要で設置可能なレール。クリップオン式で素早い機器交換が可能。',
+    specifications: {
+      extension: '最大650mm',
+      loadCapacity: '35kg',
+      type: 'クリップオン',
+      mounting: 'ツール不要',
+      compatibility: '1U-2U機器対応'
+    },
+    mountingNotes: 'ラック柱の穴位置精度が重要。',
+    railType: 'toolless'
   },
   { 
     id: 'cage-nut-m6', 

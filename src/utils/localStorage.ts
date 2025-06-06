@@ -66,6 +66,19 @@ export const loadAppState = (): Partial<AppState> => {
       return DEFAULT_APP_STATE;
     }
 
+    // 既存のラックデータに新しいプロパティを追加
+    if (parsed.data.racks) {
+      Object.keys(parsed.data.racks).forEach(rackId => {
+        const rack = parsed.data.racks[rackId];
+        if (!rack.pduPlacements) {
+          rack.pduPlacements = [];
+        }
+        if (!rack.railInstallations) {
+          rack.railInstallations = {};
+        }
+      });
+    }
+
     console.log('アプリ状態を正常に読み込みました。');
     return {
       ...DEFAULT_APP_STATE,

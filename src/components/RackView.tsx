@@ -223,7 +223,7 @@ export const RackView: React.FC<RackViewProps> = ({
       rearRight: { top: null, bottom: null }
     };
 
-    const railInstallation = rack.railInstallations[unit];
+    const railInstallation = rack.railInstallations?.[unit];
     const holeSize = Math.max(4, unitHeight * 0.12);
     
     return (
