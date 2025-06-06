@@ -3,6 +3,10 @@
 ## src/App.tsx
 
 - **Function Component:** `function App()`
+  - **Renders:**
+    - [`Sidebar`](src/components/Sidebar.tsx)
+    - [`RackView`](src/components/RackView.tsx)
+    - [`ModalsAndDialogs`](src/components/ModalsAndDialogs.tsx)
   - **Interface:** `interface FloorSettings`
   - **Type Alias:** `export type RackViewPerspective = 'front' | 'rear' | 'left' | 'right';`
   - **Function:** `const showInfoModal = (title: string, message: string)`
@@ -28,6 +32,8 @@
 
 ## src/index.tsx
 
+- **Renders:**
+  - [`App`](src/App.tsx)
 - (エントリーポイントのため、主要なコンポーネントやロジック定義はなし)
 
 ## src/types.ts
@@ -158,6 +164,8 @@
 ## src/components/Sidebar.tsx
 
 - **Function Component:** `export const Sidebar: React.FC<SidebarProps> = ({ racks, selectedRack, darkMode, zoomLevel, activeViewMode, floorSettings, onRackSelect, onAddRack, onRemoveRack, onDuplicateRack, onZoomChange, onActiveViewModeChange, onDragStart, onShowRackManager, onShowFloorSettings, onShowCoolingConfig, onShowPowerConfig, currentPerspective, onPerspectiveChange })`
+  - **Renders:**
+    - [`EquipmentLibrary`](src/components/EquipmentLibrary.tsx)
   - **Interface:** `interface FloorSettings` (ローカル定義)
   - **Interface:** `interface SidebarProps`
 
