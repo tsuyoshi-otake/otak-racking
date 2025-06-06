@@ -2,22 +2,23 @@ import React, { useState } from 'react';
 import { Moon, Sun, Maximize } from 'lucide-react';
 import { Equipment } from './types';
 import { useRackState } from './hooks/useRackState';
-import { useDragAndDrop } from './hooks/useDragAndDrop';
+import { useDragAndDrop, DraggedItem } from './hooks/useDragAndDrop';
 import { Sidebar } from './components/Sidebar';
 import { RackView } from './components/RackView';
 import { ModalsAndDialogs } from './components/ModalsAndDialogs';
 import { calculateLayoutDimensions, getContainerStyle } from './utils';
 
-interface ViewModes {
-  showPowerView: boolean;
-  showMountingView: boolean;
-  showLabelView: boolean;
-  showAirflowView: boolean;
-  showTemperatureView: boolean;
-  showCablingView: boolean;
-  showCageNutView: boolean;
-  showFloorView: boolean;
-}
+// ViewModes インターフェースは Sidebar で定義されているものを使用するため、ここでは削除またはコメントアウト
+// interface ViewModes {
+//   showPowerView: boolean;
+//   showMountingView: boolean;
+//   showLabelView: boolean;
+//   showAirflowView: boolean;
+//   showTemperatureView: boolean;
+//   showCablingView: boolean;
+//   showCageNutView: boolean;
+//   showFloorView: boolean;
+// }
 
 interface FloorSettings {
   hasAccessFloor: boolean;
@@ -32,6 +33,7 @@ interface FloorSettings {
   };
 }
 
+export type RackViewPerspective = 'front' | 'rear' | 'left' | 'right';
 function App() {
   // 基本状態
   const [darkMode, setDarkMode] = useState(false);
@@ -39,17 +41,13 @@ function App() {
   const [selectedEquipment, setSelectedEquipment] = useState<Equipment | null>(null);
   const [showEquipmentModal, setShowEquipmentModal] = useState(false);
   
-  // ビューモード状態
-  const [viewModes, setViewModes] = useState<ViewModes>({
-    showPowerView: false,
-    showMountingView: false,
-    showLabelView: false,
-    showAirflowView: false,
-    showTemperatureView: false,
-    showCablingView: false,
-    showCageNutView: false,
-    showFloorView: false
-  });
+const [rackViewPerspective, setRackViewPerspective] = useState<RackViewPerspective>('front');
+  
+  // アクティブなビューモードの状態 (単一選択)
+  // ViewModes のキー、または null (何も選択されていない状態)
+  // SidebarProps から ViewModes のキーの型を持ってくる必要があるかもしれない
+  // 一旦、string | null で定義し、Sidebar 側で具体的な型を使う
+  const [activeViewMode, setActiveViewMode] = useState<string | null>(null);
 
   // フリーアクセスフロア設定
   const [floorSettings, setFloorSettings] = useState<FloorSettings>({
@@ -96,7 +94,8 @@ function App() {
     handleDragStart,
     handleDragOver,
     handleDrop,
-    handleDragEnd
+    handleDragEnd,
+    draggedItem
   } = useDragAndDrop(
     currentRack,
     addEquipment,
@@ -104,13 +103,11 @@ function App() {
     selectedRack
   );
 
-  // ビューモード切り替え
-  const handleViewModeToggle = (mode: keyof ViewModes) => {
-    setViewModes(prev => ({
-      ...prev,
-      [mode]: !prev[mode]
-    }));
+  // アクティブなビューモード変更
+  const handleActiveViewModeChange = (mode: string | null) => {
+    setActiveViewMode(mode);
   };
+
 const handleZoomFit = () => {
     const sidebarWidth = 320; // サイドバーの幅 (w-80)
     const headerHeight = 80;  // ヘッダーの高さ
@@ -150,15 +147,6 @@ const handleZoomFit = () => {
   };
 
   // 機器削除処理
-<button
-              onClick={handleZoomFit}
-              className={`p-2 rounded transition-colors ${
-                darkMode ? 'text-gray-400 hover:bg-gray-700' : 'text-gray-600 hover:bg-gray-200'
-              }`}
-              title="画面にフィット"
-            >
-              <Maximize size={18} />
-            </button>
   const handleEquipmentRemove = (unit: number) => {
     if (window.confirm('この機器を削除しますか？\n関連する設定もすべて削除されます。')) {
       removeEquipment(selectedRack, unit);
@@ -215,19 +203,23 @@ const handleZoomFit = () => {
           selectedRack={selectedRack}
           darkMode={darkMode}
           zoomLevel={zoomLevel}
-          viewModes={viewModes}
+          // viewModes={viewModes} // 古いpropsを削除
+          activeViewMode={activeViewMode} // 新しいpropsを追加
           floorSettings={floorSettings}
           onRackSelect={setSelectedRack}
           onAddRack={addRack}
           onRemoveRack={removeRack}
           onDuplicateRack={duplicateRack}
           onZoomChange={setZoomLevel}
-          onViewModeToggle={handleViewModeToggle}
+          // onViewModeToggle={handleViewModeToggle} // 古いpropsを削除
+          onActiveViewModeChange={handleActiveViewModeChange} // 新しいpropsを追加
           onDragStart={handleDragStart}
           onShowRackManager={() => setShowRackManager(true)}
           onShowFloorSettings={() => setShowFloorSettings(true)}
           onShowCoolingConfig={() => setShowCoolingConfig(true)}
           onShowPowerConfig={() => setShowPowerConfig(true)}
+          currentPerspective={rackViewPerspective}
+          onPerspectiveChange={setRackViewPerspective}
         />
 
         {/* ラック表示エリア */}
@@ -257,8 +249,10 @@ const handleZoomFit = () => {
                       darkMode={darkMode}
                       zoomLevel={zoomLevel}
                       selectedRack={selectedRack}
-                      viewModes={viewModes}
+                      // viewModes={viewModes} // 古いpropsを削除
+                      activeViewMode={activeViewMode} // 新しいpropsを追加
                       onEquipmentClick={handleEquipmentClick}
+                      perspective={rackViewPerspective}
                     />
                   </div>
                 ))}
@@ -285,9 +279,11 @@ const handleZoomFit = () => {
                     onCageNutRemove={(unit, side, position) => 
                       removeCageNut(selectedRack, unit, side, position)
                     }
-                    onAutoInstallCageNuts={(unit, nutType) => 
+                    onAutoInstallCageNuts={(unit, nutType) =>
                       autoInstallCageNutsForUnit(selectedRack, unit, nutType)
                     }
+                    draggedItem={draggedItem as DraggedItem | null}
+                    perspective={rackViewPerspective}
                   />
                 </div>
               </div>

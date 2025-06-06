@@ -26,10 +26,11 @@ import {
   Wind,
   Thermometer
 } from 'lucide-react';
-import { Rack, Equipment, ViewMode } from '../types';
-import { 
-  getCageNutStatus, 
-  calculateCoolingStats, 
+import { Rack, Equipment } from '../types'; // ViewMode を削除
+import { RackViewPerspective } from '../App'; // App.tsx から型をインポート
+import {
+  getCageNutStatus,
+  calculateCoolingStats,
   getZoomedUnitHeight, 
   getZoomedFontSize,
   getUnitBorderClass,
@@ -44,16 +45,18 @@ interface RackViewProps {
   darkMode: boolean;
   zoomLevel: number;
   selectedRack: string;
-  viewModes: {
-    showPowerView: boolean;
-    showMountingView: boolean;
-    showLabelView: boolean;
-    showAirflowView: boolean;
-    showTemperatureView: boolean;
-    showCablingView: boolean;
-    showCageNutView: boolean;
-    showFloorView: boolean;
-  };
+  // viewModes: { // 削除
+  //   showPowerView: boolean;
+  //   showMountingView: boolean;
+  //   showLabelView: boolean;
+  //   showAirflowView: boolean;
+  //   showTemperatureView: boolean;
+  //   showCablingView: boolean;
+  //   showCageNutView: boolean;
+  //   showFloorView: boolean;
+  // };
+  activeViewMode: string | null; // 追加
+  draggedItem?: Equipment | null;
   onDragOver?: (e: React.DragEvent) => void;
   onDrop?: (e: React.DragEvent, unit: number) => void;
   onEquipmentClick?: (equipment: Equipment) => void;
@@ -61,6 +64,7 @@ interface RackViewProps {
   onCageNutInstall?: (unit: number, side: string, position: string, nutType: string) => void;
   onCageNutRemove?: (unit: number, side: string, position: string) => void;
   onAutoInstallCageNuts?: (unit: number, nutType: string) => void;
+  perspective: RackViewPerspective; // perspective prop を追加
 }
 
 export const RackView: React.FC<RackViewProps> = ({
@@ -68,14 +72,16 @@ export const RackView: React.FC<RackViewProps> = ({
   darkMode,
   zoomLevel,
   selectedRack,
-  viewModes,
+  activeViewMode,
   onDragOver,
   onDrop,
   onEquipmentClick,
   onEquipmentRemove,
   onCageNutInstall,
   onCageNutRemove,
-  onAutoInstallCageNuts
+  onAutoInstallCageNuts,
+  perspective, // perspective を分割代入に追加
+  draggedItem // draggedItem を分割代入に追加
 }) => {
   const unitHeight = getZoomedUnitHeight(zoomLevel);
   const fontSize = getZoomedFontSize(zoomLevel);
@@ -333,7 +339,7 @@ export const RackView: React.FC<RackViewProps> = ({
     if (item && isMainUnit) {
       displayName = getEquipmentDisplayName(item, rack.labels);
       
-      if (viewModes.showLabelView) {
+      if (activeViewMode === 'showLabelView') {
         const labels = rack.labels?.[item.id] || {};
         if (labels.ipAddress) {
           displayName += ` (${labels.ipAddress})`;
@@ -343,7 +349,7 @@ export const RackView: React.FC<RackViewProps> = ({
       }
       
       // 電源状態
-      if (viewModes.showPowerView) {
+      if (activeViewMode === 'showPowerView') {
         const status = getPowerStatus(item, rack.powerConnections);
         powerStatus = React.createElement(
           status.icon === 'CircleCheck' ? CheckCircle :
@@ -353,18 +359,18 @@ export const RackView: React.FC<RackViewProps> = ({
       }
       
       // 取り付け状態
-      if (viewModes.showMountingView) {
+      if (activeViewMode === 'showMountingView') {
         const mounting = rack.mountingOptions[item.id] || {};
         mountingStatus = getMountingIcon(mounting.type, item.needsRails, 12);
       }
       
       // エアフロー状態
-      if (viewModes.showAirflowView) {
+      if (activeViewMode === 'showAirflowView') {
         airflowStatus = getAirflowIcon(item.airflow, 12);
       }
       
       // 温度状態
-      if (viewModes.showTemperatureView) {
+      if (activeViewMode === 'showTemperatureView') {
         const unitTemp = coolingStats.temperatureMap[unit] || rack.environment.ambientTemp;
         const tempColor = unitTemp > 30 ? 'text-red-500' : unitTemp > 25 ? 'text-yellow-500' : 'text-green-500';
         temperatureStatus = <Thermometer size={12} className={tempColor} />;
@@ -372,7 +378,7 @@ export const RackView: React.FC<RackViewProps> = ({
     }
 
     // ゲージナット表示
-    if (viewModes.showCageNutView) {
+    if (activeViewMode === 'showCageNutView') {
       if (cageNutStatus.isComplete) {
         cageNutDisplay = <CheckCircle size={12} className="text-green-500" />;
       } else if (cageNutStatus.installed > 0) {
@@ -417,7 +423,7 @@ export const RackView: React.FC<RackViewProps> = ({
       >
         <div className="flex items-center gap-1">
           <span className={`font-mono ${unitNumClass}`}>{unit}</span>
-          {viewModes.showCageNutView && (
+          {activeViewMode === 'showCageNutView' && (
             <div className="flex gap-0.5">
               <div className="flex flex-col gap-0.5" title={`ゲージナット: ${cageNutStatus.installed}/8`}>
                 <div className="flex gap-0.5">
@@ -448,14 +454,14 @@ export const RackView: React.FC<RackViewProps> = ({
         </div>
 
         {/* ラック柱の取り付け穴 */}
-        {(viewModes.showCageNutView || isEmpty) && renderMountingHoles(unit)}
+        {(activeViewMode === 'showCageNutView' || isEmpty) && renderMountingHoles(unit)}
         
         {item && isMainUnit && (
-          <div 
+          <div
             className={`absolute inset-0 flex items-center justify-between px-2 ${
-              Object.values(viewModes).some(Boolean) ? 'border-2 border-dashed border-blue-400' : ''
+              ['showPowerView', 'showMountingView', 'showLabelView', 'showCablingView', 'showCageNutView'].includes(activeViewMode ?? '') ? 'border-2 border-dashed border-blue-400' : ''
             }`}
-            style={{ 
+            style={{
               backgroundColor: item.color, 
               height: `${item.height * unitHeight}px`,
               zIndex: 10
@@ -487,26 +493,92 @@ export const RackView: React.FC<RackViewProps> = ({
     );
   };
 
-  return (
-    <div className="flex flex-col">
-      {/* ラックヘッダー */}
-      <div className={`mb-2 p-2 border rounded-t-lg ${
-        darkMode ? 'bg-gray-800 border-gray-600' : 'bg-gray-100 border-gray-300'
-      }`}>
-        <h3 className="font-bold text-center">{rack.name}</h3>
-        <div className={`text-xs text-center ${
-          darkMode ? 'text-gray-400' : 'text-gray-600'
-        }`}>
-          {rack.units}U / {rack.width}mm × {rack.depth}mm
+  // perspective に応じて描画内容を分岐
+  if (perspective === 'front') {
+    return (
+      <div className="flex flex-col">
+        {/* ラックヘッダー (前面) */}
+        <div className={`mb-2 p-2 border rounded-t-lg ${darkMode ? 'bg-gray-800 border-gray-600' : 'bg-gray-100 border-gray-300'}`}>
+          <h3 className="font-bold text-center">{rack.name} (前面)</h3>
+          <div className={`text-xs text-center ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+            {rack.units}U / {rack.width}mm幅 × {rack.depth}mm奥行
+          </div>
+        </div>
+        {/* ラックユニット (前面) */}
+        <div className={`border rounded-b-lg overflow-hidden ${darkMode ? 'border-gray-600' : 'border-gray-300'}`}>
+          {Array.from({ length: rack.units }, (_, i) => rack.units - i).map(unit => renderRackUnit(unit))}
         </div>
       </div>
-      
-      {/* ラックユニット */}
-      <div className={`border rounded-b-lg overflow-hidden ${
-        darkMode ? 'border-gray-600' : 'border-gray-300'
-      }`}>
-        {Array.from({ length: rack.units }, (_, i) => rack.units - i).map(renderRackUnit)}
+    );
+  } else if (perspective === 'rear') {
+    // TODO: 背面ビューの詳細実装 (ゲージナット表示の切り替えなど)
+    return (
+      <div className="flex flex-col">
+        <div className={`mb-2 p-2 border rounded-t-lg ${darkMode ? 'bg-gray-800 border-gray-600' : 'bg-gray-100 border-gray-300'}`}>
+          <h3 className="font-bold text-center">{rack.name} (背面)</h3>
+          <div className={`text-xs text-center ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+            {rack.units}U / {rack.width}mm幅 × {rack.depth}mm奥行
+          </div>
+        </div>
+        <div className={`border rounded-b-lg overflow-hidden p-4 ${darkMode ? 'bg-gray-700 border-gray-600' : 'bg-gray-50 border-gray-300'}`} style={{ height: `${rack.units * Math.max(16, (32 * zoomLevel) / 100)}px` }}>
+          {/* <p className="p-4 text-center">背面ユニット表示 (実装中)</p> */}
+          {/* 背面もユニットごとに描画するが、renderRackUnit を背面用に調整するか、新しい関数を作る */}
+          {Array.from({ length: rack.units }, (_, i) => rack.units - i).map(unit => (
+            <div
+              key={`rear-unit-${unit}`}
+              className={`relative border flex items-center justify-between px-2 ${getUnitBorderClass(darkMode)} ${getEmptyUnitClass(darkMode)}`}
+              style={{ height: `${getZoomedUnitHeight(zoomLevel)}px`, fontSize: `${getZoomedFontSize(zoomLevel)}px` }}
+            >
+              <span className={`font-mono ${getUnitNumClass(darkMode)}`}>{unit}</span>
+              {/* TODO: 背面ゲージナットと機器の背面表示 */}
+              <span className="text-xs text-gray-500">機器背面 (仮)</span>
+            </div>
+          ))}
+        </div>
       </div>
-    </div>
-  );
+    );
+  } else if (perspective === 'left' || perspective === 'right') {
+    const sideLabel = perspective === 'left' ? '左側面' : '右側面';
+    // TODO: 側面ビューの詳細実装 (機器の奥行き描画、レール、PDUなど)
+    return (
+      <div className="flex flex-col">
+        <div className={`mb-2 p-2 border rounded-t-lg ${darkMode ? 'bg-gray-800 border-gray-600' : 'bg-gray-100 border-gray-300'}`}>
+          <h3 className="font-bold text-center">{rack.name} ({sideLabel})</h3>
+          <div className={`text-xs text-center ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+            {rack.units}U高さ / {rack.depth}mm奥行
+          </div>
+        </div>
+        <div
+          className={`border rounded-b-lg overflow-hidden p-4 ${darkMode ? 'bg-gray-700 border-gray-600' : 'bg-gray-50 border-gray-300'}`}
+          style={{
+            height: `${rack.units * getZoomedUnitHeight(zoomLevel)}px`, // 高さはU数に依存
+            width: `${Math.max(150, rack.depth / (zoomLevel > 75 ? 3 : zoomLevel > 50 ? 4 : 5))}px` // 奥行きは仮スケール、ズームに応じて調整
+          }}
+        >
+          <p className="text-center text-xs text-gray-500">側面ビュー (実装中)</p>
+          {/* TODO: ここに機器を奥行き方向に描画するロジック */}
+          {Object.values(rack.equipment).filter(eq => eq.isMainUnit).map(eq => (
+            <div
+              key={eq.id}
+              className="absolute border text-white text-xs flex items-center justify-center"
+              style={{
+                backgroundColor: eq.color,
+                height: `${eq.height * getZoomedUnitHeight(zoomLevel)}px`,
+                width: `${Math.max(20, eq.depth / (zoomLevel > 75 ? 3 : zoomLevel > 50 ? 4 : 5) * 0.8)}px`, // 機器の奥行きも仮スケール
+                top: `${(rack.units - (eq.startUnit || 0) - eq.height + 1) * getZoomedUnitHeight(zoomLevel)}px`,
+                left: perspective === 'left' ? '10%' : undefined, // 仮配置
+                right: perspective === 'right' ? '10%' : undefined, // 仮配置
+                opacity: 0.7
+              }}
+              title={eq.name}
+            >
+              {eq.name.substring(0,10)}
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  return null; // Should not happen if perspective is always one of the defined values
 };

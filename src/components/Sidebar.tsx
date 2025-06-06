@@ -22,10 +22,11 @@ import {
   ChevronDown,
   ChevronRight
 } from 'lucide-react';
-import { Rack, ViewMode } from '../types';
-import { 
-  calculateTotalStats, 
-  calculateRackStats, 
+import { Rack } from '../types'; // ViewMode を削除 (未使用のため)
+import { RackViewPerspective } from '../App'; // App.tsx から型をインポート
+import {
+  calculateTotalStats,
+  calculateRackStats,
   calculateCoolingStats,
   getSidebarStyle,
   getButtonStyle
@@ -33,16 +34,9 @@ import {
 import { zoomLevels } from '../constants';
 import { EquipmentLibrary } from './EquipmentLibrary';
 
-interface ViewModes {
-  showPowerView: boolean;
-  showMountingView: boolean;
-  showLabelView: boolean;
-  showAirflowView: boolean;
-  showTemperatureView: boolean;
-  showCablingView: boolean;
-  showCageNutView: boolean;
-  showFloorView: boolean;
-}
+// ViewModes は App.tsx で activeViewMode として管理されるため、
+// ここでの Props は activeViewMode とその更新関数になる
+// export type ViewModeKey = 'showPowerView' | 'showMountingView' | 'showLabelView' | 'showAirflowView' | 'showTemperatureView' | 'showCablingView' | 'showCageNutView' | 'showFloorView';
 
 interface FloorSettings {
   hasAccessFloor: boolean;
@@ -62,19 +56,23 @@ interface SidebarProps {
   selectedRack: string;
   darkMode: boolean;
   zoomLevel: number;
-  viewModes: ViewModes;
+  // viewModes: ViewModes; // 削除
+  activeViewMode: string | null; // 追加 (より厳密な型は後で検討)
   floorSettings: FloorSettings;
   onRackSelect: (rackId: string) => void;
   onAddRack: () => void;
   onRemoveRack: (rackId: string) => void;
   onDuplicateRack: (rackId: string) => void;
   onZoomChange: (zoom: number) => void;
-  onViewModeToggle: (mode: keyof ViewModes) => void;
+  // onViewModeToggle: (mode: keyof ViewModes) => void; // 削除
+  onActiveViewModeChange: (mode: string | null) => void; // 追加
   onDragStart: (e: React.DragEvent, item: any) => void;
   onShowRackManager: () => void;
   onShowFloorSettings: () => void;
   onShowCoolingConfig: () => void;
   onShowPowerConfig: () => void;
+  currentPerspective: RackViewPerspective;
+  onPerspectiveChange: (perspective: RackViewPerspective) => void;
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({
@@ -82,19 +80,23 @@ export const Sidebar: React.FC<SidebarProps> = ({
   selectedRack,
   darkMode,
   zoomLevel,
-  viewModes,
+  // viewModes, // 削除
+  activeViewMode, // 追加
   floorSettings,
   onRackSelect,
   onAddRack,
   onRemoveRack,
   onDuplicateRack,
   onZoomChange,
-  onViewModeToggle,
+  // onViewModeToggle, // 削除
+  onActiveViewModeChange, // 追加
   onDragStart,
   onShowRackManager,
   onShowFloorSettings,
   onShowCoolingConfig,
-  onShowPowerConfig
+  onShowPowerConfig,
+  currentPerspective,
+  onPerspectiveChange
 }) => {
   const [showStats, setShowStats] = useState(true);
   const [showEquipmentLibrary, setShowEquipmentLibrary] = useState(true);
@@ -202,23 +204,41 @@ export const Sidebar: React.FC<SidebarProps> = ({
           </button>
           
           {showViewModes && (
-            <div className="grid grid-cols-2 gap-1">
-              {viewModeButtons.map(({ key, icon: Icon, label, color }) => (
-                <button
-                  key={key}
-                  onClick={() => onViewModeToggle(key)}
-                  className={`p-2 rounded text-xs flex items-center justify-center gap-1 ${
-                    getButton(viewModes[key])
-                  }`}
-                  title={`${label}ビュー${viewModes[key] ? 'オフ' : 'オン'}`}
-                >
-                  <Icon size={12} className={viewModes[key] ? color : undefined} />
+            <select
+              value={activeViewMode || ''}
+              onChange={(e) => onActiveViewModeChange(e.target.value || null)}
+              className={`w-full p-2 border rounded text-sm ${
+                darkMode
+                  ? 'bg-gray-700 border-gray-600 text-white'
+                  : 'bg-white border-gray-300 text-gray-900'
+              }`}
+            >
+              <option value="">標準表示</option>
+              {viewModeButtons.map(({ key, label }) => (
+                <option key={key} value={key}>
                   {label}
+                </option>
+              ))}
+            </select>
+          )}
+        </div>
+{/* ラック視点切り替え */}
+          <div>
+            <h3 className="text-sm font-semibold mb-2 mt-4">ラック視点</h3>
+            <div className="grid grid-cols-2 gap-2">
+              {(['front', 'rear', 'left', 'right'] as const).map((p) => (
+                <button
+                  key={p}
+                  onClick={() => onPerspectiveChange(p)}
+                  className={`p-2 rounded text-xs flex items-center justify-center gap-1 ${
+                    getButton(currentPerspective === p)
+                  }`}
+                >
+                  {p === 'front' ? '前面' : p === 'rear' ? '背面' : p === 'left' ? '左面' : '右面'}
                 </button>
               ))}
             </div>
-          )}
-        </div>
+          </div>
 
         {/* 統計情報 */}
         <div>

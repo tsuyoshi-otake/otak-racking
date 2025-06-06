@@ -2,6 +2,8 @@ import { useState, useCallback } from 'react';
 import { Equipment } from '../types';
 import { canPlaceEquipment } from '../utils';
 
+export type DraggedItem = Equipment | null;
+
 export const useDragAndDrop = (
   currentRack: any,
   addEquipment: (rackId: string, startUnit: number, equipment: Equipment) => void,
