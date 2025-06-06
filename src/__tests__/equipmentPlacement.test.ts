@@ -224,8 +224,8 @@ describe('機器配置ロジック', () => {
     });
   });
 
-  describe('特殊機器の配置テスト', () => {
-    it('神棚は棚板の上にのみ設置可能', () => {
+  describe('棚板機器の配置テスト', () => {
+    it('棚板とモニターの配置パターン確認', () => {
       const rack = createTestRack();
       const shelf: Equipment = {
         id: 'shelf-1u',
@@ -245,31 +245,28 @@ describe('機器配置ロジック', () => {
         description: '棚板'
       };
       
-      const kamidana: Equipment = {
-        id: 'kamidana',
-        name: '神棚',
+      const monitor: Equipment = {
+        id: 'monitor-1u',
+        name: '1Uモニター',
         height: 1,
         depth: 200,
-        power: 0,
-        heat: 0,
-        weight: 1,
-        type: 'spiritual',
-        color: '#F59E0B',
+        power: 50,
+        heat: 170,
+        weight: 3,
+        type: 'console',
+        color: '#374151',
         dualPower: false,
         needsRails: false,
-        requiresShelf: true,
         airflow: 'natural',
-        cfm: 0,
-        heatGeneration: 0,
-        description: '神棚'
+        cfm: 20,
+        heatGeneration: 170,
+        description: 'モニター'
       };
       
-      // 棚板なしで神棚を設置しようとする
-      const result1 = canPlaceEquipment(rack, 2, kamidana);
-      expect(result1.canPlace).toBe(false);
-      expect(result1.reason).toContain('棚板の上にのみ設置できます');
-      
       // 1Uに棚板を設置
+      const result1 = canPlaceEquipment(rack, 1, shelf);
+      expect(result1.canPlace).toBe(true);
+      
       rack.equipment[1] = {
         ...shelf,
         startUnit: 1,
@@ -277,9 +274,9 @@ describe('機器配置ロジック', () => {
         isMainUnit: true
       };
       
-      // 2Uに神棚を設置しようとする（棚板は1U、2Uは空き）
-      const result2 = canPlaceEquipment(rack, 2, kamidana);
-      expect(result2.canPlace).toBe(true); // 棚板が存在するので設置可能
+      // 2Uにモニターを設置
+      const result2 = canPlaceEquipment(rack, 2, monitor);
+      expect(result2.canPlace).toBe(true);
     });
   });
 });

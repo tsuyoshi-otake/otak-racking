@@ -238,6 +238,32 @@ export const networkEquipment: Equipment[] = [
       management: '統合管理コンソール'
     },
     mountingNotes: 'セキュリティ機器につき物理アクセス制限要検討。',
+  },
+  {
+    id: 'load-balancer',
+    name: 'ロードバランサー',
+    height: 1,
+    depth: 450,
+    power: 200,
+    heat: 683,
+    weight: 12,
+    type: 'network',
+    color: '#0891B2',
+    dualPower: true,
+    needsRails: false,
+    airflow: 'front-to-rear',
+    cfm: 60,
+    heatGeneration: 683,
+    description: 'アプリケーション負荷分散装置。複数サーバーへのトラフィック分散とヘルスチェック機能を提供。高可用性とパフォーマンス向上を実現。',
+    specifications: {
+      throughput: '最大10Gbps',
+      connections: '最大100万同時接続',
+      algorithms: 'Round Robin/Least Connections/IP Hash',
+      healthcheck: 'L3/L4/L7ヘルスチェック',
+      ssl: 'SSL終端・オフロード対応',
+      management: 'Web UI/CLI/API管理'
+    },
+    mountingNotes: 'ネットワーク配線計画要検討。冗長構成推奨。',
   }
 ];
 
@@ -461,31 +487,80 @@ export const otherEquipment: Equipment[] = [
     },
     mountingNotes: 'エアフロー遮断効果あり。全空きユニット設置推奨。'
   },
-  { 
-    id: 'kamidana', 
-    name: '神棚', 
-    height: 1, 
-    depth: 200, 
-    power: 0, 
-    heat: 0, 
-    weight: 1, 
-    type: 'spiritual', 
-    color: '#F59E0B', 
-    dualPower: false, 
-    needsRails: false, 
-    requiresShelf: true, 
-    airflow: 'natural', 
-    cfm: 0, 
+  {
+    id: 'shelf-1u-standard',
+    name: '1U棚板 (標準)',
+    height: 1,
+    depth: 450,
+    power: 0,
+    heat: 0,
+    weight: 3,
+    type: 'shelf',
+    color: '#6B7280',
+    dualPower: false,
+    needsRails: false,
+    airflow: 'natural',
+    cfm: 0,
     heatGeneration: 0,
-    description: 'データセンターの安全祈願用。システム安定稼働を願い設置。',
+    description: '汎用ラック棚板。軽量機器や小型機器の設置用。19インチラック標準対応。',
     specifications: {
-      material: '桧材',
-      size: '幅300mm×奥行200mm×高70mm',
-      features: '御札収納可能',
-      maintenance: '年1回清掃推奨',
-      placement: '上位ユニット推奨'
+      material: 'スチール製（粉体塗装）',
+      loadCapacity: '20kg',
+      mounting: '前面・背面固定',
+      surface: '滑り止め加工',
+      compliance: 'EIA規格準拠'
     },
-    mountingNotes: '棚板上設置必須。清掃アクセス考慮。'
+    mountingNotes: '耐荷重20kg以下の機器用。固定ネジ確実に締付け。'
+  },
+  {
+    id: 'shelf-1u-vented',
+    name: '1U棚板 (通気孔付き)',
+    height: 1,
+    depth: 450,
+    power: 0,
+    heat: 0,
+    weight: 2.5,
+    type: 'shelf',
+    color: '#9CA3AF',
+    dualPower: false,
+    needsRails: false,
+    airflow: 'intake',
+    cfm: 15,
+    heatGeneration: 0,
+    description: '通気孔付きラック棚板。エアフロー確保が必要な機器用。冷却効率向上。',
+    specifications: {
+      material: 'アルミ製（アルマイト処理）',
+      loadCapacity: '15kg',
+      ventilation: '通気孔（40%開口率）',
+      mounting: '前面・背面固定',
+      airflow: '自然通気対応'
+    },
+    mountingNotes: '通気が必要な機器下部に設置。開口部清掃定期実施。'
+  },
+  {
+    id: 'shelf-2u-heavy',
+    name: '2U棚板 (重量用)',
+    height: 2,
+    depth: 600,
+    power: 0,
+    heat: 0,
+    weight: 8,
+    type: 'shelf',
+    color: '#4B5563',
+    dualPower: false,
+    needsRails: false,
+    airflow: 'natural',
+    cfm: 0,
+    heatGeneration: 0,
+    description: '重量機器対応2U棚板。大型UPSやバッテリーパック等の重量機器設置用。',
+    specifications: {
+      material: 'スチール製（補強リブ付き）',
+      loadCapacity: '80kg',
+      mounting: '前面・背面・中央3点固定',
+      reinforcement: '補強フレーム内蔵',
+      safety: '落下防止フランジ付き'
+    },
+    mountingNotes: '重量機器専用。設置前ラック耐荷重要確認。'
   }
 ];
 
