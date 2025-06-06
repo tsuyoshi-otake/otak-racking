@@ -205,7 +205,7 @@ const handleZoomFit = () => {
       }`}>
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold">OTAK ラック設計システム</h1>
+            <h1 className="text-2xl font-bold">otak-racking</h1>
             <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
               データセンター・サーバールーム設計支援ツール
             </p>
