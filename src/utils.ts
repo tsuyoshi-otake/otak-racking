@@ -297,33 +297,33 @@ export const autoInstallCageNuts = (unit: number, nutType: string = 'm6') => {
  * スタイルヘルパー関数
  */
 export const getContainerStyle = (darkMode: boolean): string => {
-  return darkMode ? 'bg-gray-800 text-gray-100' : 'bg-gray-300 text-gray-700';
+  return darkMode ? 'bg-gray-800 text-gray-100' : 'bg-light-bg-primary text-light-text-primary';
 };
 
 export const getSidebarStyle = (darkMode: boolean): string => {
-  return darkMode ? 'bg-gray-700 border-custom-gray text-gray-100' : 'bg-gray-200 border-gray-300 text-gray-700';
+  return darkMode ? 'bg-gray-700 border-custom-gray text-gray-100' : 'bg-light-bg-secondary border-light-border-primary text-light-text-primary';
 };
 
 export const getButtonStyle = (darkMode: boolean, isActive: boolean = false): string => {
   if (isActive) {
-    return darkMode ? 'bg-custom-gray text-white' : 'bg-custom-gray text-white';
+    return darkMode ? 'bg-custom-gray text-white' : 'bg-light-accent text-white hover:bg-light-accent-hover';
   }
-  return darkMode ? 'bg-gray-600 text-gray-200 hover:bg-custom-gray' : 'bg-gray-200 text-gray-700 hover:bg-gray-300';
+  return darkMode ? 'bg-gray-600 text-gray-200 hover:bg-custom-gray' : 'bg-light-bg-tertiary text-light-text-primary hover:bg-light-bg-hover border border-light-border-primary';
 };
 
 /**
  * ユニット表示ヘルパー
  */
 export const getUnitBorderClass = (darkMode: boolean): string => {
-  return darkMode ? 'border-custom-gray' : 'border-gray-300';
+  return darkMode ? 'border-custom-gray' : 'border-light-border-primary';
 };
 
 export const getEmptyUnitClass = (darkMode: boolean): string => {
-  return darkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-400 hover:bg-custom-gray';
+  return darkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-light-bg-secondary hover:bg-light-bg-hover';
 };
 
 export const getUnitNumClass = (darkMode: boolean): string => {
-  return darkMode ? 'text-gray-300' : 'text-custom-gray';
+  return darkMode ? 'text-gray-300' : 'text-light-text-tertiary';
 };
 
 /**

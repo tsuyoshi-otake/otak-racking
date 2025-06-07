@@ -7,7 +7,7 @@ import { LeftSidebar } from './components/LeftSidebar'; // Sidebar を LeftSideb
 import { RightSidebar } from './components/RightSidebar'; // RightSidebar を追加
 import { RackView } from './components/RackView';
 import { ModalsAndDialogs, InfoModalProps, ConfirmModalProps } from './components/ModalsAndDialogs';
-import { calculateLayoutDimensions, getContainerStyle } from './utils';
+import { calculateLayoutDimensions } from './utils';
 import { loadAppState, saveAppState } from './utils/localStorage';
 
 export type RackViewPerspective = 'front' | 'rear' | 'left' | 'right';
@@ -195,43 +195,42 @@ function App() {
   const rackIds = selectedRack === 'all' ? Object.keys(racks) : [selectedRack];
   const layoutDimensions = calculateLayoutDimensions(rackIds.length);
 
-  const containerStyle = getContainerStyle(darkMode);
-
   return (
-    <div className={`min-h-screen ${containerStyle} ${darkMode ? 'dark' : ''}`}>
-      {/* ヘッダー */}
-      <header className={`border-b p-4 ${
-        darkMode ? 'border-custom-gray bg-gray-700' : 'border-gray-300 bg-gray-200'
-      }`}>
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold">otak-racking</h1>
-            <p className={`text-sm ${darkMode ? 'text-gray-300' : 'text-custom-gray'}`}>
-              データセンター・サーバールーム設計支援ツール
-            </p>
-          </div>
-          
-          <div className="flex items-center gap-4">
-            {/* ズーム表示 */}
-            <span className={`text-sm ${darkMode ? 'text-gray-300' : 'text-custom-gray'}`}>
-              {zoomLevel}%
-            </span>
+    <div className={`min-h-screen ${darkMode ? 'dark' : ''}`}>
+      <div className={`min-h-screen ${darkMode ? 'bg-gray-800 text-gray-100' : 'bg-light-bg-primary text-light-text-primary'}`}>
+        {/* ヘッダー */}
+        <header className={`border-b p-4 ${
+          darkMode ? 'border-custom-gray bg-gray-700' : 'border-light-border-primary bg-light-bg-secondary'
+        }`}>
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className={`text-2xl font-bold ${darkMode ? 'text-gray-100' : 'text-light-text-primary'}`}>otak-racking</h1>
+              <p className={`text-sm ${darkMode ? 'text-gray-300' : 'text-light-text-secondary'}`}>
+                データセンター・サーバールーム設計支援ツール
+              </p>
+            </div>
             
-            {/* ダークモード切り替え */}
-            <button
-              onClick={() => setDarkMode(!darkMode)}
-              className={`p-2 rounded transition-colors ${
-                darkMode
-                  ? 'bg-gray-600 text-gray-200 hover:bg-custom-gray'
-                  : 'bg-gray-300 text-gray-600 hover:bg-gray-400'
-              }`}
-              title={darkMode ? 'ライトモードに切り替え' : 'ダークモードに切り替え'}
-            >
-              {darkMode ? <Sun size={20} /> : <Moon size={20} />}
-            </button>
+            <div className="flex items-center gap-4">
+              {/* ズーム表示 */}
+              <span className={`text-sm ${darkMode ? 'text-gray-300' : 'text-light-text-secondary'}`}>
+                {zoomLevel}%
+              </span>
+              
+              {/* ダークモード切り替え */}
+              <button
+                onClick={() => setDarkMode(!darkMode)}
+                className={`p-2 rounded transition-colors ${
+                  darkMode
+                    ? 'bg-gray-600 text-gray-200 hover:bg-custom-gray'
+                    : 'bg-light-bg-tertiary text-light-text-primary hover:bg-light-bg-hover border border-light-border-primary'
+                }`}
+                title={darkMode ? 'ライトモードに切り替え' : 'ダークモードに切り替え'}
+              >
+                {darkMode ? <Sun size={20} /> : <Moon size={20} />}
+              </button>
+            </div>
           </div>
-        </div>
-      </header>
+        </header>
 
       {/* メインコンテンツ */}
       <div className="flex h-[calc(100vh-80px)]">
@@ -253,10 +252,10 @@ function App() {
             // 全体表示
             <div className="space-y-6">
               <div className={`p-4 border rounded-lg ${
-                darkMode ? 'bg-gray-700 border-custom-gray' : 'bg-gray-300 border-gray-400'
+                darkMode ? 'bg-gray-700 border-custom-gray' : 'bg-light-bg-tertiary border-light-border-primary shadow-sm'
               }`}>
-                <h2 className="text-xl font-bold mb-2">全体レイアウト</h2>
-                <p className={`text-sm ${darkMode ? 'text-gray-300' : 'text-custom-gray'}`}>
+                <h2 className={`text-xl font-bold mb-2 ${darkMode ? 'text-gray-100' : 'text-light-text-primary'}`}>全体レイアウト</h2>
+                <p className={`text-sm ${darkMode ? 'text-gray-300' : 'text-light-text-secondary'}`}>
                   {Object.keys(racks).length}台のラックを表示中
                 </p>
               </div>
@@ -385,8 +384,9 @@ function App() {
         confirmModal={confirmModal}
       />
 
-      {/* ドラッグ終了処理 */}
-      <div onDragEnd={handleDragEnd} />
+        {/* ドラッグ終了処理 */}
+        <div onDragEnd={handleDragEnd} />
+      </div>
     </div>
   );
 }

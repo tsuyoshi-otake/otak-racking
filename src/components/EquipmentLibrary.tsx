@@ -40,7 +40,7 @@ export const EquipmentLibrary: React.FC<EquipmentLibraryProps> = ({
       className={`p-2 border rounded-lg cursor-move transition-shadow hover:shadow-md ${
         darkMode
           ? 'border-gray-600 bg-gray-700 hover:shadow-lg border-l-4 border-l-custom-gray'
-          : 'border-gray-200 bg-white border-l-4 border-l-gray-400'
+          : 'border-light-border-primary bg-light-bg-tertiary hover:shadow-md border-l-4 border-l-light-accent'
       } ${item.pduType || item.nutType ? 'border-dashed' : ''}`}
     >
       <div className="flex items-center justify-between">
@@ -53,7 +53,7 @@ export const EquipmentLibrary: React.FC<EquipmentLibraryProps> = ({
               setShowEquipmentInfo(showEquipmentInfo === item.id ? null : item.id);
             }}
             className={`p-0.5 rounded transition-colors ${
-              darkMode ? 'text-gray-400 hover:text-gray-200' : 'text-custom-gray hover:text-gray-700'
+              darkMode ? 'text-gray-400 hover:text-gray-200' : 'text-light-text-secondary hover:text-light-text-primary'
             }`}
             title="詳細情報"
           >
@@ -62,20 +62,20 @@ export const EquipmentLibrary: React.FC<EquipmentLibraryProps> = ({
         </div>
         <div className="flex gap-1">
           <span className={`text-xs px-1 py-0.5 rounded ${
-            darkMode ? 'bg-gray-600 text-gray-200' : 'bg-gray-100 text-gray-800'
+            darkMode ? 'bg-gray-600 text-gray-200' : 'bg-light-bg-secondary text-light-text-primary'
           }`}>
             {item.height > 0 ? `${item.height}U` : '0U'}
           </span>
           {item.dualPower && (
             <span className={`text-xs px-0.5 py-0.5 rounded flex items-center ${
-              darkMode ? 'bg-gray-600 text-gray-300' : 'bg-gray-200 text-gray-700'
+              darkMode ? 'bg-gray-600 text-gray-300' : 'bg-light-bg-secondary text-light-text-secondary'
             }`}>
               <Zap size={10} />
             </span>
           )}
           {item.pduType && (
             <span className={`text-xs px-0.5 py-0.5 rounded flex items-center ${
-              darkMode ? 'bg-gray-600 text-gray-300' : 'bg-gray-200 text-gray-700'
+              darkMode ? 'bg-gray-600 text-gray-300' : 'bg-light-bg-secondary text-light-text-secondary'
             }`} title="特殊配電">
               <Power size={8} />
             </span>
@@ -85,7 +85,7 @@ export const EquipmentLibrary: React.FC<EquipmentLibraryProps> = ({
       
       {showEquipmentInfo === item.id && (
         <div className={`mt-2 p-2 border rounded text-xs ${
-          darkMode ? 'bg-gray-600 border-custom-gray' : 'bg-gray-50 border-gray-200'
+          darkMode ? 'bg-gray-600 border-custom-gray' : 'bg-light-bg-secondary border-light-border-primary'
         }`}>
           <div className="font-medium mb-1">{item.description}</div>
           <div className="space-y-1">
@@ -105,7 +105,7 @@ export const EquipmentLibrary: React.FC<EquipmentLibraryProps> = ({
             )}
             
             {item.mountingNotes && (
-              <div className="mt-1 text-gray-600 dark:text-gray-400">
+              <div className={`mt-1 ${darkMode ? 'text-gray-400' : 'text-light-text-secondary'}`}>
                 <strong>設置注意:</strong> {item.mountingNotes}
               </div>
             )}
@@ -116,7 +116,7 @@ export const EquipmentLibrary: React.FC<EquipmentLibraryProps> = ({
   );
 
   const getEquipmentIcon = (type: string, darkMode: boolean) => {
-    const iconClass = darkMode ? 'text-gray-400' : 'text-gray-600';
+    const iconClass = darkMode ? 'text-gray-400' : 'text-light-text-secondary';
     const size = 14;
 
     switch (type) {
@@ -147,7 +147,7 @@ export const EquipmentLibrary: React.FC<EquipmentLibraryProps> = ({
       {/* サーバー類 */}
       <div>
         <h3 className={`text-sm font-semibold mb-2 flex items-center gap-1 ${
-          darkMode ? 'text-gray-300' : 'text-gray-700'
+          darkMode ? 'text-gray-300' : 'text-light-text-primary'
         }`}>
           <Server size={14} />
           サーバー
@@ -160,7 +160,7 @@ export const EquipmentLibrary: React.FC<EquipmentLibraryProps> = ({
       {/* ネットワーク・セキュリティ */}
       <div>
         <h3 className={`text-sm font-semibold mb-2 flex items-center gap-1 ${
-          darkMode ? 'text-gray-300' : 'text-gray-700'
+          darkMode ? 'text-gray-300' : 'text-light-text-primary'
         }`}>
           <Network size={14} />
           ネットワーク・セキュリティ
@@ -173,7 +173,7 @@ export const EquipmentLibrary: React.FC<EquipmentLibraryProps> = ({
       {/* ストレージ */}
       <div>
         <h3 className={`text-sm font-semibold mb-2 flex items-center gap-1 ${
-          darkMode ? 'text-gray-300' : 'text-gray-700'
+          darkMode ? 'text-gray-300' : 'text-light-text-primary'
         }`}>
           <HardDrive size={14} />
           ストレージ
@@ -186,7 +186,7 @@ export const EquipmentLibrary: React.FC<EquipmentLibraryProps> = ({
       {/* 電源・UPS・電力制御 */}
       <div>
         <h3 className={`text-sm font-semibold mb-2 flex items-center gap-1 ${
-          darkMode ? 'text-gray-300' : 'text-gray-700'
+          darkMode ? 'text-gray-300' : 'text-light-text-primary'
         }`}>
           <Zap size={14} />
           電源・UPS・電力制御
@@ -199,7 +199,7 @@ export const EquipmentLibrary: React.FC<EquipmentLibraryProps> = ({
       {/* 取り付け部品 */}
       <div>
         <h3 className={`text-sm font-semibold mb-2 flex items-center gap-1 ${
-          darkMode ? 'text-gray-300' : 'text-gray-700'
+          darkMode ? 'text-gray-300' : 'text-light-text-primary'
         }`}>
           <Wrench size={14} />
           取り付け部品
@@ -210,7 +210,7 @@ export const EquipmentLibrary: React.FC<EquipmentLibraryProps> = ({
               {renderEquipmentCard(item)}
               {item.nutType && (
                 <div className={`mt-1 text-xs px-2 py-1 rounded ${
-                  darkMode ? 'bg-gray-700 text-gray-300' : 'bg-gray-100 text-gray-700'
+                  darkMode ? 'bg-gray-700 text-gray-300' : 'bg-light-bg-secondary text-light-text-secondary'
                 }`}>
                   💡 ドラッグしてユニットにドロップすると8個まとめて設置されます
                 </div>
@@ -223,7 +223,7 @@ export const EquipmentLibrary: React.FC<EquipmentLibraryProps> = ({
       {/* その他 */}
       <div>
         <h3 className={`text-sm font-semibold mb-2 flex items-center gap-1 ${
-          darkMode ? 'text-gray-300' : 'text-gray-700'
+          darkMode ? 'text-gray-300' : 'text-light-text-primary'
         }`}>
           <Wrench size={14} />
           その他
