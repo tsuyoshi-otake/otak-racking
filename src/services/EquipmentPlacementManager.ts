@@ -12,7 +12,8 @@ import {
   PlacementChange,
   EquipmentPlacement,
   RackOccupancy,
-  PlacementState
+  PlacementState,
+  RailInstallation
 } from '../types/equipment';
 import { rackTypes } from '../constants';
 
@@ -225,6 +226,47 @@ export class EquipmentPlacementManager {
       newValue: rack.labels[equipmentId]
     });
 
+    // レール自動設置
+    if (equipment.needsRails) {
+      const railId = `rail-${equipmentId}`;
+      let highlightPositions: ('top' | 'middle' | 'bottom')[] = [];
+
+      switch (equipment.height) {
+        case 1:
+          highlightPositions = ['bottom'];
+          break;
+        case 2:
+          highlightPositions = ['top', 'bottom'];
+          break;
+        default: // 3U以上は3点留めと想定
+          highlightPositions = ['top', 'middle', 'bottom'];
+          break;
+      }
+
+      const newRail: RailInstallation = {
+        id: railId,
+        unit: position.startUnit,
+        type: 'slide', // デフォルト
+        depth: equipment.depth,
+        equipmentId: equipmentId,
+        size: equipment.height,
+        highlightPositions: highlightPositions,
+      };
+
+      if (!rack.railInstallations) {
+        rack.railInstallations = {};
+      }
+      // 機器が複数のUを占有する場合でも、レール情報は開始Uに紐付ける
+      rack.railInstallations[position.startUnit] = newRail;
+
+      changes.push({
+        type: 'rail',
+        action: 'add',
+        target: position.startUnit.toString(),
+        newValue: newRail,
+      });
+    }
+
     // ゲージナット自動設置
     if (options.autoInstallCageNuts && !equipment.needsRails) {
       for (let unit = position.startUnit; unit <= position.endUnit; unit++) {
@@ -293,6 +335,18 @@ export class EquipmentPlacementManager {
     delete rackCopy.powerConnections[equipment.id];
     delete rackCopy.mountingOptions[equipment.id];
     delete rackCopy.labels[equipment.id];
+
+    // 関連するレールを削除
+    if (equipment.needsRails && rackCopy.railInstallations?.[equipment.startUnit!]) {
+      const oldRail = rackCopy.railInstallations[equipment.startUnit!];
+      delete rackCopy.railInstallations[equipment.startUnit!];
+      changes.push({
+        type: 'rail',
+        action: 'remove',
+        target: equipment.startUnit!.toString(),
+        oldValue: oldRail,
+      });
+    }
 
     changes.push(
       {

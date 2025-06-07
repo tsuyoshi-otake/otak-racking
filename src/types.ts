@@ -119,11 +119,13 @@ export interface PDUPlacement {
 }
 
 export interface RailInstallation {
-  unit: number;
+  id: string; // レール自体のユニークID
+  unit: number; // 設置開始U
   type: 'slide' | 'fixed' | 'toolless';
-  depth: number; // レールの奥行き（mm）
-  installed: boolean;
-  equipmentId?: string; // 設置されている機器のID
+  depth: number;
+  equipmentId?: string;
+  size: number; // レールのUサイズ (e.g., 1, 2, 4)
+  highlightPositions: ('top' | 'middle' | 'bottom')[]; // ハイライトする穴
 }
 
 export interface Rack {

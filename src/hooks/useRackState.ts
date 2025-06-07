@@ -328,35 +328,36 @@ export const useRackState = () => {
     });
   }, []);
 
-  const installRail = useCallback((rackId: string, unit: number, type: 'slide' | 'fixed' | 'toolless', depth: number) => {
-      setRacks(prev => {
-        const newRacks = deepCopy(prev);
-        const rack = newRacks[rackId];
-        if (rack) {
-          if (!rack.railInstallations) {
-            rack.railInstallations = {};
-          }
-          rack.railInstallations[unit] = {
-            unit,
-            type,
-            depth,
-            installed: true
-          };
-        }
-        return newRacks;
-      });
-    }, []);
+  // const installRail = useCallback((rackId: string, unit: number, type: 'slide' | 'fixed' | 'toolless', depth: number) => {
+  //     setRacks(prev => {
+  //       const newRacks = deepCopy(prev);
+  //       const rack = newRacks[rackId];
+  //       if (rack) {
+  //         if (!rack.railInstallations) {
+  //           rack.railInstallations = {};
+  //         }
+  //         // @ts-ignore 古い型のためエラー
+  //         rack.railInstallations[unit] = {
+  //           unit,
+  //           type,
+  //           depth,
+  //           installed: true
+  //         };
+  //       }
+  //       return newRacks;
+  //     });
+  //   }, []);
 
-  const removeRail = useCallback((rackId: string, unit: number) => {
-    setRacks(prev => {
-      const newRacks = deepCopy(prev);
-      const rack = newRacks[rackId];
-      if (rack && rack.railInstallations) {
-        delete rack.railInstallations[unit];
-      }
-      return newRacks;
-    });
-  }, []);
+  // const removeRail = useCallback((rackId: string, unit: number) => {
+  //   setRacks(prev => {
+  //     const newRacks = deepCopy(prev);
+  //     const rack = newRacks[rackId];
+  //     if (rack && rack.railInstallations) {
+  //       delete rack.railInstallations[unit];
+  //     }
+  //     return newRacks;
+  //   });
+  // }, []);
 
   // 環境設定更新
   const updateEnvironment = useCallback((rackId: string, field: string, value: number) => {
@@ -389,8 +390,8 @@ export const useRackState = () => {
     removeCageNut,
     autoInstallCageNutsForUnit,
     updateEnvironment,
-    installRail,
-    removeRail,
+    // installRail, // 削除。レール設置は EquipmentPlacementManager が担当
+    // removeRail,  // 削除。レール削除は EquipmentPlacementManager が担当
     
     // Computed
     currentRack: racks[selectedRack] || racks[Object.keys(racks)[0]]

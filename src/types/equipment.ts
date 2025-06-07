@@ -56,7 +56,7 @@ export interface PlacementResult {
 }
 
 export interface PlacementChange {
-  type: 'equipment' | 'cagenut' | 'power' | 'mounting' | 'label';
+  type: 'equipment' | 'cagenut' | 'power' | 'mounting' | 'label' | 'rail';
   action: 'add' | 'remove' | 'update';
   target: string; // equipment ID, unit number, etc.
   oldValue?: any;

@@ -61,8 +61,6 @@ function App() {
     autoInstallCageNutsForUnit,
     installCageNut,
     removeCageNut,
-    installRail,
-    removeRail
   } = useRackState();
 // モーダル表示関数
   const showInfoModal = (title: string, message: string) => {
@@ -278,7 +276,6 @@ const handleZoomFit = () => {
                       onEquipmentClick={handleEquipmentClick}
                       perspective={rackViewPerspective}
                       showConfirmModal={showConfirmModal}
-                      onInstallRail={(_rackId, unit, type, depth) => installRail(rack.id, unit, type, depth)}
                     />
                   </div>
                 ))}
@@ -307,9 +304,6 @@ const handleZoomFit = () => {
                     }
                     onAutoInstallCageNuts={(unit, nutType) =>
                       autoInstallCageNutsForUnit(selectedRack, unit, nutType)
-                    }
-                    onInstallRail={(_rackId, unit, type, depth) =>
-                      installRail(selectedRack, unit, type, depth)
                     }
                     draggedItem={draggedItem as DraggedItem | null}
                     perspective={rackViewPerspective}
