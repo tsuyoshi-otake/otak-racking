@@ -184,7 +184,7 @@ export const EquipmentLibrary: React.FC<EquipmentLibraryProps> = ({
               {renderEquipmentCard(item)}
               {item.nutType && (
                 <div className="mt-1 text-xs px-2 py-1 rounded bg-gray-700 text-gray-300">
-                  💡 ドラッグしてユニットにドロップすると8個まとめて設置されます
+                  ドラッグしてユニットにドロップすると8個まとめて設置されます
                 </div>
               )}
             </div>

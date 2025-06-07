@@ -153,7 +153,10 @@ export const LeftSidebar: React.FC<LeftSidebarProps> = ({
                 name="pro-mode-toggle"
                 id="pro-mode-toggle"
                 checked={isProMode}
-                onChange={onToggleProMode}
+                onChange={(e) => {
+                  console.log('Pro Mode toggle clicked, current value:', isProMode, 'new value:', e.target.checked);
+                  onToggleProMode();
+                }}
                 className="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer"
               />
               <label

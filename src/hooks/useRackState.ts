@@ -145,9 +145,13 @@ export const useRackState = () => {
     // saveAppState(stateToSave); // App.tsx に移動したためコメントアウト
   }, [racks, selectedRack, floorSettings, isProMode]);
 
-  const toggleProMode = useCallback(() => {
-    setIsProMode(prev => !prev);
-  }, []);
+  const toggleProMode = () => {
+    setIsProMode(prev => {
+      const newValue = !prev;
+      console.log('Pro Mode toggled:', newValue);
+      return newValue;
+    });
+  };
 
   // ラック追加
   const addRack = useCallback(() => {

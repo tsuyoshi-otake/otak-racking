@@ -309,6 +309,7 @@ function App() {
           racks={racks}
           selectedRack={selectedRack}
           floorSettings={floorSettings}
+          isProMode={isProMode}
           onRackSelect={setSelectedRack}
           onAddRack={addRack}
           onRemoveRack={removeRack}

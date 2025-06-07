@@ -204,6 +204,33 @@ export const networkEquipment: Equipment[] = [
     requiresRails: false,
     requiresCageNuts: true
   },
+  {
+    id: 'switch-1u-rail',
+    name: '1Uスイッチ (レール対応)',
+    height: 1,
+    depth: 400,
+    power: 150,
+    heat: 512,
+    weight: 8,
+    type: 'network',
+    color: '#059669',
+    dualPower: true,
+    airflow: 'side-to-side',
+    cfm: 45,
+    heatGeneration: 512,
+    description: 'レール取り付け対応の1Uスイッチ。メンテナンス性を重視する場合に選択。',
+    specifications: {
+      ports: 'Gigabit×24-48',
+      uplink: '10GbE×4',
+      stackable: '最大8台',
+      power: 'PoE+対応',
+      management: 'Web/CLI/SNMP'
+    },
+    mountingNotes: 'レール使用でメンテナンス性向上。前面アクセス要確保。',
+    mountingMethod: 'rails',
+    requiresRails: true,
+    requiresCageNuts: false
+  },
 {
       id: 'core-switch',
       name: 'コアスイッチ',

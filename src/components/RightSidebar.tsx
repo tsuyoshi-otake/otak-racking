@@ -33,6 +33,7 @@ interface RightSidebarProps { // SidebarProps を RightSidebarProps に変更
   racks: Record<string, Rack>;
   selectedRack: string;
   floorSettings: FloorSettings;
+  isProMode: boolean;
   onRackSelect: (rackId: string) => void;
   onAddRack: () => void;
   onRemoveRack: (rackId: string) => void;
@@ -48,6 +49,7 @@ export const RightSidebar: React.FC<RightSidebarProps> = ({ // コンポーネ�
   racks,
   selectedRack,
   floorSettings,
+  isProMode,
   onRackSelect,
   onAddRack,
   onRemoveRack,
@@ -84,6 +86,19 @@ export const RightSidebar: React.FC<RightSidebarProps> = ({ // コンポーネ�
   return (
     <div className={`w-80 border-l overflow-y-auto custom-scrollbar ${sidebarStyle}`}> {/* border-r を border-l に変更 */}
       <div className="p-4 space-y-4">
+        {/* Pro Mode ステータス */}
+        {isProMode && (
+          <div className="p-3 border rounded bg-gray-700 border-custom-gray">
+            <div className="flex items-center gap-2 text-gray-100">
+              <Settings size={16} />
+              <span className="text-sm font-semibold">Pro Mode 有効</span>
+            </div>
+            <p className="text-xs text-gray-300 mt-1">
+              機器設置の制約が強化されています
+            </p>
+          </div>
+        )}
+
         {/* ラック選択・操作 */}
         <div>
           <div className="flex items-center justify-between mb-2">

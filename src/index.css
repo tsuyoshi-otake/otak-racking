@@ -93,3 +93,22 @@ html {
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   background: var(--scrollbar-thumb-hover-dark);
 }
+
+/* Toggle Switch Styles */
+.toggle-checkbox {
+  transition: all 0.3s ease;
+  left: 0;
+}
+
+.toggle-checkbox:checked {
+  transform: translateX(100%);
+  border-color: #10b981;
+}
+
+.toggle-label {
+  transition: background-color 0.3s ease;
+}
+
+.toggle-checkbox:checked + .toggle-label {
+  background-color: #10b981;
+}
