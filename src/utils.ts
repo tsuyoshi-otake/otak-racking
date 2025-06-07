@@ -198,7 +198,8 @@ export const calculateLayoutDimensions = (rackCount: number, windowWidth: number
  * ズーム計算ユーティリティ
  */
 export const getZoomedUnitHeight = (zoomLevel: number): number => {
-  return Math.max(16, (32 * zoomLevel) / 100);
+  // リアルな比率に修正 (幅600pxに対して、1Uの高さを約55.2pxに設定)
+  return Math.max(16, (55.2 * zoomLevel) / 100);
 };
 
 export const getZoomedFontSize = (zoomLevel: number): number => {
@@ -287,10 +288,10 @@ export const canPlaceEquipmentAdvanced = async (
  */
 export const autoInstallCageNuts = (unit: number, nutType: string = 'm6') => {
   return {
-    frontLeft: { top: nutType, bottom: nutType },
-    frontRight: { top: nutType, bottom: nutType },
-    rearLeft: { top: nutType, bottom: nutType },
-    rearRight: { top: nutType, bottom: nutType }
+    frontLeft: { top: nutType, middle: nutType, bottom: nutType },
+    frontRight: { top: nutType, middle: nutType, bottom: nutType },
+    rearLeft: { top: nutType, middle: nutType, bottom: nutType },
+    rearRight: { top: nutType, middle: nutType, bottom: nutType }
   };
 };
 

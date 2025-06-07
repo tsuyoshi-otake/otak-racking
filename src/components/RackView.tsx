@@ -24,6 +24,7 @@ interface RackViewProps {
   onCageNutInstall?: (unit: number, side: string, position: string, nutType: string) => void;
   onCageNutRemove?: (unit: number, side: string, position: string) => void;
   onAutoInstallCageNuts?: (unit: number, nutType: string) => void;
+  onInstallRail?: (unit: number, type: 'slide' | 'fixed' | 'toolless', depth: number) => void;
   perspective: RackViewPerspective;
   showConfirmModal?: (title: string, message: string, onConfirm: () => void, confirmText?: string, cancelText?: string) => void;
   onUpdatePhysicalStructure?: (updates: Partial<PhysicalStructure>) => void;
@@ -42,6 +43,7 @@ export const RackView: React.FC<RackViewProps> = ({
   onCageNutInstall,
   onCageNutRemove,
   onAutoInstallCageNuts,
+  onInstallRail,
   perspective,
   draggedItem,
   showConfirmModal,
@@ -102,6 +104,7 @@ export const RackView: React.FC<RackViewProps> = ({
               onCageNutInstall={onCageNutInstall}
               onCageNutRemove={onCageNutRemove}
               onAutoInstallCageNuts={onAutoInstallCageNuts}
+              onInstallRail={onInstallRail}
               showConfirmModal={showConfirmModal}
             />
           ))}

@@ -45,6 +45,7 @@ export interface RackType {
 
 export interface CageNutPosition {
   top: string | null;
+  middle: string | null;
   bottom: string | null;
 }
 
@@ -145,7 +146,7 @@ export interface Rack {
   housing: HousingConfig;
   environment: EnvironmentConfig;
   pduPlacements: PDUPlacement[]; // PDU配置情報
-  railInstallations: Record<number, RailInstallation>; // レール設置情報
+  railInstallations?: Record<number, RailInstallation>; // レール設置情報
   physicalStructure: PhysicalStructure; // ラック物理構造
 }
 

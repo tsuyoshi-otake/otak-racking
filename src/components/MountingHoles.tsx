@@ -30,14 +30,14 @@ export const MountingHoles: React.FC<MountingHolesProps> = ({
   };
 
   const railInstallation = rack.railInstallations?.[unit];
-  const holeSize = Math.max(13 * (zoomLevel / 100), unitHeight * 0.38);
+  const holeSize = Math.max(8, 16 * (zoomLevel / 100));
   const frameOffset = 20 * (zoomLevel / 100);
   const holeOffset = frameOffset - (holeSize / 2);
 
-  const renderHole = (side: 'front' | 'rear', position: 'left' | 'right', vertical: 'top' | 'bottom') => {
+  const renderHole = (side: 'front' | 'rear', position: 'left' | 'right', vertical: 'top' | 'middle' | 'bottom') => {
     const nutSide = `${side}${position.charAt(0).toUpperCase() + position.slice(1)}` as keyof typeof cageNuts;
     const nut = cageNuts[nutSide]?.[vertical];
-    const title = `${side === 'front' ? '前面' : '背面'}${position === 'left' ? '左' : '右'}${vertical === 'top' ? '上' : '下'}: ${nut ? `${nut.toUpperCase()}ナット` : '空き穴'}`;
+    const title = `${side === 'front' ? '前面' : '背面'}${position === 'left' ? '左' : '右'}${vertical === 'top' ? '上' : vertical === 'middle' ? '中' : '下'}: ${nut ? `${nut.toUpperCase()}ナット` : '空き穴'}`;
 
     return (
       <div
@@ -52,7 +52,9 @@ export const MountingHoles: React.FC<MountingHolesProps> = ({
           width: `${holeSize}px`,
           height: `${holeSize}px`,
           [position]: `-${holeOffset + 2}px`,
-          [vertical]: `2px`,
+          top: vertical === 'top' ? '2px' : vertical === 'middle' ? '50%' : undefined,
+          bottom: vertical === 'bottom' ? '2px' : undefined,
+          transform: vertical === 'middle' ? 'translateY(-50%)' : undefined,
           borderRadius: '2px',
           boxShadow: nut
             ? 'inset 0 2px 4px rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.2)'
@@ -131,8 +133,10 @@ export const MountingHoles: React.FC<MountingHolesProps> = ({
 
       {/* 取り付け穴 */}
       {renderHole(perspective, 'left', 'top')}
+      {renderHole(perspective, 'left', 'middle')}
       {renderHole(perspective, 'left', 'bottom')}
       {renderHole(perspective, 'right', 'top')}
+      {renderHole(perspective, 'right', 'middle')}
       {renderHole(perspective, 'right', 'bottom')}
     </>
   );

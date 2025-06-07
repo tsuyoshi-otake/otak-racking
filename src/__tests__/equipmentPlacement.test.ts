@@ -1,6 +1,6 @@
 import { describe, it, expect } from '@jest/globals';
 import { canPlaceEquipment } from '../utils';
-import { Rack, Equipment } from '../types';
+import { Rack, Equipment, createDefaultPhysicalStructure } from '../types';
 
 describe('機器配置ロジック', () => {
   const createTestRack = (): Rack => ({
@@ -21,7 +21,9 @@ describe('機器配置ロジック', () => {
     position: { row: 'A', column: 1 },
     cabling: { external: {}, overhead: {}, underfloor: {} },
     housing: { type: 'full', startUnit: 1, endUnit: 42, frontPanel: 'perforated', rearPanel: 'perforated' },
-    environment: { ambientTemp: 22, humidity: 45, pressureDiff: 0.2 }
+    environment: { ambientTemp: 22, humidity: 45, pressureDiff: 0.2 },
+    pduPlacements: [],
+    physicalStructure: createDefaultPhysicalStructure()
   });
 
   const create2UServer = (): Equipment => ({

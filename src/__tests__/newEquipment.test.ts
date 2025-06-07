@@ -3,7 +3,7 @@ import {
   calculateRackStats,
   canPlaceEquipment
 } from '../utils';
-import { Rack, Equipment } from '../types';
+import { Rack, Equipment, createDefaultPhysicalStructure } from '../types';
 
 describe('新規追加機器のテスト', () => {
   const createTestRack = (): Rack => ({
@@ -38,7 +38,9 @@ describe('新規追加機器のテスト', () => {
       ambientTemp: 22,
       humidity: 45,
       pressureDiff: 0.1
-    }
+    },
+    pduPlacements: [],
+    physicalStructure: createDefaultPhysicalStructure()
   });
 
   const createShelfBasic = (): Equipment => ({

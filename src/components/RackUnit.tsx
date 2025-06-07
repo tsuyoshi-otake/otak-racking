@@ -29,6 +29,7 @@ interface RackUnitProps {
   onCageNutInstall?: (unit: number, side: string, position: string, nutType: string) => void;
   onCageNutRemove?: (unit: number, side: string, position: string) => void;
   onAutoInstallCageNuts?: (unit: number, nutType: string) => void;
+  onInstallRail?: (unit: number, type: 'slide' | 'fixed' | 'toolless', depth: number) => void;
   showConfirmModal?: (title: string, message: string, onConfirm: () => void, confirmText?: string, cancelText?: string) => void;
 }
 
@@ -49,6 +50,7 @@ export const RackUnit: React.FC<RackUnitProps> = ({
   onCageNutInstall,
   onCageNutRemove,
   onAutoInstallCageNuts,
+  onInstallRail,
   showConfirmModal
 }) => {
   const item = rack.equipment[unit];
@@ -129,13 +131,13 @@ export const RackUnit: React.FC<RackUnitProps> = ({
       onDragOver={(isEmpty || (item && !isMainUnit)) && selectedRack !== 'all' ? onDragOver : undefined}
       onDrop={(isEmpty || (item && !isMainUnit)) && selectedRack !== 'all' ? (e) => onDrop?.(e, unit) : undefined}
       onContextMenu={(e) => {
-        if (selectedRack !== 'all' && (isEmpty || (item && !isMainUnit)) && showConfirmModal && onAutoInstallCageNuts) {
+        if (selectedRack !== 'all' && (isEmpty || (item && !isMainUnit)) && showConfirmModal) {
           e.preventDefault();
           showConfirmModal(
-            'ゲージナット一括設置',
-            `${unit}Uのすべての取り付け穴（前面4箇所・背面4箇所）にM6ゲージナットを設置しますか？`,
+            'レール設置',
+            `${unit}Uにスライドレールを設置しますか？`,
             () => {
-              onAutoInstallCageNuts(unit, 'm6');
+              onInstallRail?.(unit, 'slide', 700);
             },
             '設置する',
             'キャンセル'

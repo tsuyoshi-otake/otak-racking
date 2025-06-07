@@ -311,11 +311,11 @@ export const useRackState = () => {
     setRacks(prev => {
       const newRack = deepCopy(prev[rackId]);
       if (!newRack.cageNuts[unit]) {
-        newRack.cageNuts[unit] = { 
-          frontLeft: { top: null, bottom: null }, 
-          frontRight: { top: null, bottom: null },
-          rearLeft: { top: null, bottom: null }, 
-          rearRight: { top: null, bottom: null }
+        newRack.cageNuts[unit] = {
+          frontLeft: { top: null, middle: null, bottom: null },
+          frontRight: { top: null, middle: null, bottom: null },
+          rearLeft: { top: null, middle: null, bottom: null },
+          rearRight: { top: null, middle: null, bottom: null }
         };
       }
       (newRack.cageNuts[unit] as any)[side][position] = nutType;
@@ -340,6 +340,35 @@ export const useRackState = () => {
       const newRack = deepCopy(prev[rackId]);
       newRack.cageNuts[unit] = autoInstallCageNuts(unit, nutType);
       return { ...prev, [rackId]: newRack };
+    });
+  }, []);
+const installRail = useCallback((rackId: string, unit: number, type: 'slide' | 'fixed' | 'toolless', depth: number) => {
+    setRacks(prev => {
+      const newRacks = deepCopy(prev);
+      const rack = newRacks[rackId];
+      if (rack) {
+        if (!rack.railInstallations) {
+          rack.railInstallations = {};
+        }
+        rack.railInstallations[unit] = {
+          unit,
+          type,
+          depth,
+          installed: true
+        };
+      }
+      return newRacks;
+    });
+  }, []);
+
+  const removeRail = useCallback((rackId: string, unit: number) => {
+    setRacks(prev => {
+      const newRacks = deepCopy(prev);
+      const rack = newRacks[rackId];
+      if (rack && rack.railInstallations) {
+        delete rack.railInstallations[unit];
+      }
+      return newRacks;
     });
   }, []);
 
@@ -374,6 +403,8 @@ export const useRackState = () => {
     removeCageNut,
     autoInstallCageNutsForUnit,
     updateEnvironment,
+    installRail,
+    removeRail,
     
     // Computed
     currentRack: racks[selectedRack] || racks[Object.keys(racks)[0]]

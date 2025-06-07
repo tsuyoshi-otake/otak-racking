@@ -1,7 +1,7 @@
 import { describe, it, expect } from '@jest/globals';
 import { calculateRackStats, canPlaceEquipment } from '../utils';
 import { networkEquipment } from '../constants';
-import { Rack, Equipment } from '../types';
+import { Rack, Equipment, createDefaultPhysicalStructure } from '../types';
 
 describe('負荷分散装置のテスト', () => {
   const createTestRack = (): Rack => ({
@@ -36,7 +36,9 @@ describe('負荷分散装置のテスト', () => {
       external: {},
       overhead: {},
       underfloor: {}
-    }
+    },
+    pduPlacements: [],
+    physicalStructure: createDefaultPhysicalStructure()
   });
 
   const getLoadBalancer = (): Equipment => {

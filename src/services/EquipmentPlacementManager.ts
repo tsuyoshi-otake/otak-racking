@@ -551,10 +551,10 @@ export class EquipmentPlacementManager {
 
   private createCompleteCageNutConfig(nutType: string) {
     return {
-      frontLeft: { top: nutType, bottom: nutType },
-      frontRight: { top: nutType, bottom: nutType },
-      rearLeft: { top: nutType, bottom: nutType },
-      rearRight: { top: nutType, bottom: nutType }
+      frontLeft: { top: nutType, middle: nutType, bottom: nutType },
+      frontRight: { top: nutType, middle: nutType, bottom: nutType },
+      rearLeft: { top: nutType, middle: nutType, bottom: nutType },
+      rearRight: { top: nutType, middle: nutType, bottom: nutType }
     };
   }
 }
