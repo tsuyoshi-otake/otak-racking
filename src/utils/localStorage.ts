@@ -1,6 +1,7 @@
 // LocalStorage操作のユーティリティ
 export interface AppState {
   darkMode: boolean;
+  isProMode: boolean;
   zoomLevel: number;
   selectedRack: string;
   activeViewMode: string | null;
@@ -26,6 +27,7 @@ const STORAGE_VERSION = '1.0.0';
 // デフォルト状態
 export const DEFAULT_APP_STATE: Partial<AppState> = {
   darkMode: false,
+  isProMode: false,
   zoomLevel: 100,
   activeViewMode: null,
   rackViewPerspective: 'front',

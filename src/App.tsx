@@ -61,6 +61,8 @@ function App() {
     removeCageNut,
     installRail,
     removeRail,
+    isProMode,
+    toggleProMode,
   } = useRackState();
 // モーダル表示関数
   const showInfoModal = (title: string, message: string) => {
@@ -96,10 +98,11 @@ function App() {
       activeViewMode,
       rackViewPerspective,
       racks,
-      floorSettings
+      floorSettings,
+      isProMode,
     };
     saveAppState(appState);
-  }, [zoomLevel, selectedRack, activeViewMode, rackViewPerspective, racks, floorSettings]);
+  }, [zoomLevel, selectedRack, activeViewMode, rackViewPerspective, racks, floorSettings, isProMode]);
 
   // ドラッグ&ドロップ
   const {
@@ -224,6 +227,8 @@ function App() {
           onDragStart={handleDragStart}
           currentPerspective={rackViewPerspective}
           onPerspectiveChange={setRackViewPerspective}
+          isProMode={isProMode}
+          onToggleProMode={toggleProMode}
         />
 
         {/* ラック表示エリア */}

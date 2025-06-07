@@ -454,9 +454,9 @@ export interface PlacementWarning {
 }
 
 export interface PlacementConstraint {
-  id: string;
+  id:string;
   name: string;
-  validate: (rack: Rack, position: PlacementPosition, equipment: Equipment) => PlacementValidation;
+  validate: (context: PlacementContext) => PlacementValidation;
   priority: number; // 低い数値ほど高優先度
 }
 
@@ -465,6 +465,7 @@ export interface PlacementContext {
   position: PlacementPosition;
   equipment: Equipment;
   options: PlacementOptions;
+  isProMode: boolean;
 }
 
 export interface PlacementOptions {

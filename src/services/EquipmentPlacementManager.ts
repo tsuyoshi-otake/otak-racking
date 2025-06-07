@@ -39,7 +39,8 @@ export class EquipmentPlacementManager {
     rack: Rack,
     startUnit: number,
     equipment: Equipment,
-    options: PlacementOptions = {}
+    options: PlacementOptions = {},
+    isProMode: boolean = false
   ): Promise<PlacementResult> {
     const position: PlacementPosition = {
       startUnit,
@@ -50,7 +51,8 @@ export class EquipmentPlacementManager {
       rack: rack,
       position,
       equipment,
-      options
+      options,
+      isProMode
     };
 
     // 検証のみの場合
@@ -119,7 +121,7 @@ export class EquipmentPlacementManager {
 
     for (const constraint of sortedConstraints) {
       try {
-        const result = constraint.validate(context.rack, context.position, context.equipment);
+        const result = constraint.validate(context);
         errors.push(...result.errors);
         warnings.push(...result.warnings);
       } catch (error) {
@@ -477,8 +479,10 @@ export class EquipmentPlacementManager {
       this.createUnitRangeConstraint(),
       this.createCapacityConstraint(),
       this.createOccupancyConstraint(),
+      this.createProModeCageNutConstraint(),
       this.createShelfRequirementConstraint(),
-      this.createCageNutConstraint(),
+      this.createProModeRailConstraint(), // 新しい制約を追加
+      this.createMountingMethodWarningConstraint(),
       this.createRailConflictConstraint()
     ];
   }
@@ -491,7 +495,8 @@ export class EquipmentPlacementManager {
       id: 'unit-range',
       name: 'ユニット範囲チェック',
       priority: 1,
-      validate: (rack: Rack, position: PlacementPosition, equipment: Equipment): PlacementValidation => {
+      validate: (context: PlacementContext): PlacementValidation => {
+        const { rack, position } = context;
         const errors: PlacementError[] = [];
         
         if (position.startUnit < 1) {
@@ -525,7 +530,8 @@ export class EquipmentPlacementManager {
       id: 'capacity',
       name: '容量チェック',
       priority: 2,
-      validate: (rack: Rack, position: PlacementPosition, equipment: Equipment): PlacementValidation => {
+      validate: (context: PlacementContext): PlacementValidation => {
+        const { rack, position, equipment } = context;
         const errors: PlacementError[] = [];
         const warnings: PlacementWarning[] = [];
         
@@ -562,7 +568,8 @@ export class EquipmentPlacementManager {
       id: 'occupancy',
       name: '占有チェック',
       priority: 3,
-      validate: (rack: Rack, position: PlacementPosition, equipment: Equipment): PlacementValidation => {
+      validate: (context: PlacementContext): PlacementValidation => {
+        const { rack, position } = context;
         const errors: PlacementError[] = [];
         const occupiedUnits: number[] = [];
         
@@ -587,14 +594,94 @@ export class EquipmentPlacementManager {
   }
 
   /**
+   * Proモード用ケージナット制約（エラー）
+   */
+  private createProModeCageNutConstraint(): PlacementConstraint {
+    return {
+      id: 'pro-mode-cage-nut',
+      name: 'Proモード ケージナット必須チェック',
+      priority: 4,
+      validate: (context: PlacementContext): PlacementValidation => {
+        const { rack, position, equipment, isProMode } = context;
+
+        if (!isProMode) {
+          return { isValid: true, errors: [], warnings: [] };
+        }
+
+        if (equipment.requiresCageNuts || equipment.mountingMethod === 'cage-nuts') {
+          const missingUnits: number[] = [];
+          for (let unit = position.startUnit; unit <= position.endUnit; unit++) {
+            if (!this.hasRequiredCageNutsForProMode(rack, unit)) {
+              missingUnits.push(unit);
+            }
+          }
+
+          if (missingUnits.length > 0) {
+            const errors: PlacementError[] = [{
+              code: 'CAGE_NUT_REQUIRED',
+              message: `Proモードではケージナットの事前設置が必要です (U${missingUnits.join(', ')})`,
+              affectedUnits: missingUnits,
+              severity: 'error'
+            }];
+            return { isValid: false, errors, warnings: [] };
+          }
+        }
+        
+        return { isValid: true, errors: [], warnings: [] };
+      }
+    };
+  }
+
+  /**
+   * Proモード用レール制約（エラー）
+   */
+  private createProModeRailConstraint(): PlacementConstraint {
+    return {
+      id: 'pro-mode-rail',
+      name: 'Proモード レール必須チェック',
+      priority: 5, // ケージナットと棚板の間
+      validate: (context: PlacementContext): PlacementValidation => {
+        const { rack, position, equipment, isProMode } = context;
+
+        if (!isProMode) {
+          return { isValid: true, errors: [], warnings: [] };
+        }
+
+        if (equipment.requiresRails || equipment.mountingMethod === 'rails') {
+          const missingUnits: number[] = [];
+          for (let unit = position.startUnit; unit <= position.endUnit; unit++) {
+            // このユニットに対応するレールが設置されているかチェック
+            if (!this.hasRequiredRailForProMode(rack, unit, equipment)) {
+              missingUnits.push(unit);
+            }
+          }
+
+          if (missingUnits.length > 0) {
+            const errors: PlacementError[] = [{
+              code: 'RAIL_REQUIRED',
+              message: `Proモードではこの機器に対応するレールの事前設置が必要です (U${missingUnits.join(', ')})`,
+              affectedUnits: missingUnits,
+              severity: 'error'
+            }];
+            return { isValid: false, errors, warnings: [] };
+          }
+        }
+        
+        return { isValid: true, errors: [], warnings: [] };
+      }
+    };
+  }
+
+  /**
    * 棚板要求制約（神棚用）
    */
   private createShelfRequirementConstraint(): PlacementConstraint {
     return {
       id: 'shelf-requirement',
       name: '棚板要求チェック',
-      priority: 4,
-      validate: (rack: Rack, position: PlacementPosition, equipment: Equipment): PlacementValidation => {
+      priority: 6, // 優先度を調整
+      validate: (context: PlacementContext): PlacementValidation => {
+        const { rack, position, equipment } = context;
         const errors: PlacementError[] = [];
         
         if (equipment.requiresShelf) {
@@ -617,18 +704,21 @@ export class EquipmentPlacementManager {
   }
 
   /**
-   * 取り付け方法制約（ケージナット・レール）
+   * 取り付け方法に関する警告制約
    */
-  private createCageNutConstraint(): PlacementConstraint {
+  private createMountingMethodWarningConstraint(): PlacementConstraint {
     return {
-      id: 'mounting-method',
-      name: '取り付け方法チェック',
-      priority: 5,
-      validate: (rack: Rack, position: PlacementPosition, equipment: Equipment): PlacementValidation => {
+      id: 'mounting-method-warning',
+      name: '取り付け方法警告チェック',
+      priority: 7, // 優先度を調整
+      validate: (context: PlacementContext): PlacementValidation => {
+        const { rack, position, equipment, isProMode } = context;
         const warnings: PlacementWarning[] = [];
-        const errors: PlacementError[] = [];
         
-        // ケージナットが必要な機器のチェック
+        if (isProMode && (equipment.requiresCageNuts || equipment.mountingMethod === 'cage-nuts')) {
+          return { isValid: true, errors: [], warnings: [] };
+        }
+
         if (equipment.requiresCageNuts || equipment.mountingMethod === 'cage-nuts') {
           const missingUnits: number[] = [];
           
@@ -648,7 +738,6 @@ export class EquipmentPlacementManager {
           }
         }
         
-        // レールが必要な機器のチェック（サーバー、ストレージ）
         if (equipment.requiresRails || equipment.mountingMethod === 'rails') {
           warnings.push({
             code: 'RAILS_REQUIRED',
@@ -658,7 +747,7 @@ export class EquipmentPlacementManager {
           });
         }
         
-        return { isValid: errors.length === 0, errors, warnings };
+        return { isValid: true, errors: [], warnings };
       }
     };
   }
@@ -670,12 +759,12 @@ export class EquipmentPlacementManager {
     return {
       id: 'rail-conflict',
       name: 'レール・ケージナット競合チェック',
-      priority: 6,
-      validate: (rack: Rack, position: PlacementPosition, equipment: Equipment): PlacementValidation => {
+      priority: 8, // 優先度を調整
+      validate: (context: PlacementContext): PlacementValidation => {
+        const { rack, position, equipment } = context;
         const warnings: PlacementWarning[] = [];
         const errors: PlacementError[] = [];
 
-        // レール機器を設置する場合のケージナット競合チェック
         if (equipment.type === 'rail') {
           const conflictUnits: number[] = [];
           
@@ -695,7 +784,6 @@ export class EquipmentPlacementManager {
           }
         }
 
-        // ケージナット機器を設置する場合のレール競合チェック
         if (equipment.type === 'mounting' && equipment.nutType) {
           const conflictUnits: number[] = [];
           
@@ -746,6 +834,42 @@ export class EquipmentPlacementManager {
     ];
     
     return positions.filter(Boolean).length === 12;
+  }
+
+  private hasRequiredCageNutsForProMode(rack: Rack, unit: number): boolean {
+    const cageNuts = rack.cageNuts[unit];
+    if (!cageNuts) return false;
+
+    const frontLeftOk = cageNuts.frontLeft?.top && cageNuts.frontLeft?.middle && cageNuts.frontLeft?.bottom;
+    const frontRightOk = cageNuts.frontRight?.top && cageNuts.frontRight?.middle && cageNuts.frontRight?.bottom;
+
+    return !!(frontLeftOk && frontRightOk);
+  }
+
+  private hasRequiredRailForProMode(rack: Rack, unit: number, equipment: Equipment): boolean {
+    const railInfo = rack.rails[unit];
+    if (!railInfo) return false;
+
+    // 左右両方のレールが設置されているか
+    const isFrontRailInstalled = railInfo.frontLeft.installed && railInfo.frontRight.installed;
+    if (!isFrontRailInstalled) return false;
+
+    // レールのサイズが機器の高さと一致するか
+    const railEquipment = rack.equipment[unit];
+    if (railEquipment && railEquipment.type === 'rail' && railEquipment.height === equipment.height) {
+      return true;
+    }
+    
+    // partInventoryに格納されているレールもチェック対象とする
+    const installedRailId = railInfo.frontLeft.railId;
+    if (!installedRailId) return false;
+
+    const installedRail = Object.values(rack.partInventory).find(part => part.id === installedRailId);
+    if (installedRail && installedRail.height === equipment.height) {
+      return true;
+    }
+
+    return false;
   }
 
   private createCompleteCageNutConfig(nutType: string) {

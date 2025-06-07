@@ -6,11 +6,6 @@ describe('EquipmentPlacementManager', () => {
   let manager: EquipmentPlacementManager;
   let testRack: Rack;
 
-  beforeEach(() => {
-    manager = new EquipmentPlacementManager();
-    testRack = createTestRack();
-  });
-
   const createTestRack = (): Rack => ({
     id: 'test-rack',
     name: 'テストラック',
@@ -69,6 +64,26 @@ describe('EquipmentPlacementManager', () => {
     cfm: 120,
     heatGeneration: 1707,
     description: '2Uサーバーテスト用'
+  });
+
+  const create2URail = (): Equipment => ({
+    id: 'rail-2u',
+    name: '2Uレールキット',
+    height: 2,
+    depth: 700,
+    power: 0,
+    heat: 0,
+    weight: 2,
+    type: 'rail',
+    color: '#9CA3AF',
+    dualPower: false,
+    requiresRails: false,
+    mountingMethod: 'direct',
+    requiresCageNuts: false,
+    airflow: 'natural',
+    cfm: 0,
+    heatGeneration: 0,
+    description: '2U機器用レールキット'
   });
 
   const create1UServer = (): Equipment => ({
@@ -130,6 +145,11 @@ describe('EquipmentPlacementManager', () => {
     cfm: 0,
     heatGeneration: 0,
     description: '神棚'
+  });
+
+  beforeEach(() => {
+    manager = new EquipmentPlacementManager();
+    testRack = createTestRack();
   });
 
   describe('基本的な配置テスト', () => {
@@ -427,6 +447,132 @@ describe('EquipmentPlacementManager', () => {
       expect(railChanges.length).toBeGreaterThan(0);
       expect(cageNutChanges[0].action).toBe('remove');
       expect(railChanges[0].action).toBe('remove');
+    });
+  });
+
+  describe('Proモード ケージナット制約テスト', () => {
+    const createCageNutServer = (): Equipment => ({
+      id: 'server-1u-cagenut',
+      name: '1U CageNutサーバー',
+      height: 1,
+      depth: 500,
+      power: 200,
+      heat: 700,
+      weight: 10,
+      type: 'server',
+      color: '#8B5CF6',
+      dualPower: false,
+      requiresRails: false,
+      mountingMethod: 'cage-nuts' as const,
+      requiresCageNuts: true,
+      airflow: 'front-to-rear',
+      cfm: 50,
+      heatGeneration: 700,
+      description: 'ケージナット固定サーバー'
+    });
+
+    it('ProモードON: ケージナットがないと設置に失敗する', async () => {
+      const server = createCageNutServer();
+      const result = await manager.placeEquipment(testRack, 1, server, {}, true); // isProMode = true
+
+      expect(result.success).toBe(false);
+      expect(result.validation.isValid).toBe(false);
+      expect(result.validation.errors).toHaveLength(1);
+      expect(result.validation.errors[0].code).toBe('CAGE_NUT_REQUIRED');
+    });
+
+    it('ProモードON: ケージナットが正しく設置されていれば設置に成功する', async () => {
+      const server = createCageNutServer();
+      
+      // 前面の左右にケージナットを設置
+      testRack.cageNuts[1] = {
+        frontLeft: { top: 'm6', middle: 'm6', bottom: 'm6' },
+        frontRight: { top: 'm6', middle: 'm6', bottom: 'm6' },
+        rearLeft: { top: null, middle: null, bottom: null },
+        rearRight: { top: null, middle: null, bottom: null }
+      };
+
+      const result = await manager.placeEquipment(testRack, 1, server, {}, true); // isProMode = true
+
+      expect(result.success).toBe(true);
+      expect(result.validation.isValid).toBe(true);
+      expect(result.updatedRack?.equipment[1]).toBeDefined();
+    });
+
+    it('ProモードOFF: ケージナットがなくても警告のみで設置は成功する', async () => {
+      const server = createCageNutServer();
+      const result = await manager.placeEquipment(testRack, 1, server, {}, false); // isProMode = false
+
+      expect(result.success).toBe(false); // skipWarnings: false なので失敗する
+      expect(result.validation.isValid).toBe(true); // エラーはない
+      expect(result.validation.warnings).toHaveLength(1);
+      expect(result.validation.warnings[0].code).toBe('CAGE_NUT_MISSING');
+      
+      // skipWarnings: true で再試行
+      const result2 = await manager.placeEquipment(testRack, 1, server, { skipWarnings: true }, false);
+      expect(result2.success).toBe(true);
+      expect(result2.updatedRack?.equipment[1]).toBeDefined();
+    });
+  });
+
+  describe('Proモード レール制約テスト', () => {
+    it('ProモードON: レールがないと設置に失敗する', async () => {
+      const server = create2UServer();
+      const result = await manager.placeEquipment(testRack, 1, server, {}, true); // isProMode = true
+
+      expect(result.success).toBe(false);
+      expect(result.validation.isValid).toBe(false);
+      expect(result.validation.errors).toHaveLength(1);
+      expect(result.validation.errors[0].code).toBe('RAIL_REQUIRED');
+    });
+
+    it('ProモードON: 対応するレールが設置されていれば設置に成功する', async () => {
+      const server = create2UServer();
+      const rail = create2URail();
+
+      // 1-2Uにレールを設置
+      const railPlaceResult = await manager.placeEquipment(testRack, 1, rail, { skipWarnings: true });
+      expect(railPlaceResult.success).toBe(true);
+      const rackWithRail = railPlaceResult.updatedRack!;
+
+      // 1-2Uにサーバーを設置
+      const serverPlaceResult = await manager.placeEquipment(rackWithRail, 1, server, {}, true);
+
+      expect(serverPlaceResult.success).toBe(true);
+      expect(serverPlaceResult.validation.isValid).toBe(true);
+      expect(serverPlaceResult.updatedRack?.equipment[1].id).toContain('server-2u');
+    });
+
+    it('ProモードON: サイズの違うレールが設置されている場合は失敗する', async () => {
+      const server = create2UServer(); // 2Uサーバー
+      const rail = { ...create2URail(), id: 'rail-1u', name: '1Uレールキット', height: 1 }; // 1Uレール
+
+      // 1Uに1Uレールを設置
+      const railPlaceResult = await manager.placeEquipment(testRack, 1, rail, { skipWarnings: true });
+      expect(railPlaceResult.success).toBe(true);
+      const rackWithRail = railPlaceResult.updatedRack!;
+
+      // 1-2Uに2Uサーバーを設置しようとする
+      const serverPlaceResult = await manager.placeEquipment(rackWithRail, 1, server, {}, true);
+
+      expect(serverPlaceResult.success).toBe(false);
+      expect(serverPlaceResult.validation.errors[0].code).toBe('RAIL_REQUIRED');
+    });
+
+    it('ProモードOFF: レールがなくても警告のみで設置は成功する', async () => {
+      const server = create2UServer();
+      
+      // isProMode = false, skipWarnings = false
+      const result1 = await manager.placeEquipment(testRack, 1, server, {}, false);
+      expect(result1.success).toBe(false); // 警告があるので失敗
+      expect(result1.validation.isValid).toBe(true);
+      expect(result1.validation.warnings).toHaveLength(1);
+      expect(result1.validation.warnings[0].code).toBe('RAILS_REQUIRED');
+
+      // isProMode = false, skipWarnings = true
+      const result2 = await manager.placeEquipment(testRack, 1, server, { skipWarnings: true }, false);
+      expect(result2.success).toBe(true);
+      expect(result2.updatedRack?.equipment[1]).toBeDefined();
     });
   });
 });

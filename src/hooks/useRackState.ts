@@ -132,15 +132,22 @@ export const useRackState = () => {
     return loadedState.floorSettings || initialFloorSettings;
   });
 
+  const [isProMode, setIsProMode] = useState<boolean>(() => loadedState.isProMode || false);
+
   // 状態変更時にLocalStorageに保存
   useEffect(() => {
     const stateToSave = {
       racks,
       selectedRack,
       floorSettings,
+      isProMode,
     };
     // saveAppState(stateToSave); // App.tsx に移動したためコメントアウト
-  }, [racks, selectedRack, floorSettings]);
+  }, [racks, selectedRack, floorSettings, isProMode]);
+
+  const toggleProMode = useCallback(() => {
+    setIsProMode(prev => !prev);
+  }, []);
 
   // ラック追加
   const addRack = useCallback(() => {
@@ -207,28 +214,56 @@ export const useRackState = () => {
   // 機器追加（新しいEquipmentPlacementManagerを使用）
   const addEquipment = useCallback(async (rackId: string, startUnit: number, equipment: Equipment) => {
     const currentRack = racks[rackId];
-    if (!currentRack) return;
+    if (!currentRack) {
+      // エラーハンドリングを改善
+      return {
+        success: false,
+        validation: {
+          isValid: false,
+          errors: [{
+            code: 'RACK_NOT_FOUND',
+            message: '指定されたラックが見つかりません。',
+            affectedUnits: [],
+            severity: 'error'
+          }],
+          warnings: []
+        },
+        appliedChanges: [],
+      };
+    }
 
     try {
       const rackCopy = JSON.parse(JSON.stringify(currentRack));
       const result = await placementManager.placeEquipment(rackCopy, startUnit, equipment, {
-        autoInstallCageNuts: true
-      });
+        autoInstallCageNuts: !isProMode
+      }, isProMode);
 
       if (result.success && result.updatedRack) {
-        const newRack = result.updatedRack;
         setRacks(prev => ({
           ...prev,
-          [rackId]: newRack
+          [rackId]: result.updatedRack!
         }));
-      } else {
-        console.error('機器の配置に失敗しました:', result.validation.errors);
-        // TODO: ユーザーにエラーメッセージを表示する仕組みを追加
       }
+      // 失敗した場合でも result を返すことで、UI側でエラーメッセージをハンドリングできるようにする
+      return result;
     } catch (error) {
-      console.error('機器配置中にエラーが発生しました:', error);
+      console.error('機器配置中に予期せぬエラーが発生しました:', error);
+      return {
+        success: false,
+        validation: {
+          isValid: false,
+          errors: [{
+            code: 'UNEXPECTED_ERROR',
+            message: '予期せぬエラーが発生しました。',
+            affectedUnits: [startUnit],
+            severity: 'error'
+          }],
+          warnings: []
+        },
+        appliedChanges: [],
+      };
     }
-  }, [racks]);
+  }, [racks, isProMode]);
 
   // 機器削除（新しいEquipmentPlacementManagerを使用）
   const removeEquipment = useCallback(async (rackId: string, unit: number) => {
@@ -542,6 +577,7 @@ export const useRackState = () => {
     racks,
     selectedRack,
     floorSettings,
+    isProMode,
     
     // Actions
     setSelectedRack,
@@ -562,6 +598,7 @@ export const useRackState = () => {
     updateEnvironment,
     installRail,
     removeRail,
+    toggleProMode,
     
     // Computed
     currentRack: racks[selectedRack] || racks[Object.keys(racks)[0]]

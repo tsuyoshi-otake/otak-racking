@@ -27,6 +27,8 @@ interface LeftSidebarProps {
   onDragStart: (e: React.DragEvent, item: any) => void;
   currentPerspective: RackViewPerspective;
   onPerspectiveChange: (perspective: RackViewPerspective) => void;
+  isProMode: boolean;
+  onToggleProMode: () => void;
 }
 
 export const LeftSidebar: React.FC<LeftSidebarProps> = ({
@@ -36,7 +38,9 @@ export const LeftSidebar: React.FC<LeftSidebarProps> = ({
   onActiveViewModeChange,
   onDragStart,
   currentPerspective,
-  onPerspectiveChange
+  onPerspectiveChange,
+  isProMode,
+  onToggleProMode
 }) => {
   const [showEquipmentLibrary, setShowEquipmentLibrary] = useState(true);
   const [showViewModes, setShowViewModes] = useState(true);
@@ -134,6 +138,33 @@ export const LeftSidebar: React.FC<LeftSidebarProps> = ({
               onDragStart={onDragStart}
             />
           )}
+        </div>
+        
+        {/* Pro Mode トグル */}
+        <div className="border-t border-custom-gray pt-4">
+          <h3 className="text-sm font-semibold mb-2 text-gray-100">設定</h3>
+          <div className="flex items-center justify-between">
+            <label htmlFor="pro-mode-toggle" className="text-sm text-gray-300">
+              Pro Mode
+            </label>
+            <div className="relative inline-block w-10 mr-2 align-middle select-none transition duration-200 ease-in">
+              <input
+                type="checkbox"
+                name="pro-mode-toggle"
+                id="pro-mode-toggle"
+                checked={isProMode}
+                onChange={onToggleProMode}
+                className="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer"
+              />
+              <label
+                htmlFor="pro-mode-toggle"
+                className="toggle-label block overflow-hidden h-6 rounded-full bg-gray-600 cursor-pointer"
+              ></label>
+            </div>
+          </div>
+          <p className="text-xs text-gray-400 mt-1">
+            機器設置の制約を強化します。
+          </p>
         </div>
       </div>
     </div>
