@@ -1,198 +1,408 @@
-# OTAK Racking System - Code Definitions
+# OTAK Racking Tool - アーキテクチャ設計書
 
-## src/App.tsx
+## プロジェクト概要
+データセンター・サーバールーム向けのラック管理システム。
+機器の配置、電源管理、冷却計算、ケーブル管理などの包括的な機能を提供。
 
-- **Function Component:** `function App()`
-  - **Renders:**
-    - [`Sidebar`](src/components/Sidebar.tsx)
-    - [`RackView`](src/components/RackView.tsx)
-    - [`ModalsAndDialogs`](src/components/ModalsAndDialogs.tsx)
-  - **Interface:** `interface FloorSettings`
-  - **Type Alias:** `export type RackViewPerspective = 'front' | 'rear' | 'left' | 'right';`
-  - **Function:** `const showInfoModal = (title: string, message: string)`
-  - **Function:** `const showConfirmModal = (title: string, message: string, onConfirmAction: () => void, confirmText?: string, cancelText?: string)`
-  - **Function:** `const handleActiveViewModeChange = (mode: string | null)`
-  - **Function:** `const handleZoomFit = ()()`
-  - **Function:** `const handleEquipmentClick = (equipment: Equipment)`
-  - **Function:** `const handleEquipmentRemove = (unit: number)`
+## システムアーキテクチャ
 
-## src/constants.ts
+```mermaid
+classDiagram
+    %% メインアプリケーション
+    class App {
+        -darkMode: boolean
+        -zoomLevel: number
+        -selectedRack: string
+        -activeViewMode: string | null
+        -currentPerspective: RackViewPerspective
+        -racks: Record~string, Rack~
+        -floorSettings: FloorSettings
+        -selectedEquipment: Equipment | null
+        -showEquipmentModal: boolean
+        -showRackManager: boolean
+        -showFloorSettings: boolean
+        -showCoolingConfig: boolean
+        -showPowerConfig: boolean
+        -infoModal: InfoModalProps | null
+        -confirmModal: ConfirmModalProps | null
+        +render(): JSX.Element
+        +handleDragStart(e: DragEvent, item: Equipment): void
+        +handleDragOver(e: DragEvent): void
+        +handleDrop(e: DragEvent, unit: number): void
+        +showInfoModal(title: string, message: string): void
+        +showConfirmModal(title: string, message: string, onConfirm: Function): void
+    }
 
-- **Constant:** `export const rackTypes: Record<string, RackType>`
-- **Constant:** `export const serverEquipment: Equipment[]`
-- **Constant:** `export const networkEquipment: Equipment[]`
-- **Constant:** `export const storageEquipment: Equipment[]`
-- **Constant:** `export const powerEquipment: Equipment[]`
-- **Constant:** `export const mountingEquipment: Equipment[]`
-- **Constant:** `export const otherEquipment: Equipment[]`
-- **Constant:** `export const equipmentLibrary: Equipment[]`
-- **Constant:** `export const zoomLevels = [50, 75, 100];`
-- **Constant:** `export const airflowIcons: { 'front-to-rear': string; 'rear-to-front': string; 'side-to-side': string; intake: string; exhaust: string; blocking: string; natural: string; }`
-- **Constant:** `export const equipmentTypeIcons: { server: string; network: string; security: string; storage: string; pdu: string; ups: string; power: string; console: string; monitoring: string; cooling: string; shelf: string; spiritual: string; cable: string; mounting: string; panel: string; other: string; }`
+    %% 型定義
+    class Equipment {
+        +id: string
+        +name: string
+        +height: number
+        +depth: number
+        +power: number
+        +heat: number
+        +weight: number
+        +type: EquipmentType
+        +color: string
+        +dualPower: boolean
+        +airflow: string
+        +cfm: number
+        +heatGeneration: number
+        +description: string
+        +specifications?: Record~string, string~
+        +mountingNotes?: string
+        +startUnit?: number
+        +endUnit?: number
+        +isMainUnit?: boolean
+        +pduType?: string
+        +nutType?: string
+        +screwType?: string
+        +washerType?: string
+        +requiresShelf?: boolean
+        +system?: string
+    }
 
-## src/index.tsx
+    class Rack {
+        +id: string
+        +name: string
+        +type: string
+        +units: number
+        +depth: number
+        +width: number
+        +equipment: Record~number, Equipment~
+        +powerConnections: Record~string, PowerConnection~
+        +mountingOptions: Record~string, MountingOption~
+        +labels: Record~string, Label~
+        +cageNuts: Record~number, CageNutConfig~
+        +partInventory: Record~string, Equipment~
+        +fans: FanConfig
+        +position: Position
+        +cabling: CablingConfig
+        +housing: HousingConfig
+        +environment: EnvironmentConfig
+        +pduPlacements: PDUPlacement[]
+        +physicalStructure: PhysicalStructure
+    }
 
-- **Renders:**
-  - [`App`](src/App.tsx)
-- (エントリーポイントのため、主要なコンポーネントやロジック定義はなし)
+    class PhysicalStructure {
+        +frame: RackFrame
+        +frontDoor: RackDoor
+        +rearDoor: RackDoor
+        +leftPanel: SidePanel
+        +rightPanel: SidePanel
+        +mountingPosts: any
+        +base: RackBase
+        +top: RackTop
+        +dimensions: any
+        +weight: any
+        +ventilation: any
+    }
 
-## src/types.ts
+    class FloorSettings {
+        +hasAccessFloor: boolean
+        +floorHeight: number
+        +tileSize: number
+        +supportType: 'adjustable' | 'fixed' | 'string'
+        +loadCapacity: 'light' | 'medium' | 'heavy'
+        +cableRouting: any
+    }
 
-- **Interface:** `export interface Equipment`
-- **Interface:** `export interface RackType`
-- **Interface:** `export interface CageNutPosition`
-- **Interface:** `export interface CageNutConfig`
-- **Interface:** `export interface PowerConnection`
-- **Interface:** `export interface MountingOption`
-- **Interface:** `export interface Label`
-- **Interface:** `export interface Position`
-- **Interface:** `export interface CablingConfig`
-- **Interface:** `export interface HousingConfig`
-- **Interface:** `export interface EnvironmentConfig`
-- **Interface:** `export interface FanConfig`
-- **Interface:** `export interface Rack`
-- **Interface:** `export interface FloorSettings`
-- **Interface:** `export interface RackStats`
-- **Interface:** `export interface TotalStats extends RackStats`
-- **Interface:** `export interface CoolingStats`
-- **Interface:** `export interface CageNutStatus`
-- **Interface:** `export interface PowerSources`
-- **Interface:** `export interface LayoutDimensions`
-- **Type Alias:** `export type EquipmentType = 'server' | 'network' | 'security' | 'storage' | 'pdu' | 'ups' | 'power' | 'console' | 'monitoring' | 'cooling' | 'shelf' | 'spiritual' | 'cable' | 'mounting' | 'panel' | 'other';`
-- **Type Alias:** `export type AirflowDirection = 'front-to-rear' | 'rear-to-front' | 'side-to-side' | 'intake' | 'exhaust' | 'blocking' | 'natural';`
-- **Type Alias:** `export type ViewMode = 'power' | 'mounting' | 'label' | 'airflow' | 'temperature' | 'cabling' | 'floor' | 'cagenut';`
+    %% コンポーネント階層
+    class LeftSidebar {
+        +darkMode: boolean
+        +zoomLevel: number
+        +activeViewMode: string | null
+        +currentPerspective: RackViewPerspective
+        +onZoomChange(zoom: number): void
+        +onActiveViewModeChange(mode: string | null): void
+        +onDragStart(e: DragEvent, item: any): void
+        +onPerspectiveChange(perspective: RackViewPerspective): void
+        +render(): JSX.Element
+    }
 
-## src/utils.ts
+    class RightSidebar {
+        +racks: Record~string, Rack~
+        +selectedRack: string
+        +darkMode: boolean
+        +floorSettings: FloorSettings
+        +onRackSelect(rackId: string): void
+        +onAddRack(): void
+        +onRemoveRack(rackId: string): void
+        +onDuplicateRack(rackId: string): void
+        +onClearAllEquipment(): void
+        +onShowRackManager(): void
+        +onShowFloorSettings(): void
+        +onShowCoolingConfig(): void
+        +onShowPowerConfig(): void
+        +render(): JSX.Element
+    }
 
-- **Function:** `export const calculateRackStats = (rack: Rack): RackStats`
-- **Function:** `export const calculateTotalStats = (racks: Record<string, Rack>): TotalStats`
-- **Function:** `export const calculateCoolingStats = (rack: Rack): CoolingStats`
-- **Function:** `export const getCageNutStatus = (unit: number, rack: Rack): CageNutStatus`
-- **Function:** `export const getPowerSources = (rack: Rack): PowerSources`
-- **Function:** `export const calculateLayoutDimensions = (rackCount: number, windowWidth?: number)`
-- **Function:** `export const getZoomedUnitHeight = (zoomLevel: number): number`
-- **Function:** `export const getZoomedFontSize = (zoomLevel: number): number`
-- **Function:** `export const canPlaceEquipment = (rack: Rack, startUnit: number, equipment: Equipment): { canPlace: boolean; reason?: string }`
-- **Function:** `export const autoInstallCageNuts = (unit: number, nutType?: string)`
-- **Function:** `export const getContainerStyle = (darkMode: boolean): string`
-- **Function:** `export const getSidebarStyle = (darkMode: boolean): string`
-- **Function:** `export const getButtonStyle = (darkMode: boolean, isActive?: boolean): string`
-- **Function:** `export const getUnitBorderClass = (darkMode: boolean): string`
-- **Function:** `export const getEmptyUnitClass = (darkMode: boolean): string`
-- **Function:** `export const getUnitNumClass = (darkMode: boolean): string`
-- **Function:** `export const getPowerStatus = (equipment: Equipment, powerConnections: any)`
-- **Function:** `export const getEquipmentDisplayName = (equipment: Equipment, labels: any): string`
-- **Function:** `export const debounce = <T extends (...args: any[]) => any>(func: T, wait: number): ((...args: Parameters<T>) => void)`
-- **Function:** `export const deepCopy = <T>(obj: T): T`
+    class RackView {
+        +rack: Rack
+        +darkMode: boolean
+        +zoomLevel: number
+        +selectedRack: string
+        +activeViewMode: string | null
+        +perspective: RackViewPerspective
+        +draggedItem?: Equipment | null
+        +onDragOver?(e: DragEvent): void
+        +onDrop?(e: DragEvent, unit: number): void
+        +onEquipmentClick?(equipment: Equipment): void
+        +onEquipmentRemove?(unit: number): void
+        +onCageNutInstall?(unit: number, side: string, position: string, nutType: string): void
+        +onCageNutRemove?(unit: number, side: string, position: string): void
+        +onAutoInstallCageNuts?(unit: number, nutType: string): void
+        +onUpdatePhysicalStructure?(updates: Partial~PhysicalStructure~): void
+        +render(): JSX.Element
+    }
 
-## src/__tests__/2uServerIssue.test.ts
+    class RackUnit {
+        +rack: Rack
+        +unit: number
+        +darkMode: boolean
+        +zoomLevel: number
+        +unitHeight: number
+        +fontSize: number
+        +activeViewMode: string | null
+        +selectedRack: string
+        +coolingStats: CoolingStats
+        +render(): JSX.Element
+    }
 
-- **Describe Block:** `describe('2Uサーバー設置問題の調査', () => { ... })`
-  - **Function:** `const createTestRack = (): Rack`
-  - **Function:** `const create2UServer = (): Equipment`
-  - **Function:** `const create1UServer = (): Equipment`
-  - **Describe Block:** `describe('シナリオ1: 2Uサーバーを設置後の前方配置', () => { ... })`
-    - **Test Case:** `it('ケース1: 3-4Uに2Uサーバー設置後、1-2Uに設置可能か', () => { ... })`
-    - **Test Case:** `it('ケース2: 2-3Uに2Uサーバー設置後、1Uに1Uサーバー設置可能か', () => { ... })`
-    - **Test Case:** `it('ケース3: 1-2Uに2Uサーバー設置後、その前（0U?）には設置できない', () => { ... })`
-  - **Describe Block:** `describe('シナリオ2: ラック番号付けの確認', () => { ... })`
-    - **Test Case:** `it('ラック番号は下から上に1, 2, 3...42の順番', () => { ... })`
-  - **Describe Block:** `describe('シナリオ3: 実際の配置確認', () => { ... })`
-    - **Test Case:** `it('段階的な機器配置テスト', () => { ... })`
+    class RackStructure {
+        +rack: Rack
+        +zoomLevel: number
+        +unitHeight: number
+        +perspective: RackViewPerspective
+        +onUpdatePhysicalStructure?(updates: Partial~PhysicalStructure~): void
+        +render(): JSX.Element
+    }
 
-## src/__tests__/equipmentPlacement.test.ts
+    class RackPDU {
+        +rack: Rack
+        +zoomLevel: number
+        +unitHeight: number
+        +render(): JSX.Element
+    }
 
-- **Describe Block:** `describe('機器配置ロジック', () => { ... })`
-  - **Function:** `const createTestRack = (): Rack`
-  - **Function:** `const create2UServer = (): Equipment`
-  - **Function:** `const create1UServer = (): Equipment`
-  - **Describe Block:** `describe('2Uサーバーの配置テスト', () => { ... })`
-    - **Test Case:** `it('空のラックに2Uサーバーを1Uに配置できる', () => { ... })`
-    - **Test Case:** `it('空のラックに2Uサーバーを42Uに配置できない（ラック容量オーバー）', () => { ... })`
-    - **Test Case:** `it('1Uに1Uサーバーがある場合、2Uに2Uサーバーを配置できる', () => { ... })`
-    - **Test Case:** `it('1Uに2Uサーバーがある場合、1Uより前に機器を配置できない', () => { ... })`
-    - **Test Case:** `it('3-4Uに2Uサーバーがある場合、1-2Uに2Uサーバーを配置できる', () => { ... })`
-    - **Test Case:** `it('1-2Uに2Uサーバーがある場合、2Uに1Uサーバーを配置できない', () => { ... })`
-    - **Test Case:** `it('連続する複数ユニットの占有チェック', () => { ... })`
-  - **Describe Block:** `describe('エッジケーステスト', () => { ... })`
-    - **Test Case:** `it('ラック上限近くでの配置チェック', () => { ... })`
-    - **Test Case:** `it('ラック容量を超える配置チェック', () => { ... })`
-  - **Describe Block:** `describe('特殊機器の配置テスト', () => { ... })`
-    - **Test Case:** `it('神棚は棚板の上にのみ設置可能', () => { ... })`
+    class MountingHoles {
+        +rack: Rack
+        +unit: number
+        +zoomLevel: number
+        +unitHeight: number
+        +darkMode: boolean
+        +perspective: 'front' | 'rear'
+        +onCageNutInstall?(unit: number, side: string, position: string, nutType: string): void
+        +onCageNutRemove?(unit: number, side: string, position: string): void
+        +render(): JSX.Element
+    }
 
-## src/__tests__/utils.test.ts
+    class EquipmentLibrary {
+        +darkMode: boolean
+        +onDragStart(e: DragEvent, item: Equipment): void
+        +render(): JSX.Element
+    }
 
-- **Describe Block:** `describe('ラック統計計算', () => { ... })`
-  - **Test Case:** `it('個別ラック統計を正しく計算する', () => { ... })`
-  - **Test Case:** `it('冷却統計を正しく計算する', () => { ... })`
-  - **Test Case:** `it('ゲージナット状態を正しく取得する', () => { ... })`
-- **Describe Block:** `describe('全体統計計算', () => { ... })`
-  - **Test Case:** `it('全体統計を正しく計算する', () => { ... })`
+    class ModalsAndDialogs {
+        +darkMode: boolean
+        +currentRack: Rack | null
+        +selectedEquipment: Equipment | null
+        +showEquipmentModal: boolean
+        +racks?: Record~string, Rack~
+        +showRackManager?: boolean
+        +floorSettings?: FloorSettings
+        +showFloorSettings?: boolean
+        +showCoolingConfig?: boolean
+        +showPowerConfig?: boolean
+        +infoModal?: InfoModalProps | null
+        +confirmModal?: ConfirmModalProps | null
+        +onCloseEquipmentModal(): void
+        +onUpdateLabel(equipmentId: string, field: string, value: string): void
+        +onUpdatePowerConnection(equipmentId: string, field: string, value: any): void
+        +onUpdateMountingOption(equipmentId: string, field: string, value: any): void
+        +render(): JSX.Element
+    }
 
-## src/components/EquipmentLibrary.tsx
+    %% Hooks
+    class useRackState {
+        +racks: Record~string, Rack~
+        +selectedRack: string
+        +floorSettings: FloorSettings
+        +currentRack: Rack
+        +setSelectedRack(rackId: string): void
+        +setFloorSettings(settings: FloorSettings): void
+        +addRack(): void
+        +removeRack(rackId: string): void
+        +duplicateRack(rackId: string): void
+        +updateRack(rackId: string, updates: Partial~Rack~): void
+        +addEquipment(rackId: string, startUnit: number, equipment: Equipment): void
+        +removeEquipment(rackId: string, unit: number): void
+        +clearAllEquipment(rackId: string): void
+        +updateLabel(rackId: string, equipmentId: string, field: string, value: string): void
+        +updatePowerConnection(rackId: string, equipmentId: string, field: string, value: any): void
+        +updateMountingOption(rackId: string, equipmentId: string, field: string, value: any): void
+        +installCageNut(rackId: string, unit: number, side: string, position: string, nutType: string): void
+        +removeCageNut(rackId: string, unit: number, side: string, position: string): void
+        +autoInstallCageNutsForUnit(rackId: string, unit: number, nutType: string): void
+        +updateEnvironment(rackId: string, field: string, value: number): void
+    }
 
-- **Function Component:** `export const EquipmentLibrary: React.FC<EquipmentLibraryProps> = ({ darkMode, onDragStart })`
-  - **Interface:** `interface EquipmentLibraryProps`
-  - **Function:** `const renderEquipmentCard = (item: Equipment)`
-  - **Function:** `const getEquipmentIcon = (type: string, darkMode: boolean)`
+    class useDragAndDrop {
+        +draggedItem: Equipment | null
+        +handleDragStart(e: DragEvent, item: Equipment): void
+        +handleDragOver(e: DragEvent): void
+        +handleDrop(e: DragEvent, startUnit: number): void
+        +handleDragEnd(): void
+        +setDraggedItem(item: Equipment | null): void
+    }
 
-## src/components/ModalsAndDialogs.tsx
+    %% サービス層
+    class EquipmentPlacementManager {
+        -constraints: PlacementConstraint[]
+        +placeEquipment(rack: Rack, startUnit: number, equipment: Equipment, options?: PlacementOptions): Promise~PlacementResult~
+        +removeEquipment(rack: Rack, unit: number): Promise~PlacementResult~
+        +clearAllEquipment(rack: Rack): Promise~PlacementResult~
+        +validatePlacement(context: PlacementContext): Promise~PlacementValidation~
+        +getRackOccupancy(rack: Rack): RackOccupancy
+        -executePlacement(context: PlacementContext): Promise~PlacementChange[]~
+        -initializeConstraints(): void
+        -createUnitRangeConstraint(): PlacementConstraint
+        -createCapacityConstraint(): PlacementConstraint
+        -createOccupancyConstraint(): PlacementConstraint
+        -createShelfRequirementConstraint(): PlacementConstraint
+        -createCageNutConstraint(): PlacementConstraint
+        -calculateTotalWeight(rack: Rack): number
+        -getRackMaxWeight(rack: Rack): number
+        -hasCompleteCageNuts(rack: Rack, unit: number): boolean
+        -createCompleteCageNutConfig(nutType: string): any
+    }
 
-- **Function Component:** `export const ModalsAndDialogs: React.FC<ModalsAndDialogsProps> = ({ darkMode, currentRack, selectedEquipment, showEquipmentModal, onCloseEquipmentModal, onUpdateLabel, onUpdatePowerConnection, onUpdateMountingOption, racks, showRackManager, onCloseRackManager, onAddRack, onRemoveRack, onDuplicateRack, floorSettings, showFloorSettings, onCloseFloorSettings, onUpdateFloorSettings, showCoolingConfig, onCloseCoolingConfig, showPowerConfig, onClosePowerConfig, infoModal, confirmModal })`
-  - **Interface:** `export interface InfoModalProps`
-  - **Interface:** `export interface ConfirmModalProps extends InfoModalProps`
-  - **Interface:** `interface FloorSettings` (ローカル定義)
-  - **Interface:** `interface ModalsAndDialogsProps`
-  - **Function:** `const renderEquipmentModal = ()`
-  - **Function:** `const renderRackManagerModal = ()`
-  - **Function:** `const renderFloorSettingsModal = ()`
-  - **Function:** `const renderCoolingConfigModal = ()`
-  - **Function:** `const renderPowerConfigModal = ()`
-  - **Function:** `const renderInfoModal = ()`
-  - **Function:** `const renderConfirmModal = ()`
+    class PlacementConstraint {
+        +id: string
+        +name: string
+        +priority: number
+        +validate(rack: Rack, position: PlacementPosition, equipment: Equipment): PlacementValidation
+    }
 
-## src/components/RackView.tsx
+    class PlacementResult {
+        +success: boolean
+        +position?: PlacementPosition
+        +validation: PlacementValidation
+        +appliedChanges: PlacementChange[]
+        +updatedRack?: Rack
+    }
 
-- **Function Component:** `export const RackView: React.FC<RackViewProps> = ({ rack, darkMode, zoomLevel, selectedRack, activeViewMode, onDragOver, onDrop, onEquipmentClick, onEquipmentRemove, onCageNutInstall, onCageNutRemove, onAutoInstallCageNuts, perspective, draggedItem, showConfirmModal })`
-  - **Interface:** `interface RackViewProps`
-  - **Function:** `const getEquipmentIcon = (type: string, size: number)`
-  - **Function:** `const getAirflowIcon = (airflow: string, size: number)`
-  - **Function:** `const getMountingIcon = (mountingType: string, needsRails: boolean, size: number)`
-  - **Function:** `const renderMountingHoles = (unit: number)`
-  - **Function:** `const renderRackUnit = (unit: number)`
+    class PlacementValidation {
+        +isValid: boolean
+        +errors: PlacementError[]
+        +warnings: PlacementWarning[]
+    }
 
-## src/components/Sidebar.tsx
+    %% ユーティリティ
+    class LocalStorageUtils {
+        +loadAppState(): Partial~AppState~
+        +saveAppState(state: Partial~AppState~): void
+        +clearAppState(): void
+        +getStorageSize(): string
+        +getStorageInfo(): any
+    }
 
-- **Function Component:** `export const Sidebar: React.FC<SidebarProps> = ({ racks, selectedRack, darkMode, zoomLevel, activeViewMode, floorSettings, onRackSelect, onAddRack, onRemoveRack, onDuplicateRack, onZoomChange, onActiveViewModeChange, onDragStart, onShowRackManager, onShowFloorSettings, onShowCoolingConfig, onShowPowerConfig, currentPerspective, onPerspectiveChange })`
-  - **Renders:**
-    - [`EquipmentLibrary`](src/components/EquipmentLibrary.tsx)
-  - **Interface:** `interface FloorSettings` (ローカル定義)
-  - **Interface:** `interface SidebarProps`
+    class UtilityFunctions {
+        +calculateTotalStats(racks: Record~string, Rack~): TotalStats
+        +calculateRackStats(rack: Rack): RackStats
+        +calculateCoolingStats(rack: Rack): CoolingStats
+        +canPlaceEquipment(rack: Rack, startUnit: number, equipment: Equipment): any
+        +getCageNutStatus(unit: number, rack: Rack): CageNutStatus
+        +getPowerStatus(equipment: Equipment, powerConnections: any): any
+        +getEquipmentDisplayName(equipment: Equipment, labels: any): string
+        +deepCopy~T~(obj: T): T
+        +autoInstallCageNuts(unit: number, nutType: string): any
+        +getPowerSources(rack: Rack): PowerSources
+        +getZoomedUnitHeight(zoomLevel: number): number
+        +getZoomedFontSize(zoomLevel: number): number
+    }
 
-## src/hooks/useDragAndDrop.ts
+    %% アイコンコンポーネント
+    class RackIcons {
+        +getEquipmentIcon(type: string, size: number): JSX.Element
+        +getAirflowIcon(airflow: string, size: number): JSX.Element
+        +getMountingIcon(mountingType: string, needsRails: boolean, size: number): JSX.Element
+    }
 
-- **Type Alias:** `export type DraggedItem = Equipment | null;`
-- **Function:** `export const useDragAndDrop = (currentRack: any, addEquipment: (rackId: string, startUnit: number, equipment: Equipment) => void, autoInstallCageNutsForUnit: (rackId: string, unit: number, nutType: string) => void, selectedRack: string, showInfoModal: (title: string, message: string) => void, showConfirmModal: (title: string, message: string, onConfirm: () => void) => void)`
-  - **Function:** `const handleDragStart = useCallback((e: React.DragEvent, item: Equipment) => { ... }, [])`
-  - **Function:** `const handleDragOver = useCallback((e: React.DragEvent) => { ... }, [])`
-  - **Function:** `const handleDrop = useCallback((e: React.DragEvent, startUnit: number) => { ... }, [draggedItem, currentRack, selectedRack, addEquipment, autoInstallCageNutsForUnit, showInfoModal, showConfirmModal])`
-  - **Function:** `const handleDragEnd = useCallback(() => { ... }, [])`
+    %% 関係性の定義
+    App *-- "1" useRackState : uses
+    App *-- "1" useDragAndDrop : uses
+    App *-- "1" LeftSidebar : contains
+    App *-- "1" RightSidebar : contains
+    App *-- "1" RackView : contains
+    App *-- "1" ModalsAndDialogs : contains
 
-## src/hooks/useRackState.ts
+    RackView *-- "0..*" RackUnit : contains
+    RackView *-- "1" RackStructure : contains
+    RackView *-- "1" RackPDU : contains
 
-- **Function:** `const createInitialRack = (id: string, name: string, rackCount: number): Rack`
-- **Constant:** `const initialFloorSettings: FloorSettings`
-- **Function:** `export const useRackState = ()`
-  - **Function:** `const addRack = useCallback(() => { ... }, [racks])`
-  - **Function:** `const removeRack = useCallback((rackId: string) => { ... }, [racks, selectedRack])`
-  - **Function:** `const duplicateRack = useCallback((rackId: string) => { ... }, [racks])`
-  - **Function:** `const updateRack = useCallback((rackId: string, updates: Partial<Rack>) => { ... }, [])`
-  - **Function:** `const addEquipment = useCallback((rackId: string, startUnit: number, equipment: Equipment) => { ... }, [])`
-  - **Function:** `const removeEquipment = useCallback((rackId: string, unit: number) => { ... }, [])`
-  - **Function:** `const updateLabel = useCallback((rackId: string, equipmentId: string, field: string, value: string) => { ... }, [])`
-  - **Function:** `const updatePowerConnection = useCallback((rackId: string, equipmentId: string, field: string, value: any) => { ... }, [])`
-  - **Function:** `const updateMountingOption = useCallback((rackId: string, equipmentId: string, field: string, value: any) => { ... }, [])`
-  - **Function:** `const installCageNut = useCallback((rackId: string, unit: number, side: string, position: string, nutType?: string) => { ... }, [])`
-  - **Function:** `const removeCageNut = useCallback((rackId: string, unit: number, side: string, position: string) => { ... }, [])`
-  - **Function:** `const autoInstallCageNutsForUnit = useCallback((rackId: string, unit: number, nutType?: string) => { ... }, [])`
-  - **Function:** `const updateEnvironment = useCallback((rackId: string, field: string, value: number) => { ... }, [])`
+    RackUnit *-- "1" MountingHoles : contains
+    RackUnit ..> RackIcons : uses
+
+    LeftSidebar *-- "1" EquipmentLibrary : contains
+
+    useRackState ..> EquipmentPlacementManager : uses
+    useRackState ..> LocalStorageUtils : uses
+
+    useDragAndDrop ..> UtilityFunctions : uses
+
+    EquipmentPlacementManager *-- "0..*" PlacementConstraint : contains
+    EquipmentPlacementManager ..> PlacementResult : creates
+    EquipmentPlacementManager ..> PlacementValidation : creates
+
+    Rack *-- "0..*" Equipment : contains
+    Rack *-- "1" PhysicalStructure : contains
+    Rack ..> FloorSettings : references
+
+    %% 重要な依存関係
+    App ..> Rack : manages
+    App ..> Equipment : handles
+    App ..> FloorSettings : configures
+
+    note for App "メインアプリケーション\n状態管理とイベントハンドリング"
+    note for EquipmentPlacementManager "機器配置の制約チェックと実行\n複雑なビジネスロジックを担当"
+    note for useRackState "ラック状態管理\nLocalStorage連携"
+    note for Rack "ラックの完全な状態表現\n物理構造から論理設定まで"
+```
+
+## 主要設計パターン
+
+### 1. コンポーネント構成
+- **プレゼンテーション層**: UI表示とユーザー操作
+- **ビジネスロジック層**: EquipmentPlacementManager
+- **データ層**: LocalStorage + useRackState
+
+### 2. 状態管理
+- **React Hooks**: useRackState, useDragAndDrop
+- **Immutable Updates**: 状態の不変性を保持
+- **LocalStorage**: 永続化
+
+### 3. 制約システム
+- **PlacementConstraint**: 機器配置の制約を定義
+- **Priority-based Validation**: 優先度順での制約チェック
+- **Error/Warning System**: エラーと警告の分離
+
+### 4. 型安全性
+- **TypeScript**: 完全な型定義
+- **インターフェース分離**: 明確な責務分担
+- **ジェネリック**: 再利用可能なユーティリティ
+
+## 拡張ポイント
+
+1. **新しい機器タイプ**: Equipment型の拡張
+2. **新しい制約**: PlacementConstraint実装
+3. **新しい表示モード**: activeViewModeの追加
+4. **新しいラックタイプ**: rackTypesの拡張
+5. **新しい物理構造**: PhysicalStructureの拡張
+
+## パフォーマンス考慮
+
+1. **メモ化**: React.memo, useMemo, useCallback
+2. **遅延ローディング**: 大規模データの段階的読み込み
+3. **仮想スクロール**: 大量機器の効率的表示
+4. **状態最適化**: 必要最小限の再レンダリング
