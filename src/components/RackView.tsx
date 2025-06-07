@@ -163,7 +163,7 @@ export const RackView: React.FC<RackViewProps> = ({
     if (!rack.pduPlacements || rack.pduPlacements.length === 0) return null;
 
     return rack.pduPlacements.map((pdu, index) => {
-      const pduWidth = 20; // PDUの幅
+      const pduWidth = 20 * (zoomLevel / 100); // PDUの幅をズームに対応
       const pduHeight = Math.min(rack.units * unitHeight * 0.8, pdu.equipment.height * unitHeight || rack.units * unitHeight * 0.6);
       
       let positionStyle: React.CSSProperties = {};
@@ -171,7 +171,7 @@ export const RackView: React.FC<RackViewProps> = ({
       switch (pdu.position) {
         case 'left':
           positionStyle = {
-            left: `-${pduWidth + 10}px`,
+            left: `-${pduWidth + 10 * (zoomLevel / 100)}px`,
             top: `${pdu.offset}px`,
             width: `${pduWidth}px`,
             height: `${pduHeight}px`
@@ -179,7 +179,7 @@ export const RackView: React.FC<RackViewProps> = ({
           break;
         case 'right':
           positionStyle = {
-            right: `-${pduWidth + 10}px`,
+            right: `-${pduWidth + 10 * (zoomLevel / 100)}px`,
             top: `${pdu.offset}px`,
             width: `${pduWidth}px`,
             height: `${pduHeight}px`
@@ -232,7 +232,8 @@ export const RackView: React.FC<RackViewProps> = ({
 
     const railInstallation = rack.railInstallations?.[unit];
     const holeSize = Math.max(13 * (zoomLevel / 100), unitHeight * 0.38);
-    const holeOffset = Math.max(15, 15 * (zoomLevel / 100));
+    const frameOffset = 20 * (zoomLevel / 100); // 物理構造と同じオフセット
+    const holeOffset = frameOffset - (holeSize / 2); // フレーム内に収める
     
     return (
       <>
@@ -243,9 +244,9 @@ export const RackView: React.FC<RackViewProps> = ({
             <div
               className="absolute bg-gradient-to-r from-gray-400 to-gray-600 border border-gray-500 opacity-90"
               style={{
-                width: `3px`,
+                width: `${3 * (zoomLevel / 100)}px`,
                 height: `${unitHeight - 4}px`,
-                left: `-8px`,
+                left: `-${8 * (zoomLevel / 100)}px`,
                 top: `2px`,
                 borderRadius: '1px'
               }}
@@ -263,9 +264,9 @@ export const RackView: React.FC<RackViewProps> = ({
             <div
               className="absolute bg-gradient-to-r from-gray-400 to-gray-600 border border-gray-500 opacity-90"
               style={{
-                width: `3px`,
+                width: `${3 * (zoomLevel / 100)}px`,
                 height: `${unitHeight - 4}px`,
-                right: `-8px`,
+                right: `-${8 * (zoomLevel / 100)}px`,
                 top: `2px`,
                 borderRadius: '1px'
               }}
@@ -466,7 +467,8 @@ export const RackView: React.FC<RackViewProps> = ({
 
     const railInstallation = rack.railInstallations?.[unit];
     const holeSize = Math.max(13 * (zoomLevel / 100), unitHeight * 0.38);
-    const holeOffset = Math.max(15, 15 * (zoomLevel / 100));
+    const frameOffset = 20 * (zoomLevel / 100); // 物理構造と同じオフセット
+    const holeOffset = frameOffset - (holeSize / 2); // フレーム内に収める
     
     return (
       <>
@@ -477,9 +479,9 @@ export const RackView: React.FC<RackViewProps> = ({
             <div
               className="absolute bg-gradient-to-r from-gray-400 to-gray-600 border border-gray-500 opacity-90"
               style={{
-                width: `3px`,
+                width: `${3 * (zoomLevel / 100)}px`,
                 height: `${unitHeight - 4}px`,
-                left: `-8px`,
+                left: `-${8 * (zoomLevel / 100)}px`,
                 top: `2px`,
                 borderRadius: '1px'
               }}
@@ -496,9 +498,9 @@ export const RackView: React.FC<RackViewProps> = ({
             <div
               className="absolute bg-gradient-to-r from-gray-400 to-gray-600 border border-gray-500 opacity-90"
               style={{
-                width: `3px`,
+                width: `${3 * (zoomLevel / 100)}px`,
                 height: `${unitHeight - 4}px`,
-                right: `-8px`,
+                right: `-${8 * (zoomLevel / 100)}px`,
                 top: `2px`,
                 borderRadius: '1px'
               }}
@@ -1152,7 +1154,12 @@ export const RackView: React.FC<RackViewProps> = ({
           </div>
         </div>
         {/* ラックユニット (前面) */}
-        <div className={`border rounded-b-lg overflow-visible relative ${darkMode ? 'border-gray-600' : 'border-gray-300'}`}>
+        <div
+          className={`border rounded-b-lg overflow-visible relative ${darkMode ? 'border-gray-600' : 'border-gray-300'}`}
+          style={{
+            width: `${600 * (zoomLevel / 100)}px`
+          }}
+        >
           {/* 物理構造表示 */}
           {renderPhysicalStructure()}
           {/* PDU表示 */}
@@ -1174,7 +1181,12 @@ export const RackView: React.FC<RackViewProps> = ({
           </div>
         </div>
         {/* ラックユニット (背面) */}
-        <div className={`border rounded-b-lg overflow-visible relative ${darkMode ? 'border-gray-600' : 'border-gray-300'}`}>
+        <div
+          className={`border rounded-b-lg overflow-visible relative ${darkMode ? 'border-gray-600' : 'border-gray-300'}`}
+          style={{
+            width: `${600 * (zoomLevel / 100)}px`
+          }}
+        >
           {/* 物理構造表示 */}
           {renderPhysicalStructure()}
           {/* ラックユニット */}
