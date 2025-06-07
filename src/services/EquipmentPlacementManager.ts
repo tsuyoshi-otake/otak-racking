@@ -645,20 +645,18 @@ export class EquipmentPlacementManager {
           return { isValid: true, errors: [], warnings: [] };
         }
 
-        if (equipment.requiresRails || equipment.mountingMethod === 'rails') {
-          const missingUnits: number[] = [];
-          for (let unit = position.startUnit; unit <= position.endUnit; unit++) {
-            // このユニットに対応するレールが設置されているかチェック
-            if (!this.hasRequiredRailForProMode(rack, unit, equipment)) {
-              missingUnits.push(unit);
-            }
-          }
+        console.log(`[Pro Mode Rail Constraint] Checking equipment: ${equipment.name}, requiresRails: ${equipment.requiresRails}, mountingMethod: ${equipment.mountingMethod}`);
+        console.log(`[Pro Mode Rail Constraint] Position: startUnit=${position.startUnit}, endUnit=${position.endUnit}`);
 
-          if (missingUnits.length > 0) {
+        if (equipment.requiresRails || equipment.mountingMethod === 'rails') {
+          // 複数ユニットにまたがる機器の場合、最初のユニットでのみチェックを行う
+          const hasValidRails = this.hasRequiredRailForProMode(rack, position.startUnit, equipment);
+          
+          if (!hasValidRails) {
             const errors: PlacementError[] = [{
               code: 'RAIL_REQUIRED',
-              message: `Proモードではこの機器に対応するレールの事前設置が必要です (U${missingUnits.join(', ')})`,
-              affectedUnits: missingUnits,
+              message: `Proモードではこの機器に対応するレールの事前設置が必要です (U${position.startUnit}-${position.endUnit})`,
+              affectedUnits: Array.from({ length: position.endUnit - position.startUnit + 1 }, (_, i) => position.startUnit + i),
               severity: 'error' as const
             }];
             return { isValid: false, errors, warnings: [] };
@@ -857,28 +855,65 @@ export class EquipmentPlacementManager {
   }
 
   private hasRequiredRailForProMode(rack: Rack, unit: number, equipment: Equipment): boolean {
+    console.log(`[Pro Mode Rail Check] Unit ${unit}, Equipment: ${equipment.name} (${equipment.height}U)`);
+    
     const railInfo = rack.rails[unit];
-    if (!railInfo) return false;
+    if (!railInfo) {
+      console.log(`[Pro Mode Rail Check] No rail info found for unit ${unit}`);
+      return false;
+    }
 
     // 左右両方のレールが設置されているか
     const isFrontRailInstalled = railInfo.frontLeft.installed && railInfo.frontRight.installed;
+    console.log(`[Pro Mode Rail Check] Front rails installed: ${isFrontRailInstalled} (Left: ${railInfo.frontLeft.installed}, Right: ${railInfo.frontRight.installed})`);
+    
     if (!isFrontRailInstalled) return false;
 
-    // レールのサイズが機器の高さと一致するか
-    const railEquipment = rack.equipment[unit];
-    if (railEquipment && railEquipment.type === 'rail' && railEquipment.height === equipment.height) {
+    // レールのタイプを取得
+    const railType = railInfo.frontLeft.railType;
+    const railHeight = railType === '1u' ? 1 :
+                      railType === '2u' ? 2 :
+                      railType === '4u' ? 4 : 0;
+
+    console.log(`[Pro Mode Rail Check] Rail type: ${railType}, Rail height: ${railHeight}U, Equipment height: ${equipment.height}U`);
+
+    // ケース1: レールの高さが機器の高さと一致する場合（理想的）
+    if (railHeight === equipment.height) {
+      console.log(`[Pro Mode Rail Check] Perfect match: Rail height matches equipment height`);
       return true;
     }
-    
-    // partInventoryに格納されているレールもチェック対象とする
-    const installedRailId = railInfo.frontLeft.railId;
-    if (!installedRailId) return false;
 
-    const installedRail = Object.values(rack.partInventory).find(part => part.id === installedRailId);
-    if (installedRail && installedRail.height === equipment.height) {
-      return true;
+    // ケース2: 1Uレールが複数設置されている場合の対応
+    if (railType === '1u' && equipment.height > 1) {
+      console.log(`[Pro Mode Rail Check] Checking for multiple 1U rails for ${equipment.height}U equipment`);
+      
+      // 必要な全てのユニットに1Uレールが設置されているかチェック
+      let allUnitsHaveRails = true;
+      const startUnit = unit;
+      const endUnit = unit + equipment.height - 1;
+      
+      console.log(`[Pro Mode Rail Check] Checking units ${startUnit} to ${endUnit} for 1U rails`);
+      
+      for (let checkUnit = startUnit; checkUnit <= endUnit; checkUnit++) {
+        const checkRailInfo = rack.rails[checkUnit];
+        if (!checkRailInfo ||
+            !checkRailInfo.frontLeft.installed ||
+            !checkRailInfo.frontRight.installed ||
+            checkRailInfo.frontLeft.railType !== '1u') {
+          console.log(`[Pro Mode Rail Check] Unit ${checkUnit} missing 1U rail`);
+          allUnitsHaveRails = false;
+          break;
+        }
+        console.log(`[Pro Mode Rail Check] Unit ${checkUnit} has 1U rail`);
+      }
+      
+      if (allUnitsHaveRails) {
+        console.log(`[Pro Mode Rail Check] All ${equipment.height} units have 1U rails - acceptable configuration`);
+        return true;
+      }
     }
 
+    console.log(`[Pro Mode Rail Check] Rail configuration not suitable for equipment`);
     return false;
   }
 
