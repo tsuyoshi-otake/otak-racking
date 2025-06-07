@@ -383,4 +383,50 @@ describe('EquipmentPlacementManager', () => {
       expect(occupancy[3]).toBeNull();
     });
   });
+
+  describe('clearAllEquipment', () => {
+    it('should clear all equipment, cage nuts, and rails from rack', async () => {
+      const manager = new EquipmentPlacementManager();
+      const rack = createTestRack();
+      
+      // ケージナットを設置
+      rack.cageNuts[5] = {
+        frontLeft: { top: 'm6', middle: 'm6', bottom: 'm6' },
+        frontRight: { top: 'm6', middle: 'm6', bottom: 'm6' },
+        rearLeft: { top: 'm6', middle: 'm6', bottom: 'm6' },
+        rearRight: { top: 'm6', middle: 'm6', bottom: 'm6' }
+      };
+      
+      // レールを設置
+      rack.rails[10] = {
+        frontLeft: { installed: true, railType: '2u', startUnit: 10, endUnit: 11, railId: 'rail-1' },
+        frontRight: { installed: true, railType: '2u', startUnit: 10, endUnit: 11, railId: 'rail-1' },
+        rearLeft: { installed: false, railType: null, startUnit: null, endUnit: null, railId: null },
+        rearRight: { installed: false, railType: null, startUnit: null, endUnit: null, railId: null }
+      };
+      
+      // 機器を追加
+      const server = create2UServer();
+      await manager.placeEquipment(rack, 20, server);
+      
+      const result = await manager.clearAllEquipment(rack);
+      
+      expect(result.success).toBe(true);
+      expect(result.updatedRack?.equipment).toEqual({});
+      expect(result.updatedRack?.powerConnections).toEqual({});
+      expect(result.updatedRack?.mountingOptions).toEqual({});
+      expect(result.updatedRack?.labels).toEqual({});
+      expect(result.updatedRack?.cageNuts).toEqual({});
+      expect(result.updatedRack?.rails).toEqual({});
+      
+      // 変更履歴を確認
+      const cageNutChanges = result.appliedChanges.filter(c => c.type === 'cagenut');
+      const railChanges = result.appliedChanges.filter(c => c.type === 'rail');
+      
+      expect(cageNutChanges.length).toBeGreaterThan(0);
+      expect(railChanges.length).toBeGreaterThan(0);
+      expect(cageNutChanges[0].action).toBe('remove');
+      expect(railChanges[0].action).toBe('remove');
+    });
+  });
 });

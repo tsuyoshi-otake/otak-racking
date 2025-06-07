@@ -82,7 +82,7 @@ export const RackUnit: React.FC<RackUnitProps> = ({
     }
     
     if (activeViewMode === 'showPowerView') {
-      const status = getPowerStatus(item, rack.powerConnections);
+      const status = getPowerStatus(item, rack.powerConnections, darkMode);
       powerStatus = React.createElement(
         status.icon === 'CircleCheck' ? CheckCircle :
         status.icon === 'AlertCircle' ? AlertCircle : XCircle,
@@ -101,27 +101,27 @@ export const RackUnit: React.FC<RackUnitProps> = ({
     
     if (activeViewMode === 'showTemperatureView') {
       const unitTemp = coolingStats.temperatureMap[unit] || rack.environment.ambientTemp;
-      const tempColor = unitTemp > 30 ? 'text-gray-800' : unitTemp > 25 ? 'text-gray-700' : (darkMode ? 'text-gray-400' : 'text-gray-600');
+      const tempColor = unitTemp > 30 ? 'text-red-500' : unitTemp > 25 ? 'text-yellow-500' : (darkMode ? 'text-gray-300' : 'text-gray-600');
       temperatureStatus = <Thermometer size={12} className={tempColor} />;
     }
   }
 
   if (activeViewMode === 'showCageNutView') {
     if (cageNutStatus.isComplete) {
-      cageNutDisplay = <CheckCircle size={12} className={darkMode ? "text-gray-400" : "text-gray-600"} />;
+      cageNutDisplay = <CheckCircle size={12} className={darkMode ? "text-green-400" : "text-green-600"} />;
     } else if (cageNutStatus.installed > 0) {
-      cageNutDisplay = <AlertCircle size={12} className={darkMode ? "text-gray-500" : "text-gray-600"} />;
+      cageNutDisplay = <AlertCircle size={12} className={darkMode ? "text-yellow-400" : "text-yellow-600"} />;
     } else {
-      cageNutDisplay = <XCircle size={12} className={darkMode ? "text-gray-500" : "text-gray-400"} />;
+      cageNutDisplay = <XCircle size={12} className={darkMode ? "text-gray-400" : "text-custom-gray"} />;
     }
   }
 
   // レール表示処理
   if (activeViewMode === 'showRailView') {
     if (railStatus && (railStatus.frontLeft?.installed || railStatus.frontRight?.installed)) {
-      railDisplay = <Move size={12} className={darkMode ? "text-gray-400" : "text-gray-600"} />;
+      railDisplay = <Move size={12} className={darkMode ? "text-blue-400" : "text-blue-600"} />;
     } else {
-      railDisplay = <XCircle size={12} className={darkMode ? "text-gray-500" : "text-gray-400"} />;
+      railDisplay = <XCircle size={12} className={darkMode ? "text-gray-400" : "text-custom-gray"} />;
     }
   }
 
@@ -159,7 +159,7 @@ export const RackUnit: React.FC<RackUnitProps> = ({
                   <div
                     key={i}
                     className={`w-1 h-1 rounded-full ${
-                      cageNutStatus.installed > i ? (darkMode ? 'bg-gray-400' : 'bg-gray-600') : 'bg-gray-300 dark:bg-gray-600'
+                      cageNutStatus.installed > i ? (darkMode ? 'bg-gray-300' : 'bg-gray-600') : (darkMode ? 'bg-gray-600' : 'bg-gray-300')
                     }`}
                   />
                 ))}
@@ -169,7 +169,7 @@ export const RackUnit: React.FC<RackUnitProps> = ({
                   <div
                     key={i}
                     className={`w-1 h-1 rounded-full ${
-                      cageNutStatus.installed > i ? (darkMode ? 'bg-gray-400' : 'bg-gray-600') : 'bg-gray-300 dark:bg-gray-600'
+                      cageNutStatus.installed > i ? (darkMode ? 'bg-gray-300' : 'bg-gray-600') : (darkMode ? 'bg-gray-600' : 'bg-gray-300')
                     }`}
                   />
                 ))}
@@ -197,7 +197,7 @@ export const RackUnit: React.FC<RackUnitProps> = ({
       {item && isMainUnit && (
         <div
           className={`absolute inset-0 flex items-center justify-between px-2 ${
-            ['showPowerView', 'showMountingView', 'showLabelView', 'showCablingView', 'showCageNutView', 'showRailView'].includes(activeViewMode ?? '') ? `border-2 border-dashed ${darkMode ? 'border-gray-500' : 'border-gray-400'}` : ''
+            ['showPowerView', 'showMountingView', 'showLabelView', 'showCablingView', 'showCageNutView', 'showRailView'].includes(activeViewMode ?? '') ? `border-2 border-dashed ${darkMode ? 'border-gray-400' : 'border-custom-gray'}` : ''
           }`}
           style={{
             backgroundColor: item.color, 

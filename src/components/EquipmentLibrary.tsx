@@ -39,7 +39,7 @@ export const EquipmentLibrary: React.FC<EquipmentLibraryProps> = ({
       onDragStart={(e) => onDragStart(e, item)}
       className={`p-2 border rounded-lg cursor-move transition-shadow hover:shadow-md ${
         darkMode
-          ? 'border-gray-600 bg-gray-700 hover:shadow-lg border-l-4 border-l-gray-500'
+          ? 'border-gray-600 bg-gray-700 hover:shadow-lg border-l-4 border-l-custom-gray'
           : 'border-gray-200 bg-white border-l-4 border-l-gray-400'
       } ${item.pduType || item.nutType ? 'border-dashed' : ''}`}
     >
@@ -53,7 +53,7 @@ export const EquipmentLibrary: React.FC<EquipmentLibraryProps> = ({
               setShowEquipmentInfo(showEquipmentInfo === item.id ? null : item.id);
             }}
             className={`p-0.5 rounded transition-colors ${
-              darkMode ? 'text-gray-400 hover:text-gray-200' : 'text-gray-500 hover:text-gray-700'
+              darkMode ? 'text-gray-400 hover:text-gray-200' : 'text-custom-gray hover:text-gray-700'
             }`}
             title="詳細情報"
           >
@@ -85,7 +85,7 @@ export const EquipmentLibrary: React.FC<EquipmentLibraryProps> = ({
       
       {showEquipmentInfo === item.id && (
         <div className={`mt-2 p-2 border rounded text-xs ${
-          darkMode ? 'bg-gray-600 border-gray-500' : 'bg-gray-50 border-gray-200'
+          darkMode ? 'bg-gray-600 border-custom-gray' : 'bg-gray-50 border-gray-200'
         }`}>
           <div className="font-medium mb-1">{item.description}</div>
           <div className="space-y-1">

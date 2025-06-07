@@ -131,7 +131,7 @@ export const RackStructure: React.FC<RackStructureProps> = ({
             <div className="w-full h-full bg-gradient-to-br from-gray-400 to-gray-600">
               <div className="w-full h-full grid grid-cols-4 grid-rows-8 gap-1 p-4">
                 {Array.from({ length: 32 }, (_, i) => (
-                  <div key={i} className="border border-gray-500 rounded-sm" />
+                  <div key={i} className="border border-custom-gray rounded-sm" />
                 ))}
               </div>
             </div>
@@ -153,7 +153,7 @@ export const RackStructure: React.FC<RackStructureProps> = ({
             {structure.frontDoor.locked ? (
               <Lock size={16} className="text-gray-700" />
             ) : (
-              <Unlock size={16} className="text-gray-500" />
+              <Unlock size={16} className="text-custom-gray" />
             )}
           </div>
 
@@ -204,7 +204,7 @@ export const RackStructure: React.FC<RackStructureProps> = ({
             {structure.rearDoor.locked ? (
               <Lock size={16} className="text-gray-700" />
             ) : (
-              <Unlock size={16} className="text-gray-500" />
+              <Unlock size={16} className="text-custom-gray" />
             )}
           </div>
         </div>
@@ -242,7 +242,7 @@ export const RackStructure: React.FC<RackStructureProps> = ({
           )}
           
           {structure.leftPanel.type === 'steel' && (
-            <div className="w-full h-full bg-gradient-to-r from-gray-500 to-gray-600" />
+            <div className="w-full h-full bg-gradient-to-r from-custom-gray to-gray-600" />
           )}
         </div>
       )}
@@ -279,7 +279,7 @@ export const RackStructure: React.FC<RackStructureProps> = ({
           )}
           
           {structure.rightPanel.type === 'steel' && (
-            <div className="w-full h-full bg-gradient-to-r from-gray-500 to-gray-600" />
+            <div className="w-full h-full bg-gradient-to-r from-custom-gray to-gray-600" />
           )}
         </div>
       )}

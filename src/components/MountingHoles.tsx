@@ -127,7 +127,7 @@ export const MountingHoles: React.FC<MountingHolesProps> = ({
           className={`relative border ${isRailFixed ? '' : 'cursor-pointer'} ${
             isRailFixed
               ? darkMode
-                ? 'bg-gradient-to-br from-slate-600 via-slate-700 to-slate-800 border-slate-500'
+                ? 'border-gray-600'
                 : 'bg-gradient-to-br from-slate-400 via-slate-500 to-slate-600 border-slate-700'
               : nut
                 ? darkMode
@@ -135,12 +135,13 @@ export const MountingHoles: React.FC<MountingHolesProps> = ({
                   : 'bg-gradient-to-br from-zinc-400 via-zinc-500 to-zinc-600 border-zinc-700'
                 : darkMode
                   ? 'bg-gradient-to-br from-gray-900 via-black to-gray-950 border-gray-800'
-                  : 'bg-gradient-to-br from-gray-200 via-gray-300 to-gray-400 border-gray-500'
+                  : 'bg-gradient-to-br from-gray-200 via-gray-300 to-gray-400 border-custom-gray'
           }`}
           style={{
             width: `${holeSize}px`,
             height: `${holeSize}px`,
             borderRadius: '2px',
+            backgroundColor: isRailFixed && darkMode ? '#242d40' : undefined,
             boxShadow: isRailFixed
               ? 'inset 0 2px 4px rgba(0,0,0,0.6), 0 1px 2px rgba(255,255,255,0.05)'
               : nut
@@ -167,7 +168,7 @@ export const MountingHoles: React.FC<MountingHolesProps> = ({
               <div
                 className={`${
                   darkMode
-                    ? 'bg-gradient-to-br from-slate-400 to-slate-600'
+                    ? 'bg-gradient-to-br from-gray-400 to-gray-600'
                     : 'bg-gradient-to-br from-slate-500 to-slate-700'
                 }`}
                 style={{
@@ -185,7 +186,7 @@ export const MountingHoles: React.FC<MountingHolesProps> = ({
                   }}
                 >
                   <div
-                    className={darkMode ? 'bg-slate-800' : 'bg-slate-900'}
+                    className={darkMode ? 'bg-gray-800' : 'bg-slate-900'}
                     style={{
                       width: '1px',
                       height: '60%',
@@ -193,7 +194,7 @@ export const MountingHoles: React.FC<MountingHolesProps> = ({
                     }}
                   />
                   <div
-                    className={darkMode ? 'bg-slate-800' : 'bg-slate-900'}
+                    className={darkMode ? 'bg-gray-800' : 'bg-slate-900'}
                     style={{
                       width: '60%',
                       height: '1px',

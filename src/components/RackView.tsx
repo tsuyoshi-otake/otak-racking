@@ -57,13 +57,13 @@ export const RackView: React.FC<RackViewProps> = ({
 
   const renderRackHeader = (view: '前面' | '背面' | '左側面' | '右側面') => (
     <div
-      className={`mb-2 p-2 border rounded-t-lg ${darkMode ? 'bg-gray-800 border-gray-600' : 'bg-gray-100 border-gray-300'}`}
+      className={`mb-2 p-2 border rounded-t-lg ${darkMode ? 'bg-gray-800 border-custom-gray' : 'bg-gray-100 border-gray-300'}`}
       style={{
         width: `${600 * (zoomLevel / 100)}px`
       }}
     >
       <h3 className="font-bold text-center" style={{ fontSize: `${fontSize * 1.2}px` }}>{rack.name} ({view})</h3>
-      <div className={`text-center ${darkMode ? 'text-gray-400' : 'text-gray-600'}`} style={{ fontSize: `${fontSize * 0.8}px` }}>
+      <div className={`text-center ${darkMode ? 'text-gray-300' : 'text-gray-600'}`} style={{ fontSize: `${fontSize * 0.8}px` }}>
         {rack.units}U / {rack.width}mm幅 × {rack.depth}mm奥行
       </div>
     </div>
@@ -75,7 +75,7 @@ export const RackView: React.FC<RackViewProps> = ({
       <div className="flex flex-col relative items-center">
         {renderRackHeader(perspective === 'front' ? '前面' : '背面')}
         <div
-          className={`border rounded-b-lg overflow-visible relative ${darkMode ? 'border-gray-600' : 'border-gray-300'}`}
+          className={`border rounded-b-lg overflow-visible relative ${darkMode ? 'border-custom-gray' : 'border-gray-300'}`}
           style={{
             width: `${rackWidth}px`
           }}
@@ -126,13 +126,13 @@ export const RackView: React.FC<RackViewProps> = ({
       <div className="flex flex-col">
         {renderRackHeader(sideLabel)}
         <div
-          className={`border rounded-b-lg overflow-hidden p-4 ${darkMode ? 'bg-gray-700 border-gray-600' : 'bg-gray-50 border-gray-300'}`}
+          className={`border rounded-b-lg overflow-hidden p-4 ${darkMode ? 'bg-gray-700 border-custom-gray' : 'bg-gray-50 border-gray-300'}`}
           style={{
             height: `${rack.units * getZoomedUnitHeight(zoomLevel)}px`,
             width: `${Math.max(150, rack.depth / (zoomLevel > 75 ? 3 : zoomLevel > 50 ? 4 : 5))}px`
           }}
         >
-          <p className="text-center text-xs text-gray-500">側面ビュー (実装中)</p>
+          <p className="text-center text-xs text-custom-gray">側面ビュー (実装中)</p>
           {Object.values(rack.equipment).filter(eq => eq.isMainUnit).map(eq => (
             <div
               key={eq.id}

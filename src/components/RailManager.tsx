@@ -56,7 +56,7 @@ export const RailManager: React.FC<RailManagerProps> = ({
                 className={`px-2 py-1 text-xs rounded transition-colors ${
                   darkMode
                     ? 'bg-gray-600 hover:bg-gray-700 text-white'
-                    : 'bg-gray-500 hover:bg-gray-600 text-white'
+                    : 'bg-custom-gray hover:bg-gray-600 text-white'
                 }`}
                 title={`左側に${rail.label}を設置`}
               >
@@ -98,7 +98,7 @@ export const RailManager: React.FC<RailManagerProps> = ({
                 className={`px-2 py-1 text-xs rounded transition-colors ${
                   darkMode
                     ? 'bg-gray-600 hover:bg-gray-700 text-white'
-                    : 'bg-gray-500 hover:bg-gray-600 text-white'
+                    : 'bg-custom-gray hover:bg-gray-600 text-white'
                 }`}
                 title={`右側に${rail.label}を設置`}
               >

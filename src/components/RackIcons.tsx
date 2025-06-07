@@ -54,9 +54,9 @@ export const getAirflowIcon = (airflow: string, size: number) => {
   const iconProps = { size };
   
   switch (airflow) {
-    case 'front-to-rear': return <ArrowRight {...iconProps} className="text-gray-500" />;
+    case 'front-to-rear': return <ArrowRight {...iconProps} className="text-custom-gray" />;
     case 'rear-to-front': return <ArrowLeft {...iconProps} className="text-gray-600" />;
-    case 'side-to-side': return <ArrowUp {...iconProps} className="text-gray-500" />;
+    case 'side-to-side': return <ArrowUp {...iconProps} className="text-custom-gray" />;
     case 'intake': return <ArrowDown {...iconProps} className="text-gray-600" />;
     case 'exhaust': return <ArrowUp {...iconProps} className="text-gray-700" />;
     case 'blocking': return <Square {...iconProps} className="text-gray-800" />;
@@ -70,7 +70,7 @@ export const getMountingIcon = (mountingType: string, needsRails: boolean, size:
     case 'slide-rail':
       return <Settings size={size} className="text-gray-600" />;
     case 'fixed-rail':
-      return <Settings size={size} className="text-gray-500" />;
+      return <Settings size={size} className="text-custom-gray" />;
     case 'toolless-rail':
       return <Settings size={size} className="text-gray-600" />;
     case 'shelf':

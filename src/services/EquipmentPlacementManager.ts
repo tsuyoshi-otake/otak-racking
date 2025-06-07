@@ -420,6 +420,19 @@ export class EquipmentPlacementManager {
     }
     rackCopy.cageNuts = {};
 
+    // レールもクリア
+    for (const unit in rackCopy.rails) {
+      if (rackCopy.rails[unit]) {
+        changes.push({
+          type: 'rail',
+          action: 'remove',
+          target: unit,
+          oldValue: rackCopy.rails[unit]
+        });
+      }
+    }
+    rackCopy.rails = {};
+
     return {
       success: true,
       validation: { isValid: true, errors: [], warnings: [] },

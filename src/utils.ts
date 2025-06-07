@@ -297,39 +297,39 @@ export const autoInstallCageNuts = (unit: number, nutType: string = 'm6') => {
  * スタイルヘルパー関数
  */
 export const getContainerStyle = (darkMode: boolean): string => {
-  return darkMode ? 'bg-gray-800 text-gray-200' : 'bg-gray-300 text-gray-700';
+  return darkMode ? 'bg-gray-800 text-gray-100' : 'bg-gray-300 text-gray-700';
 };
 
 export const getSidebarStyle = (darkMode: boolean): string => {
-  return darkMode ? 'bg-gray-700 border-gray-600 text-gray-200' : 'bg-gray-200 border-gray-300 text-gray-700';
+  return darkMode ? 'bg-gray-700 border-custom-gray text-gray-100' : 'bg-gray-200 border-gray-300 text-gray-700';
 };
 
 export const getButtonStyle = (darkMode: boolean, isActive: boolean = false): string => {
   if (isActive) {
-    return darkMode ? 'bg-gray-600 text-gray-100' : 'bg-gray-500 text-white';
+    return darkMode ? 'bg-custom-gray text-white' : 'bg-custom-gray text-white';
   }
-  return darkMode ? 'bg-gray-700 text-gray-300 hover:bg-gray-600' : 'bg-gray-200 text-gray-700 hover:bg-gray-300';
+  return darkMode ? 'bg-gray-600 text-gray-200 hover:bg-custom-gray' : 'bg-gray-200 text-gray-700 hover:bg-gray-300';
 };
 
 /**
  * ユニット表示ヘルパー
  */
 export const getUnitBorderClass = (darkMode: boolean): string => {
-  return darkMode ? 'border-gray-600' : 'border-gray-300';
+  return darkMode ? 'border-custom-gray' : 'border-gray-300';
 };
 
 export const getEmptyUnitClass = (darkMode: boolean): string => {
-  return darkMode ? 'bg-gray-600 hover:bg-gray-500' : 'bg-gray-400 hover:bg-gray-500';
+  return darkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-400 hover:bg-custom-gray';
 };
 
 export const getUnitNumClass = (darkMode: boolean): string => {
-  return darkMode ? 'text-gray-400' : 'text-gray-500';
+  return darkMode ? 'text-gray-300' : 'text-custom-gray';
 };
 
 /**
  * 電源状態チェック
  */
-export const getPowerStatus = (equipment: Equipment, powerConnections: any) => {
+export const getPowerStatus = (equipment: Equipment, powerConnections: any, darkMode: boolean = false) => {
   const connections = powerConnections[equipment.id] || {};
   
   if (equipment.dualPower) {
@@ -337,16 +337,16 @@ export const getPowerStatus = (equipment: Equipment, powerConnections: any) => {
     const hasSecondary = connections.secondarySource;
     
     if (hasPrimary && hasSecondary) {
-      return { status: 'ok', icon: 'CircleCheck', color: 'text-gray-500' };
+      return { status: 'ok', icon: 'CircleCheck', color: darkMode ? 'text-green-400' : 'text-green-600' };
     } else if (hasPrimary || hasSecondary) {
-      return { status: 'warning', icon: 'AlertCircle', color: 'text-orange-500' };
+      return { status: 'warning', icon: 'AlertCircle', color: darkMode ? 'text-yellow-400' : 'text-yellow-600' };
     } else {
       return { status: 'error', icon: 'XCircle', color: 'text-red-500' };
     }
   } else {
     const hasPrimary = connections.primarySource;
     if (hasPrimary) {
-      return { status: 'ok', icon: 'CircleCheck', color: 'text-gray-500' };
+      return { status: 'ok', icon: 'CircleCheck', color: darkMode ? 'text-green-400' : 'text-green-600' };
     } else {
       return { status: 'error', icon: 'XCircle', color: 'text-red-500' };
     }

@@ -47,15 +47,15 @@ export const LeftSidebar: React.FC<LeftSidebarProps> = ({
   const getButton = (isActive: boolean = false) => getButtonStyle(darkMode, isActive);
 
   const viewModeButtons = [
-    { key: 'showPowerView' as const, icon: Zap, label: '電源', color: darkMode ? 'text-gray-400' : 'text-gray-600' },
-    { key: 'showMountingView' as const, icon: Wrench, label: '取付', color: darkMode ? 'text-gray-400' : 'text-gray-600' },
-    { key: 'showLabelView' as const, icon: Tag, label: 'ラベル', color: darkMode ? 'text-gray-400' : 'text-gray-600' },
-    { key: 'showAirflowView' as const, icon: Wind, label: 'エアフロー', color: darkMode ? 'text-gray-400' : 'text-gray-600' },
-    { key: 'showTemperatureView' as const, icon: Thermometer, label: '温度', color: darkMode ? 'text-gray-400' : 'text-gray-600' },
-    { key: 'showCablingView' as const, icon: Cable, label: 'ケーブル', color: darkMode ? 'text-gray-400' : 'text-gray-600' },
-    { key: 'showCageNutView' as const, icon: Square, label: 'ゲージナット', color: darkMode ? 'text-gray-400' : 'text-gray-600' },
-    { key: 'showRailView' as const, icon: Move, label: 'レール', color: darkMode ? 'text-gray-400' : 'text-gray-600' },
-    { key: 'showFloorView' as const, icon: Square, label: 'フロア', color: darkMode ? 'text-gray-400' : 'text-gray-600' }
+    { key: 'showPowerView' as const, icon: Zap, label: '電源', color: darkMode ? 'text-gray-300' : 'text-gray-600' },
+    { key: 'showMountingView' as const, icon: Wrench, label: '取付', color: darkMode ? 'text-gray-300' : 'text-gray-600' },
+    { key: 'showLabelView' as const, icon: Tag, label: 'ラベル', color: darkMode ? 'text-gray-300' : 'text-gray-600' },
+    { key: 'showAirflowView' as const, icon: Wind, label: 'エアフロー', color: darkMode ? 'text-gray-300' : 'text-gray-600' },
+    { key: 'showTemperatureView' as const, icon: Thermometer, label: '温度', color: darkMode ? 'text-gray-300' : 'text-gray-600' },
+    { key: 'showCablingView' as const, icon: Cable, label: 'ケーブル', color: darkMode ? 'text-gray-300' : 'text-gray-600' },
+    { key: 'showCageNutView' as const, icon: Square, label: 'ゲージナット', color: darkMode ? 'text-gray-300' : 'text-gray-600' },
+    { key: 'showRailView' as const, icon: Move, label: 'レール', color: darkMode ? 'text-gray-300' : 'text-gray-600' },
+    { key: 'showFloorView' as const, icon: Square, label: 'フロア', color: darkMode ? 'text-gray-300' : 'text-gray-600' }
   ];
 
   return (
@@ -93,7 +93,7 @@ export const LeftSidebar: React.FC<LeftSidebarProps> = ({
               onChange={(e) => onActiveViewModeChange(e.target.value || null)}
               className={`w-full p-2 border rounded text-sm ${
                 darkMode
-                  ? 'bg-gray-600 border-gray-500 text-gray-200'
+                  ? 'bg-gray-600 border-custom-gray text-gray-100'
                   : 'bg-gray-300 border-gray-400 text-gray-700'
               }`}
             >

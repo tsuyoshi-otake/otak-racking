@@ -163,18 +163,26 @@ function App() {
     
     const rack = racks[selectedRack];
     const equipmentCount = Object.keys(rack?.equipment || {}).length;
+    const cageNutCount = Object.keys(rack?.cageNuts || {}).length;
+    const railCount = Object.keys(rack?.rails || {}).length;
     
-    if (equipmentCount === 0) {
+    if (equipmentCount === 0 && cageNutCount === 0 && railCount === 0) {
       showInfoModal(
         'ラッククリア',
-        'このラックには機器が設置されていません。'
+        'このラックには機器・ケージナット・レールが設置されていません。'
       );
       return;
     }
 
+    const items = [];
+    if (equipmentCount > 0) items.push(`機器${equipmentCount}台`);
+    if (cageNutCount > 0) items.push(`ケージナット${cageNutCount}箇所`);
+    if (railCount > 0) items.push(`レール${railCount}箇所`);
+    const itemsText = items.join('、');
+
     showConfirmModal(
-      'ラック機器クリア',
-      `このラックの全ての機器（${equipmentCount}台）を削除しますか？\n関連する設定もすべて削除されます。\n\n⚠️ この操作は元に戻せません。`,
+      'ラック内容クリア',
+      `このラックの${itemsText}をすべて削除しますか？\n関連する設定もすべて削除されます。\n\n⚠️ この操作は元に戻せません。`,
       () => {
         clearAllEquipment(selectedRack);
       },
@@ -193,19 +201,19 @@ function App() {
     <div className={`min-h-screen ${containerStyle} ${darkMode ? 'dark' : ''}`}>
       {/* ヘッダー */}
       <header className={`border-b p-4 ${
-        darkMode ? 'border-gray-600 bg-gray-700' : 'border-gray-300 bg-gray-200'
+        darkMode ? 'border-custom-gray bg-gray-700' : 'border-gray-300 bg-gray-200'
       }`}>
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold">otak-racking</h1>
-            <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+            <p className={`text-sm ${darkMode ? 'text-gray-300' : 'text-custom-gray'}`}>
               データセンター・サーバールーム設計支援ツール
             </p>
           </div>
           
           <div className="flex items-center gap-4">
             {/* ズーム表示 */}
-            <span className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+            <span className={`text-sm ${darkMode ? 'text-gray-300' : 'text-custom-gray'}`}>
               {zoomLevel}%
             </span>
             
@@ -214,7 +222,7 @@ function App() {
               onClick={() => setDarkMode(!darkMode)}
               className={`p-2 rounded transition-colors ${
                 darkMode
-                  ? 'bg-gray-600 text-gray-300 hover:bg-gray-500'
+                  ? 'bg-gray-600 text-gray-200 hover:bg-custom-gray'
                   : 'bg-gray-300 text-gray-600 hover:bg-gray-400'
               }`}
               title={darkMode ? 'ライトモードに切り替え' : 'ダークモードに切り替え'}
@@ -245,10 +253,10 @@ function App() {
             // 全体表示
             <div className="space-y-6">
               <div className={`p-4 border rounded-lg ${
-                darkMode ? 'bg-gray-700 border-gray-600' : 'bg-gray-300 border-gray-400'
+                darkMode ? 'bg-gray-700 border-custom-gray' : 'bg-gray-300 border-gray-400'
               }`}>
                 <h2 className="text-xl font-bold mb-2">全体レイアウト</h2>
-                <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                <p className={`text-sm ${darkMode ? 'text-gray-300' : 'text-custom-gray'}`}>
                   {Object.keys(racks).length}台のラックを表示中
                 </p>
               </div>
