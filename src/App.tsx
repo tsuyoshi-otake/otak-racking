@@ -303,11 +303,11 @@ function App() {
                     perspective={rackViewPerspective}
                     showConfirmModal={showConfirmModal}
                     onUpdatePhysicalStructure={handleUpdatePhysicalStructure}
-                    onRailInstall={(unit, railType) =>
-                      installRail(selectedRack, unit, railType as any)
+                    onRailInstall={(unit, side, railType) =>
+                      installRail(selectedRack, unit, side, railType as any)
                     }
-                    onRailRemove={(unit) =>
-                      removeRail(selectedRack, unit)
+                    onRailRemove={(unit, side) =>
+                      removeRail(selectedRack, unit, side)
                     }
                   />
                 </div>

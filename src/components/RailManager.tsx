@@ -6,8 +6,8 @@ interface RailManagerProps {
   rack: Rack;
   unit: number;
   darkMode: boolean;
-  onInstallRail?: (unit: number, railType: RailType) => void;
-  onRemoveRail?: (unit: number) => void;
+  onInstallRail?: (unit: number, side: 'left' | 'right', railType: RailType) => void;
+  onRemoveRail?: (unit: number, side: 'left' | 'right') => void;
 }
 
 export const RailManager: React.FC<RailManagerProps> = ({
@@ -18,7 +18,8 @@ export const RailManager: React.FC<RailManagerProps> = ({
   onRemoveRail
 }) => {
   const rails = rack.rails?.[unit];
-  const hasRails = rails?.frontLeft?.installed || rails?.frontRight?.installed;
+  const hasLeftRail = rails?.frontLeft?.installed || false;
+  const hasRightRail = rails?.frontRight?.installed || false;
 
   const railTypes: { value: RailType; label: string; units: number }[] = [
     { value: '1u', label: '1Uレール', units: 1 },
@@ -26,60 +27,106 @@ export const RailManager: React.FC<RailManagerProps> = ({
     { value: '4u', label: '4Uレール', units: 4 }
   ];
 
-  const handleInstallRail = (railType: RailType) => {
-    onInstallRail?.(unit, railType);
+  const handleInstallRail = (side: 'left' | 'right', railType: RailType) => {
+    onInstallRail?.(unit, side, railType);
   };
 
-  const handleRemoveRail = () => {
-    onRemoveRail?.(unit);
+  const handleRemoveRail = (side: 'left' | 'right') => {
+    onRemoveRail?.(unit, side);
   };
 
   return (
-    <div className={`flex items-center gap-2 p-2 rounded ${
+    <div className={`flex flex-col gap-2 p-2 rounded ${
       darkMode ? 'bg-gray-700' : 'bg-gray-100'
     }`}>
-      <Move size={16} className={darkMode ? 'text-gray-400' : 'text-gray-600'} />
+      <div className="flex items-center gap-2">
+        <Move size={16} className={darkMode ? 'text-gray-400' : 'text-gray-600'} />
+        <span className="text-sm font-medium">レール管理</span>
+      </div>
       
-      {!hasRails ? (
-        <>
-          <span className="text-sm">レール設置:</span>
+      {/* 左レール */}
+      <div className="flex items-center gap-2">
+        <span className="text-xs w-16">左レール:</span>
+        {!hasLeftRail ? (
           <div className="flex gap-1">
             {railTypes.map((rail) => (
               <button
-                key={rail.value}
-                onClick={() => handleInstallRail(rail.value)}
+                key={`left-${rail.value}`}
+                onClick={() => handleInstallRail('left', rail.value)}
                 className={`px-2 py-1 text-xs rounded transition-colors ${
                   darkMode
                     ? 'bg-indigo-600 hover:bg-indigo-700 text-white'
                     : 'bg-indigo-500 hover:bg-indigo-600 text-white'
                 }`}
-                title={`${rail.label}を設置`}
+                title={`左側に${rail.label}を設置`}
               >
-                <Plus size={12} className="inline mr-1" />
+                <Plus size={10} className="inline mr-1" />
                 {rail.label}
               </button>
             ))}
           </div>
-        </>
-      ) : (
-        <>
-          <span className="text-sm">
-            レール設置済み: {rails.frontLeft?.railType?.toUpperCase()}
-          </span>
-          <button
-            onClick={handleRemoveRail}
-            className={`px-2 py-1 text-xs rounded transition-colors ${
-              darkMode
-                ? 'bg-red-600 hover:bg-red-700 text-white'
-                : 'bg-red-500 hover:bg-red-600 text-white'
-            }`}
-            title="レールを削除"
-          >
-            <Trash2 size={12} className="inline mr-1" />
-            削除
-          </button>
-        </>
-      )}
+        ) : (
+          <div className="flex items-center gap-2">
+            <span className="text-xs">
+              {rails.frontLeft?.railType?.toUpperCase()}設置済み
+            </span>
+            <button
+              onClick={() => handleRemoveRail('left')}
+              className={`px-2 py-1 text-xs rounded transition-colors ${
+                darkMode
+                  ? 'bg-red-600 hover:bg-red-700 text-white'
+                  : 'bg-red-500 hover:bg-red-600 text-white'
+              }`}
+              title="左レールを削除"
+            >
+              <Trash2 size={10} className="inline mr-1" />
+              削除
+            </button>
+          </div>
+        )}
+      </div>
+      
+      {/* 右レール */}
+      <div className="flex items-center gap-2">
+        <span className="text-xs w-16">右レール:</span>
+        {!hasRightRail ? (
+          <div className="flex gap-1">
+            {railTypes.map((rail) => (
+              <button
+                key={`right-${rail.value}`}
+                onClick={() => handleInstallRail('right', rail.value)}
+                className={`px-2 py-1 text-xs rounded transition-colors ${
+                  darkMode
+                    ? 'bg-indigo-600 hover:bg-indigo-700 text-white'
+                    : 'bg-indigo-500 hover:bg-indigo-600 text-white'
+                }`}
+                title={`右側に${rail.label}を設置`}
+              >
+                <Plus size={10} className="inline mr-1" />
+                {rail.label}
+              </button>
+            ))}
+          </div>
+        ) : (
+          <div className="flex items-center gap-2">
+            <span className="text-xs">
+              {rails.frontRight?.railType?.toUpperCase()}設置済み
+            </span>
+            <button
+              onClick={() => handleRemoveRail('right')}
+              className={`px-2 py-1 text-xs rounded transition-colors ${
+                darkMode
+                  ? 'bg-red-600 hover:bg-red-700 text-white'
+                  : 'bg-red-500 hover:bg-red-600 text-white'
+              }`}
+              title="右レールを削除"
+            >
+              <Trash2 size={10} className="inline mr-1" />
+              削除
+            </button>
+          </div>
+        )}
+      </div>
     </div>
   );
 };

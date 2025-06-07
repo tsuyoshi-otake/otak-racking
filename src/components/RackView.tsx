@@ -27,8 +27,8 @@ interface RackViewProps {
   perspective: RackViewPerspective;
   showConfirmModal?: (title: string, message: string, onConfirm: () => void, confirmText?: string, cancelText?: string) => void;
   onUpdatePhysicalStructure?: (updates: Partial<PhysicalStructure>) => void;
-  onRailInstall?: (unit: number, railType: string) => void;
-  onRailRemove?: (unit: number) => void;
+  onRailInstall?: (unit: number, side: 'left' | 'right', railType: string) => void;
+  onRailRemove?: (unit: number, side: 'left' | 'right') => void;
 }
 
 export const RackView: React.FC<RackViewProps> = ({
@@ -87,7 +87,10 @@ export const RackView: React.FC<RackViewProps> = ({
             perspective={perspective}
             onUpdatePhysicalStructure={onUpdatePhysicalStructure}
           />
-          <RackPDU rack={rack} zoomLevel={zoomLevel} unitHeight={unitHeight} />
+          {/* PDUは背面のみ表示 */}
+          {perspective === 'rear' && (
+            <RackPDU rack={rack} zoomLevel={zoomLevel} unitHeight={unitHeight} />
+          )}
           
 
           {Array.from({ length: rack.units }, (_, i) => rack.units - i).map(unit => (

@@ -365,55 +365,92 @@ export const useRackState = () => {
     });
   }, []);
 
-  // レール設置
+  // レール設置（左右独立）
   const installRail = useCallback(
-    (rackId: string, unit: number, railType: RailType) => {
+    (rackId: string, unit: number, side: 'left' | 'right', railType: RailType) => {
       setRacks(prev => {
         const rack = prev[rackId];
         if (!rack) return prev;
 
         const railUnits = parseInt(railType);
         const newRails = { ...rack.rails };
+        const newCageNuts = { ...rack.cageNuts };
 
         // レールが占有するユニット範囲を設定
         for (let u = unit; u < unit + railUnits && u <= rack.units; u++) {
-          newRails[u] = {
-            frontLeft: {
+          if (!newRails[u]) {
+            newRails[u] = {
+              frontLeft: { installed: false, railType: null, startUnit: null, endUnit: null, railId: null },
+              frontRight: { installed: false, railType: null, startUnit: null, endUnit: null, railId: null },
+              rearLeft: { installed: false, railType: null, startUnit: null, endUnit: null, railId: null },
+              rearRight: { installed: false, railType: null, startUnit: null, endUnit: null, railId: null }
+            };
+          }
+
+          // レール固定用のケージナット穴を自動的に「rail-fixed」として記録
+          // レールの最初と最後のユニットにケージナットを設置
+          if (u === unit || u === unit + railUnits - 1) {
+            if (!newCageNuts[u]) {
+              newCageNuts[u] = {
+                frontLeft: { top: null, middle: null, bottom: null },
+                frontRight: { top: null, middle: null, bottom: null },
+                rearLeft: { top: null, middle: null, bottom: null },
+                rearRight: { top: null, middle: null, bottom: null }
+              };
+            }
+
+            // レール固定用のマーカーを設定（実際のケージナットではなく、レール固定を示す）
+            if (side === 'left') {
+              // 前面と背面の左側に固定マーカーを設定
+              newCageNuts[u].frontLeft = { top: 'rail-fixed', middle: 'rail-fixed', bottom: 'rail-fixed' };
+              newCageNuts[u].rearLeft = { top: 'rail-fixed', middle: 'rail-fixed', bottom: 'rail-fixed' };
+            } else {
+              // 前面と背面の右側に固定マーカーを設定
+              newCageNuts[u].frontRight = { top: 'rail-fixed', middle: 'rail-fixed', bottom: 'rail-fixed' };
+              newCageNuts[u].rearRight = { top: 'rail-fixed', middle: 'rail-fixed', bottom: 'rail-fixed' };
+            }
+          }
+
+          // 指定された側のレールのみを設置
+          if (side === 'left') {
+            newRails[u].frontLeft = {
               installed: true,
               railType: railType,
               startUnit: unit,
               endUnit: unit + railUnits - 1,
               railId: `rail-${railType}-${unit}-left`
-            },
-            frontRight: {
-              installed: true,
-              railType: railType,
-              startUnit: unit,
-              endUnit: unit + railUnits - 1,
-              railId: `rail-${railType}-${unit}-right`
-            },
-            rearLeft: {
+            };
+            newRails[u].rearLeft = {
               installed: true,
               railType: railType,
               startUnit: unit,
               endUnit: unit + railUnits - 1,
               railId: `rail-${railType}-${unit}-rear-left`
-            },
-            rearRight: {
+            };
+          } else {
+            newRails[u].frontRight = {
+              installed: true,
+              railType: railType,
+              startUnit: unit,
+              endUnit: unit + railUnits - 1,
+              railId: `rail-${railType}-${unit}-right`
+            };
+            newRails[u].rearRight = {
               installed: true,
               railType: railType,
               startUnit: unit,
               endUnit: unit + railUnits - 1,
               railId: `rail-${railType}-${unit}-rear-right`
-            }
-          };
+            };
+          }
         }
 
         return {
           ...prev,
           [rackId]: {
             ...rack,
-            rails: newRails
+            rails: newRails,
+            cageNuts: newCageNuts
           }
         };
       });
@@ -421,29 +458,78 @@ export const useRackState = () => {
     []
   );
 
-  // レール削除
+  // レール削除（左右独立）
   const removeRail = useCallback(
-    (rackId: string, unit: number) => {
+    (rackId: string, unit: number, side: 'left' | 'right') => {
       setRacks(prev => {
         const rack = prev[rackId];
         if (!rack || !rack.rails[unit]) return prev;
 
         const railConfig = rack.rails[unit];
-        const startUnit = railConfig.frontLeft?.startUnit || unit;
-        const endUnit = railConfig.frontLeft?.endUnit || unit;
+        const leftStartUnit = railConfig.frontLeft?.startUnit || unit;
+        const leftEndUnit = railConfig.frontLeft?.endUnit || unit;
+        const rightStartUnit = railConfig.frontRight?.startUnit || unit;
+        const rightEndUnit = railConfig.frontRight?.endUnit || unit;
 
         const newRails = { ...rack.rails };
+        const newCageNuts = { ...rack.cageNuts };
 
-        // レールが占有していたユニット範囲をクリア
-        for (let u = startUnit; u <= endUnit && u <= rack.units; u++) {
-          delete newRails[u];
+        if (side === 'left') {
+          // 左側のレールが占有していたユニット範囲をクリア
+          for (let u = leftStartUnit; u <= leftEndUnit && u <= rack.units; u++) {
+            if (newRails[u]) {
+              newRails[u].frontLeft = { installed: false, railType: null, startUnit: null, endUnit: null, railId: null };
+              newRails[u].rearLeft = { installed: false, railType: null, startUnit: null, endUnit: null, railId: null };
+              
+              // レール固定用のケージナットマーカーもクリア（最初と最後のユニット）
+              if ((u === leftStartUnit || u === leftEndUnit) && newCageNuts[u]) {
+                // rail-fixedマーカーをクリア
+                if (newCageNuts[u].frontLeft?.top === 'rail-fixed') {
+                  newCageNuts[u].frontLeft = { top: null, middle: null, bottom: null };
+                }
+                if (newCageNuts[u].rearLeft?.top === 'rail-fixed') {
+                  newCageNuts[u].rearLeft = { top: null, middle: null, bottom: null };
+                }
+              }
+              
+              // 右側にもレールがない場合は、エントリ自体を削除
+              if (!newRails[u].frontRight.installed && !newRails[u].rearRight.installed) {
+                delete newRails[u];
+              }
+            }
+          }
+        } else {
+          // 右側のレールが占有していたユニット範囲をクリア
+          for (let u = rightStartUnit; u <= rightEndUnit && u <= rack.units; u++) {
+            if (newRails[u]) {
+              newRails[u].frontRight = { installed: false, railType: null, startUnit: null, endUnit: null, railId: null };
+              newRails[u].rearRight = { installed: false, railType: null, startUnit: null, endUnit: null, railId: null };
+              
+              // レール固定用のケージナットマーカーもクリア（最初と最後のユニット）
+              if ((u === rightStartUnit || u === rightEndUnit) && newCageNuts[u]) {
+                // rail-fixedマーカーをクリア
+                if (newCageNuts[u].frontRight?.top === 'rail-fixed') {
+                  newCageNuts[u].frontRight = { top: null, middle: null, bottom: null };
+                }
+                if (newCageNuts[u].rearRight?.top === 'rail-fixed') {
+                  newCageNuts[u].rearRight = { top: null, middle: null, bottom: null };
+                }
+              }
+              
+              // 左側にもレールがない場合は、エントリ自体を削除
+              if (!newRails[u].frontLeft.installed && !newRails[u].rearLeft.installed) {
+                delete newRails[u];
+              }
+            }
+          }
         }
 
         return {
           ...prev,
           [rackId]: {
             ...rack,
-            rails: newRails
+            rails: newRails,
+            cageNuts: newCageNuts
           }
         };
       });

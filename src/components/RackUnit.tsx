@@ -30,8 +30,8 @@ interface RackUnitProps {
   onCageNutRemove?: (unit: number, side: string, position: string) => void;
   onAutoInstallCageNuts?: (unit: number, nutType: string) => void;
   showConfirmModal?: (title: string, message: string, onConfirm: () => void, confirmText?: string, cancelText?: string) => void;
-  onRailInstall?: (unit: number, railType: string) => void;
-  onRailRemove?: (unit: number) => void;
+  onRailInstall?: (unit: number, side: 'left' | 'right', railType: string) => void;
+  onRailRemove?: (unit: number, side: 'left' | 'right') => void;
 }
 
 export const RackUnit: React.FC<RackUnitProps> = ({
@@ -150,7 +150,7 @@ export const RackUnit: React.FC<RackUnitProps> = ({
       }}
     >
       <div className="flex items-center gap-1">
-        <span className={`font-mono ${unitNumClass} ml-2`}>{unit}</span>
+        <span className={`font-mono ${unitNumClass} ml-6`}>{unit}</span>
         {activeViewMode === 'showCageNutView' && (
           <div className="flex gap-0.5">
             <div className="flex flex-col gap-0.5" title={`ゲージナット: ${cageNutStatus.installed}/8`}>
