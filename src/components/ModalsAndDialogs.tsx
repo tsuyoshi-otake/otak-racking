@@ -313,9 +313,6 @@ export const ModalsAndDialogs: React.FC<ModalsAndDialogsProps> = ({
                     >
                       <option value="none">未設定</option>
                       <option value="direct">直接取り付け</option>
-                      <option value="slide-rail">スライドレール</option>
-                      <option value="fixed-rail">固定レール</option>
-                      <option value="toolless-rail">ツールレスレール</option>
                       <option value="shelf">棚板設置</option>
                     </select>
                   </div>
@@ -342,14 +339,6 @@ export const ModalsAndDialogs: React.FC<ModalsAndDialogsProps> = ({
                     </label>
                   </div>
 
-                  {selectedEquipment.needsRails && (
-                    <div className="p-2 bg-blue-100 dark:bg-blue-900 rounded">
-                      <div className="flex items-center gap-2 text-blue-800 dark:text-blue-200">
-                        <Info size={14} />
-                        <span className="text-sm">この機器にはレールが必要です</span>
-                      </div>
-                    </div>
-                  )}
                 </div>
               </div>
             </div>

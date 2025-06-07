@@ -10,7 +10,6 @@ export interface Equipment {
   type: string;
   color: string;
   dualPower: boolean;
-  needsRails: boolean;
   airflow: string;
   cfm: number;
   heatGeneration: number;
@@ -25,7 +24,6 @@ export interface Equipment {
   
   // 特殊プロパティ
   pduType?: string;
-  railType?: string;
   nutType?: string;
   screwType?: string;
   washerType?: string;
@@ -65,7 +63,7 @@ export interface PowerConnection {
 }
 
 export interface MountingOption {
-  type: 'none' | 'slide-rail' | 'fixed-rail' | 'toolless-rail' | 'shelf' | 'direct';
+  type: 'none' | 'shelf' | 'direct';
   hasShelf: boolean;
   hasCableArm: boolean;
 }
@@ -118,15 +116,6 @@ export interface PDUPlacement {
   orientation: 'vertical' | 'horizontal';
 }
 
-export interface RailInstallation {
-  id: string; // レール自体のユニークID
-  startUnit: number; // 設置開始U
-  endUnit: number; // 設置終了U
-  type: 'slide' | 'fixed' | 'toolless';
-  depth: number;
-  equipmentId?: string;
-  highlightPositions: ('top' | 'middle' | 'bottom')[]; // ハイライトする穴
-}
 
 export interface Rack {
   id: string;
@@ -140,7 +129,6 @@ export interface Rack {
   mountingOptions: Record<string, MountingOption>;
   labels: Record<string, Label>;
   cageNuts: Record<number, CageNutConfig>;
-  railInventory: Record<string, Equipment>;
   partInventory: Record<string, Equipment>;
   fans: FanConfig;
   position: Position;
@@ -148,7 +136,6 @@ export interface Rack {
   housing: HousingConfig;
   environment: EnvironmentConfig;
   pduPlacements: PDUPlacement[]; // PDU配置情報
-  railInstallations: Record<string, RailInstallation>; // レール設置情報
   physicalStructure: PhysicalStructure; // ラック物理構造
 }
 
@@ -469,7 +456,7 @@ export interface PlacementResult {
 }
 
 export interface PlacementChange {
-  type: 'equipment' | 'cagenut' | 'power' | 'mounting' | 'label' | 'rail';
+  type: 'equipment' | 'cagenut' | 'power' | 'mounting' | 'label';
   action: 'add' | 'remove' | 'update';
   target: string; // equipment ID, unit number, etc.
   oldValue?: any;

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Rack, RailInstallation } from '../types';
+import { Rack } from '../types';
 
 interface MountingHolesProps {
   rack: Rack;
@@ -29,10 +29,6 @@ export const MountingHoles: React.FC<MountingHolesProps> = ({
     rearRight: { top: null, middle: null, bottom: null }
   };
 
-  // このユニットに影響を与えているレール設備を検索する
-  const relevantRail = Object.values(rack.railInstallations || {}).find(
-    (rail) => unit >= rail.startUnit && unit <= rail.endUnit
-  );
 
   const holeSize = Math.max(8, 16 * (zoomLevel / 100));
   const frameOffset = 20 * (zoomLevel / 100);
@@ -47,8 +43,6 @@ export const MountingHoles: React.FC<MountingHolesProps> = ({
     const holeWithSlotWidth = holeSize + slotWidth;
     const holeWithSlotOffset = frameOffset - (holeWithSlotWidth / 2);
     
-    // このスロットをハイライトするかどうかを決定
-    const shouldHighlightSlot = relevantRail?.highlightPositions.includes(vertical) ?? false;
 
     return (
       <div
@@ -64,28 +58,23 @@ export const MountingHoles: React.FC<MountingHolesProps> = ({
       >
         {/* ゲージナット穴 */}
         <div
-          className={`relative border ${relevantRail ? 'cursor-not-allowed' : 'cursor-pointer'} ${
-            relevantRail
+          className={`relative border cursor-pointer ${
+            nut
               ? darkMode
-                ? 'bg-gray-700 border-gray-600'
-                : 'bg-gray-400 border-gray-500'
-              : nut
-                ? darkMode
-                  ? 'bg-gradient-to-br from-gray-500 via-gray-600 to-gray-700 border-gray-400'
-                  : 'bg-gradient-to-br from-gray-300 via-gray-400 to-gray-500 border-gray-600'
-                : darkMode
-                  ? 'bg-gradient-to-br from-gray-800 via-gray-900 to-black border-gray-700'
-                  : 'bg-gradient-to-br from-gray-100 via-gray-200 to-gray-300 border-gray-400'
+                ? 'bg-gradient-to-br from-gray-500 via-gray-600 to-gray-700 border-gray-400'
+                : 'bg-gradient-to-br from-gray-300 via-gray-400 to-gray-500 border-gray-600'
+              : darkMode
+                ? 'bg-gradient-to-br from-gray-800 via-gray-900 to-black border-gray-700'
+                : 'bg-gradient-to-br from-gray-100 via-gray-200 to-gray-300 border-gray-400'
           }`}
           style={{
             width: `${holeSize}px`,
             height: `${holeSize}px`,
             borderRadius: '2px',
-            boxShadow: nut && !relevantRail ? 'inset 0 2px 4px rgba(0,0,0,0.3)' : 'inset 0 2px 4px rgba(0,0,0,0.1)',
+            boxShadow: nut ? 'inset 0 2px 4px rgba(0,0,0,0.3)' : 'inset 0 2px 4px rgba(0,0,0,0.1)',
           }}
-          title={relevantRail ? `レール設置により使用不可` : title}
+          title={title}
           onClick={(e) => {
-            if (relevantRail) return;
             e.stopPropagation();
             if (nut) {
               onCageNutRemove?.(unit, nutSide, vertical);
@@ -94,18 +83,7 @@ export const MountingHoles: React.FC<MountingHolesProps> = ({
             }
           }}
         >
-          {relevantRail ? (
-            <div className="w-full h-full flex items-center justify-center">
-              <div
-                className={`rounded-full ${darkMode ? 'bg-gray-600' : 'bg-gray-500'}`}
-                style={{
-                  width: `${Math.max(6, holeSize * 0.4)}px`,
-                  height: `${Math.max(6, holeSize * 0.4)}px`,
-                  boxShadow: 'inset 0 1px 2px rgba(0,0,0,0.2)',
-                }}
-              />
-            </div>
-          ) : nut && (
+          {nut && (
             <div className="w-full h-full flex items-center justify-center">
               <div
                 className={`rounded-full ${
@@ -122,25 +100,6 @@ export const MountingHoles: React.FC<MountingHolesProps> = ({
             </div>
           )}
         </div>
-        {/* レールスロット */}
-        {relevantRail && (
-          <div
-            className={`border-y ${
-              shouldHighlightSlot
-                ? darkMode
-                  ? 'bg-blue-500 border-blue-400'
-                  : 'bg-blue-400 border-blue-500'
-                : darkMode
-                  ? 'bg-gray-700 border-gray-600'
-                  : 'bg-gray-300 border-gray-400'
-            } ${position === 'left' ? 'border-r' : 'border-l'}`}
-            style={{
-              width: `${slotWidth}px`,
-              height: '100%',
-            }}
-            title={`レール設置済み (U${relevantRail.startUnit}-${relevantRail.endUnit})`}
-          />
-        )}
       </div>
     );
   };

@@ -55,6 +55,7 @@ function App() {
     updateRack,
     addEquipment,
     removeEquipment,
+    clearAllEquipment,
     updateLabel,
     updatePowerConnection,
     updateMountingOption,
@@ -185,6 +186,32 @@ const handleZoomFit = () => {
         removeEquipment(selectedRack, unit);
       },
       '削除する',
+      'キャンセル'
+    );
+  };
+
+  // ラック機器全クリア処理
+  const handleClearAllEquipment = () => {
+    if (selectedRack === 'all') return;
+    
+    const rack = racks[selectedRack];
+    const equipmentCount = Object.keys(rack?.equipment || {}).length;
+    
+    if (equipmentCount === 0) {
+      showInfoModal(
+        'ラッククリア',
+        'このラックには機器が設置されていません。'
+      );
+      return;
+    }
+
+    showConfirmModal(
+      'ラック機器クリア',
+      `このラックの全ての機器（${equipmentCount}台）を削除しますか？\n関連する設定もすべて削除されます。\n\n⚠️ この操作は元に戻せません。`,
+      () => {
+        clearAllEquipment(selectedRack);
+      },
+      'すべて削除する',
       'キャンセル'
     );
   };
@@ -326,6 +353,7 @@ const handleZoomFit = () => {
           onAddRack={addRack}
           onRemoveRack={removeRack}
           onDuplicateRack={duplicateRack}
+          onClearAllEquipment={handleClearAllEquipment}
           onShowRackManager={() => setShowRackManager(true)}
           onShowFloorSettings={() => setShowFloorSettings(true)}
           onShowCoolingConfig={() => setShowCoolingConfig(true)}

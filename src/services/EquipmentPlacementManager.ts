@@ -12,8 +12,7 @@ import {
   PlacementChange,
   EquipmentPlacement,
   RackOccupancy,
-  PlacementState,
-  RailInstallation
+  PlacementState
 } from '../types';
 import { rackTypes } from '../constants';
 
@@ -193,7 +192,7 @@ export class EquipmentPlacementManager {
 
     // 取り付け設定
     rack.mountingOptions[equipmentId] = {
-      type: equipment.needsRails ? 'none' : 'direct',
+      type: 'direct',
       hasShelf: false,
       hasCableArm: false
     };
@@ -223,48 +222,9 @@ export class EquipmentPlacementManager {
       newValue: rack.labels[equipmentId]
     });
 
-    // レール自動設置
-    if (equipment.needsRails) {
-      const railId = `rail-${equipmentId}`;
-      let highlightPositions: ('top' | 'middle' | 'bottom')[] = [];
-
-      switch (equipment.height) {
-        case 1:
-          highlightPositions = ['bottom'];
-          break;
-        case 2:
-          highlightPositions = ['top', 'bottom'];
-          break;
-        default: // 3U以上は3点留めと想定
-          highlightPositions = ['top', 'middle', 'bottom'];
-          break;
-      }
-
-      const newRail: RailInstallation = {
-        id: railId,
-        startUnit: position.startUnit,
-        endUnit: position.endUnit,
-        type: 'slide', // デフォルト
-        depth: equipment.depth,
-        equipmentId: equipmentId,
-        highlightPositions: highlightPositions,
-      };
-
-      if (!rack.railInstallations) {
-        rack.railInstallations = {};
-      }
-      rack.railInstallations[railId] = newRail;
-
-      changes.push({
-        type: 'rail',
-        action: 'add',
-        target: position.startUnit.toString(),
-        newValue: newRail,
-      });
-    }
 
     // ゲージナット自動設置
-    if (options.autoInstallCageNuts && !equipment.needsRails) {
+    if (options.autoInstallCageNuts) {
       for (let unit = position.startUnit; unit <= position.endUnit; unit++) {
         if (!this.hasCompleteCageNuts(rack, unit)) {
           rack.cageNuts[unit] = this.createCompleteCageNutConfig('m6');
@@ -332,21 +292,6 @@ export class EquipmentPlacementManager {
     delete rackCopy.mountingOptions[equipment.id];
     delete rackCopy.labels[equipment.id];
 
-    // 関連するレールを削除
-    const railIdToRemove = Object.keys(rackCopy.railInstallations || {}).find(
-      id => rackCopy.railInstallations![id].equipmentId === equipment.id
-    );
-
-    if (railIdToRemove) {
-      const oldRail = rackCopy.railInstallations![railIdToRemove];
-      delete rackCopy.railInstallations![railIdToRemove];
-      changes.push({
-        type: 'rail',
-        action: 'remove',
-        target: railIdToRemove,
-        oldValue: oldRail,
-      });
-    }
 
     changes.push(
       {
@@ -368,6 +313,87 @@ export class EquipmentPlacementManager {
         oldValue: oldLabel
       }
     );
+
+    return {
+      success: true,
+      validation: { isValid: true, errors: [], warnings: [] },
+      appliedChanges: changes,
+      updatedRack: rackCopy
+    };
+  }
+
+  /**
+   * ラック内の全機器をクリア
+   */
+  async clearAllEquipment(rack: Rack): Promise<PlacementResult> {
+    // 不変性を保つためにラックのディープコピーを作成
+    const rackCopy = JSON.parse(JSON.stringify(rack));
+    const changes: PlacementChange[] = [];
+
+    // 全機器を削除
+    const equipmentIds = new Set<string>();
+    for (const unit in rackCopy.equipment) {
+      const equipment = rackCopy.equipment[unit];
+      if (equipment) {
+        equipmentIds.add(equipment.id);
+        
+        changes.push({
+          type: 'equipment',
+          action: 'remove',
+          target: unit,
+          oldValue: equipment
+        });
+      }
+    }
+
+    // 機器を全てクリア
+    rackCopy.equipment = {};
+
+    // 関連設定もクリア
+    Array.from(equipmentIds).forEach(equipmentId => {
+      if (rackCopy.powerConnections[equipmentId]) {
+        changes.push({
+          type: 'power',
+          action: 'remove',
+          target: equipmentId,
+          oldValue: rackCopy.powerConnections[equipmentId]
+        });
+        delete rackCopy.powerConnections[equipmentId];
+      }
+
+      if (rackCopy.mountingOptions[equipmentId]) {
+        changes.push({
+          type: 'mounting',
+          action: 'remove',
+          target: equipmentId,
+          oldValue: rackCopy.mountingOptions[equipmentId]
+        });
+        delete rackCopy.mountingOptions[equipmentId];
+      }
+
+      if (rackCopy.labels[equipmentId]) {
+        changes.push({
+          type: 'label',
+          action: 'remove',
+          target: equipmentId,
+          oldValue: rackCopy.labels[equipmentId]
+        });
+        delete rackCopy.labels[equipmentId];
+      }
+    });
+
+    // ゲージナットもクリア
+    for (const unit in rackCopy.cageNuts) {
+      if (rackCopy.cageNuts[unit]) {
+        changes.push({
+          type: 'cagenut',
+          action: 'remove',
+          target: unit,
+          oldValue: rackCopy.cageNuts[unit]
+        });
+      }
+    }
+    rackCopy.cageNuts = {};
 
     return {
       success: true,

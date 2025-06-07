@@ -47,13 +47,6 @@ export const useDragAndDrop = (
       return;
     }
 
-    // レール類の場合は仮想設置（実際のユニットは占有しない）
-    if (draggedItem.railType) {
-      // レール情報をラック設定に追加する処理は後で実装
-      showInfoModal('レール仮設置', `${draggedItem.name}を${startUnit}Uエリアに仮設置しました。\n機器設定で実際の取り付けを行ってください。`);
-      setDraggedItem(null);
-      return;
-    }
 
     // 神棚の特別チェック
     if (draggedItem.requiresShelf) {
@@ -75,8 +68,8 @@ export const useDragAndDrop = (
       return;
     }
 
-    // 機器設置前にゲージナットの確認（レール不要機器のみ）
-    if (!draggedItem.needsRails && draggedItem.type !== 'mounting') {
+    // 機器設置前にゲージナットの確認（取り付け部品以外）
+    if (draggedItem.type !== 'mounting') {
       let missingCageNuts: number[] = [];
       const endUnit = startUnit + draggedItem.height - 1;
       

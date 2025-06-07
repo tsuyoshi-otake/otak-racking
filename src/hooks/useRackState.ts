@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from 'react';
-import { Rack, Equipment, FloorSettings, createDefaultPhysicalStructure, RailInstallation } from '../types';
+import { Rack, Equipment, FloorSettings, createDefaultPhysicalStructure } from '../types';
 import { deepCopy, autoInstallCageNuts } from '../utils';
 import { rackTypes } from '../constants';
 import { placementManager } from '../services/EquipmentPlacementManager';
@@ -18,7 +18,6 @@ const createInitialRack = (id: string, name: string, rackCount: number): Rack =>
   mountingOptions: {},
   labels: {},
   cageNuts: {},
-  railInventory: {},
   partInventory: {},
   fans: { count: 4, rpm: 3000 },
   position: { row: 'A', column: rackCount + 1 },
@@ -53,7 +52,6 @@ const createInitialRack = (id: string, name: string, rackCount: number): Rack =>
         type: 'pdu',
         color: '#DC2626',
         dualPower: false,
-        needsRails: false,
         airflow: 'natural',
         cfm: 0,
         heatGeneration: 0,
@@ -76,7 +74,6 @@ const createInitialRack = (id: string, name: string, rackCount: number): Rack =>
         type: 'pdu',
         color: '#B91C1C',
         dualPower: false,
-        needsRails: false,
         airflow: 'natural',
         cfm: 0,
         heatGeneration: 0,
@@ -87,7 +84,6 @@ const createInitialRack = (id: string, name: string, rackCount: number): Rack =>
       orientation: 'vertical'
     }
   ],
-  railInstallations: {},
   physicalStructure: createDefaultPhysicalStructure()
 });
 
@@ -255,6 +251,28 @@ export const useRackState = () => {
     }
   }, [racks]);
 
+  // 全機器削除（ラッククリア）
+  const clearAllEquipment = useCallback(async (rackId: string) => {
+    const currentRack = racks[rackId];
+    if (!currentRack) return;
+
+    try {
+      const result = await placementManager.clearAllEquipment(currentRack);
+
+      if (result.success && result.updatedRack) {
+        const newRack = result.updatedRack;
+        setRacks(prev => ({
+          ...prev,
+          [rackId]: newRack
+        }));
+      } else {
+        console.error('ラッククリアに失敗しました:', result.validation.errors);
+      }
+    } catch (error) {
+      console.error('ラッククリア中にエラーが発生しました:', error);
+    }
+  }, [racks]);
+
   // ラベル更新
   const updateLabel = useCallback((rackId: string, equipmentId: string, field: string, value: string) => {
     setRacks(prev => {
@@ -294,32 +312,6 @@ export const useRackState = () => {
             [field]: value
         };
 
-        // if the type of mounting is being changed
-        if (field === 'type') {
-            const railType = value;
-            const existingRailId = Object.keys(newRack.railInstallations).find(
-                id => newRack.railInstallations[id].equipmentId === equipmentId
-            );
-
-            // Remove existing rail if it exists
-            if (existingRailId) {
-                delete newRack.railInstallations[existingRailId];
-            }
-
-            // Add new rail if a rail type is selected
-            if (railType.includes('rail')) {
-                const newRailId = `rail-${Date.now()}`;
-                newRack.railInstallations[newRailId] = {
-                    id: newRailId,
-                    startUnit: equipment.startUnit!,
-                    endUnit: equipment.endUnit!,
-                    type: railType,
-                    depth: equipment.depth,
-                    equipmentId: equipmentId,
-                    highlightPositions: ['top', 'bottom'],
-                };
-            }
-        }
 
         return { ...prev, [rackId]: newRack };
     });
@@ -362,36 +354,6 @@ export const useRackState = () => {
     });
   }, []);
 
-  const installRail = useCallback((rackId: string, equipmentId: string, startUnit: number, endUnit: number, type: 'slide' | 'fixed' | 'toolless', depth: number) => {
-      setRacks(prev => {
-        const newRacks = deepCopy(prev);
-        const rack = newRacks[rackId];
-        if (rack) {
-          const newRailId = `rail-${Date.now()}`;
-          rack.railInstallations[newRailId] = {
-            id: newRailId,
-            startUnit,
-            endUnit,
-            type,
-            depth,
-            equipmentId,
-            highlightPositions: ['top', 'bottom'],
-          };
-        }
-        return newRacks;
-      });
-    }, []);
-
-  const removeRail = useCallback((rackId: string, railId: string) => {
-    setRacks(prev => {
-      const newRacks = deepCopy(prev);
-      const rack = newRacks[rackId];
-      if (rack && rack.railInstallations[railId]) {
-        delete rack.railInstallations[railId];
-      }
-      return newRacks;
-    });
-  }, []);
 
   // 環境設定更新
   const updateEnvironment = useCallback((rackId: string, field: string, value: number) => {
@@ -417,6 +379,7 @@ export const useRackState = () => {
     updateRack,
     addEquipment,
     removeEquipment,
+    clearAllEquipment,
     updateLabel,
     updatePowerConnection,
     updateMountingOption,
@@ -424,8 +387,6 @@ export const useRackState = () => {
     removeCageNut,
     autoInstallCageNutsForUnit,
     updateEnvironment,
-    installRail,
-    removeRail,
     
     // Computed
     currentRack: racks[selectedRack] || racks[Object.keys(racks)[0]]

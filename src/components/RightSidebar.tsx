@@ -3,6 +3,7 @@ import {
   Plus,
   Copy,
   Trash2,
+  RotateCcw,
   Settings,
   Eye,
   EyeOff,
@@ -47,6 +48,7 @@ interface RightSidebarProps { // SidebarProps を RightSidebarProps に変更
   onAddRack: () => void;
   onRemoveRack: (rackId: string) => void;
   onDuplicateRack: (rackId: string) => void;
+  onClearAllEquipment: () => void;
   onShowRackManager: () => void;
   onShowFloorSettings: () => void;
   onShowCoolingConfig: () => void;
@@ -62,6 +64,7 @@ export const RightSidebar: React.FC<RightSidebarProps> = ({ // コンポーネ�
   onAddRack,
   onRemoveRack,
   onDuplicateRack,
+  onClearAllEquipment,
   onShowRackManager,
   onShowFloorSettings,
   onShowCoolingConfig,
@@ -124,23 +127,33 @@ export const RightSidebar: React.FC<RightSidebarProps> = ({ // コンポーネ�
           </select>
 
           {selectedRack !== 'all' && (
-            <div className="flex gap-2">
+            <div className="space-y-2">
+              <div className="flex gap-2">
+                <button
+                  onClick={() => onDuplicateRack(selectedRack)}
+                  className={`flex-1 p-2 rounded text-sm flex items-center justify-center gap-1 ${getButton()}`}
+                  title="ラック複製"
+                >
+                  <Copy size={14} />
+                  複製
+                </button>
+                <button
+                  onClick={() => onRemoveRack(selectedRack)}
+                  className={`flex-1 p-2 rounded text-sm flex items-center justify-center gap-1 ${getButton()}`}
+                  title="ラック削除"
+                  disabled={Object.keys(racks).length <= 1}
+                >
+                  <Trash2 size={14} />
+                  削除
+                </button>
+              </div>
               <button
-                onClick={() => onDuplicateRack(selectedRack)}
-                className={`flex-1 p-2 rounded text-sm flex items-center justify-center gap-1 ${getButton()}`}
-                title="ラック複製"
+                onClick={onClearAllEquipment}
+                className={`w-full p-2 rounded text-sm flex items-center justify-center gap-1 ${getButton()}`}
+                title="ラック内の全機器をクリア"
               >
-                <Copy size={14} />
-                複製
-              </button>
-              <button
-                onClick={() => onRemoveRack(selectedRack)}
-                className={`flex-1 p-2 rounded text-sm flex items-center justify-center gap-1 ${getButton()}`}
-                title="ラック削除"
-                disabled={Object.keys(racks).length <= 1}
-              >
-                <Trash2 size={14} />
-                削除
+                <RotateCcw size={14} />
+                機器クリア
               </button>
             </div>
           )}

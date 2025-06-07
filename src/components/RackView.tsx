@@ -9,7 +9,6 @@ import {
 import { RackStructure } from './RackStructure';
 import { RackPDU } from './RackPDU';
 import { RackUnit } from './RackUnit';
-import { Rail } from './Rail';
 
 interface RackViewProps {
   rack: Rack;
@@ -86,19 +85,6 @@ export const RackView: React.FC<RackViewProps> = ({
           />
           <RackPDU rack={rack} zoomLevel={zoomLevel} unitHeight={unitHeight} />
           
-          {/* レールを描画 */}
-          {Object.values(rack.railInstallations).map(rail => (
-            <Rail
-              key={rail.id}
-              rack={rack}
-              rail={rail}
-              unitHeight={unitHeight}
-              zoomLevel={zoomLevel}
-              rackWidth={rackWidth}
-              totalUnits={rack.units}
-              darkMode={darkMode}
-            />
-          ))}
 
           {Array.from({ length: rack.units }, (_, i) => rack.units - i).map(unit => (
             <RackUnit

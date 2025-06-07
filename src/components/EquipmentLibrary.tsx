@@ -40,7 +40,7 @@ export const EquipmentLibrary: React.FC<EquipmentLibraryProps> = ({
         darkMode 
           ? 'border-gray-600 bg-gray-700 hover:shadow-lg' 
           : 'border-gray-200 bg-white'
-      } ${item.pduType || item.railType || item.nutType ? 'border-dashed' : ''}`}
+      } ${item.pduType || item.nutType ? 'border-dashed' : ''}`}
       style={{ borderLeft: `4px solid ${item.color}` }}
     >
       <div className="flex items-center justify-between">
@@ -194,13 +194,13 @@ export const EquipmentLibrary: React.FC<EquipmentLibraryProps> = ({
         </div>
       </div>
 
-      {/* レール・取り付け部品 */}
+      {/* 取り付け部品 */}
       <div>
         <h3 className={`text-sm font-semibold mb-2 flex items-center gap-1 ${
           darkMode ? 'text-gray-300' : 'text-gray-700'
         }`}>
           <Wrench size={14} />
-          レール・取り付け部品
+          取り付け部品
         </h3>
         <div className="space-y-2">
           {mountingEquipment.map((item) => (

@@ -86,7 +86,7 @@ export const RackUnit: React.FC<RackUnitProps> = ({
     
     if (activeViewMode === 'showMountingView') {
       const mounting = rack.mountingOptions[item.id] || {};
-      mountingStatus = getMountingIcon(mounting.type, item.needsRails, 12);
+      mountingStatus = getMountingIcon(mounting.type, false, 12);
     }
     
     if (activeViewMode === 'showAirflowView') {
