@@ -224,7 +224,7 @@ export const useRackState = () => {
             code: 'RACK_NOT_FOUND',
             message: '指定されたラックが見つかりません。',
             affectedUnits: [],
-            severity: 'error'
+            severity: 'error' as const
           }],
           warnings: []
         },
@@ -256,7 +256,7 @@ export const useRackState = () => {
             code: 'UNEXPECTED_ERROR',
             message: '予期せぬエラーが発生しました。',
             affectedUnits: [startUnit],
-            severity: 'error'
+            severity: 'error' as const
           }],
           warnings: []
         },

@@ -84,9 +84,7 @@ export class EquipmentPlacementManager {
                                  options.forceOverride ||
                                  (options.autoInstallCageNuts &&
                                   (equipment.requiresCageNuts || equipment.mountingMethod === 'cage-nuts') &&
-                                  validation.warnings.every(w => w.code === 'CAGE_NUT_MISSING')) ||
-                                 // レール要求警告は設置を阻害しない（警告のみ）
-                                 validation.warnings.every(w => w.code === 'RAILS_REQUIRED');
+                                  validation.warnings.every(w => w.code === 'CAGE_NUT_MISSING'));
     
     if (validation.warnings.length > 0 && !shouldIgnoreWarnings) {
       return {
@@ -129,7 +127,7 @@ export class EquipmentPlacementManager {
           code: 'CONSTRAINT_ERROR',
           message: `制約チェック中にエラーが発生: ${constraint.name}`,
           affectedUnits: [context.position.startUnit],
-          severity: 'error'
+          severity: 'error' as const
         });
       }
     }
@@ -270,7 +268,7 @@ export class EquipmentPlacementManager {
             code: 'EQUIPMENT_NOT_FOUND',
             message: `ユニット${unit}に機器が見つかりません`,
             affectedUnits: [unit],
-            severity: 'error'
+            severity: 'error' as const
           }],
           warnings: []
         },
@@ -504,7 +502,7 @@ export class EquipmentPlacementManager {
             code: 'INVALID_START_UNIT',
             message: 'ユニット番号は1以上である必要があります',
             affectedUnits: [position.startUnit],
-            severity: 'error'
+            severity: 'error' as const
           });
         }
         
@@ -513,7 +511,7 @@ export class EquipmentPlacementManager {
             code: 'EXCEED_RACK_CAPACITY',
             message: `ラックの容量（${rack.units}U）を超えています`,
             affectedUnits: [position.endUnit],
-            severity: 'error'
+            severity: 'error' as const
           });
         }
         
@@ -544,7 +542,7 @@ export class EquipmentPlacementManager {
             code: 'WEIGHT_EXCEEDED',
             message: `重量制限（${maxWeight}kg）を超過します。現在: ${currentWeight}kg, 追加: ${equipment.weight}kg`,
             affectedUnits: [position.startUnit],
-            severity: 'error'
+            severity: 'error' as const
           });
         } else if (currentWeight + equipment.weight > maxWeight * 0.8) {
           warnings.push({
@@ -584,7 +582,7 @@ export class EquipmentPlacementManager {
             code: 'UNIT_OCCUPIED',
             message: `ユニット ${occupiedUnits.join(', ')} には既に機器が設置されています`,
             affectedUnits: occupiedUnits,
-            severity: 'error'
+            severity: 'error' as const
           });
         }
         
@@ -621,7 +619,7 @@ export class EquipmentPlacementManager {
               code: 'CAGE_NUT_REQUIRED',
               message: `Proモードではケージナットの事前設置が必要です (U${missingUnits.join(', ')})`,
               affectedUnits: missingUnits,
-              severity: 'error'
+              severity: 'error' as const
             }];
             return { isValid: false, errors, warnings: [] };
           }
@@ -661,7 +659,7 @@ export class EquipmentPlacementManager {
               code: 'RAIL_REQUIRED',
               message: `Proモードではこの機器に対応するレールの事前設置が必要です (U${missingUnits.join(', ')})`,
               affectedUnits: missingUnits,
-              severity: 'error'
+              severity: 'error' as const
             }];
             return { isValid: false, errors, warnings: [] };
           }
@@ -693,7 +691,7 @@ export class EquipmentPlacementManager {
               code: 'SHELF_REQUIRED',
               message: '神棚は棚板の上にのみ設置できます。まず棚板を設置してください',
               affectedUnits: [position.startUnit, shelfUnit],
-              severity: 'error'
+              severity: 'error' as const
             });
           }
         }
@@ -898,8 +896,18 @@ export class EquipmentPlacementManager {
     const changes: PlacementChange[] = [];
     const { rack, position, equipment } = context;
     const equipmentId = `${equipment.id}-${Date.now()}`;
+    const railWithId = { ...equipment, id: equipmentId };
 
-    // レール情報をrack.railsに追加
+    // 1. レール本体を partInventory に追加
+    rack.partInventory[equipmentId] = railWithId;
+    changes.push({
+      type: 'equipment',
+      action: 'add',
+      target: equipmentId,
+      newValue: railWithId
+    });
+
+    // 2. レール情報を rack.rails に追加
     for (let unit = position.startUnit; unit <= position.endUnit; unit++) {
       if (!rack.rails[unit]) {
         rack.rails[unit] = {
@@ -910,16 +918,8 @@ export class EquipmentPlacementManager {
         };
       }
 
-      // レール設置情報を更新（左右のレール）
       const railType = equipment.height === 1 ? '1u' : equipment.height === 2 ? '2u' : '4u';
-      rack.rails[unit].frontLeft = {
-        installed: true,
-        railType,
-        startUnit: position.startUnit,
-        endUnit: position.endUnit,
-        railId: equipmentId
-      };
-      rack.rails[unit].frontRight = {
+      const railPositionInfo = {
         installed: true,
         railType,
         startUnit: position.startUnit,
@@ -927,34 +927,18 @@ export class EquipmentPlacementManager {
         railId: equipmentId
       };
 
+      rack.rails[unit].frontLeft = railPositionInfo;
+      rack.rails[unit].frontRight = railPositionInfo;
+
       changes.push({
-        type: 'equipment',
-        action: 'add',
-        target: `rail-${unit}`,
+        type: 'rail',
+        action: 'update',
+        target: unit.toString(),
         newValue: rack.rails[unit]
       });
     }
 
-    // 通常の機器設置処理も実行
-    for (let unit = position.startUnit; unit <= position.endUnit; unit++) {
-      const equipmentPlacement: Equipment = {
-        ...equipment,
-        id: equipmentId,
-        startUnit: position.startUnit,
-        endUnit: position.endUnit,
-        isMainUnit: unit === position.startUnit
-      };
-
-      rack.equipment[unit] = equipmentPlacement;
-
-      changes.push({
-        type: 'equipment',
-        action: 'add',
-        target: unit.toString(),
-        newValue: equipmentPlacement
-      });
-    }
-
+    // 3. rack.equipment には何も追加しない
     return changes;
   }
 }
