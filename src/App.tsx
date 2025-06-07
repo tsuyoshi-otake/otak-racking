@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Moon, Sun, Maximize } from 'lucide-react';
-import { Equipment, FloorSettings } from './types';
+import { Equipment, FloorSettings, PhysicalStructure } from './types';
 import { useRackState } from './hooks/useRackState';
 import { useDragAndDrop, DraggedItem } from './hooks/useDragAndDrop';
 import { LeftSidebar } from './components/LeftSidebar'; // Sidebar を LeftSidebar に変更
@@ -67,6 +67,7 @@ function App() {
     addRack,
     removeRack,
     duplicateRack,
+    updateRack,
     addEquipment,
     removeEquipment,
     updateLabel,
@@ -171,6 +172,18 @@ const handleZoomFit = () => {
       setZoomLevel(optimalZoom);
     }
   };
+
+  // 物理構造更新関数
+  const handleUpdatePhysicalStructure = useCallback((updates: Partial<PhysicalStructure>) => {
+    if (selectedRack && selectedRack !== 'all') {
+      updateRack(selectedRack, {
+        physicalStructure: {
+          ...racks[selectedRack]?.physicalStructure,
+          ...updates
+        }
+      });
+    }
+  }, [selectedRack, racks, updateRack]);
 
   // 機器クリック処理
   const handleEquipmentClick = (equipment: Equipment) => {
@@ -311,6 +324,7 @@ const handleZoomFit = () => {
                     draggedItem={draggedItem as DraggedItem | null}
                     perspective={rackViewPerspective}
                     showConfirmModal={showConfirmModal}
+                    onUpdatePhysicalStructure={handleUpdatePhysicalStructure}
                   />
                 </div>
               </div>

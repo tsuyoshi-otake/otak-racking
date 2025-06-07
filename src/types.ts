@@ -146,6 +146,7 @@ export interface Rack {
   environment: EnvironmentConfig;
   pduPlacements: PDUPlacement[]; // PDU配置情報
   railInstallations: Record<number, RailInstallation>; // レール設置情報
+  physicalStructure: PhysicalStructure; // ラック物理構造
 }
 
 export interface FloorSettings {
@@ -223,3 +224,188 @@ export type EquipmentType = 'server' | 'network' | 'security' | 'storage' | 'pdu
 export type AirflowDirection = 'front-to-rear' | 'rear-to-front' | 'side-to-side' | 'intake' | 'exhaust' | 'blocking' | 'natural';
 
 export type ViewMode = 'power' | 'mounting' | 'label' | 'airflow' | 'temperature' | 'cabling' | 'floor' | 'cagenut';
+
+// ラック物理構造の型定義
+export interface RackDoor {
+  type: 'none' | 'mesh' | 'glass' | 'steel' | 'perforated';
+  locked: boolean;
+  opened: boolean;
+  color: string;
+  transparency: number; // 0-100%
+  ventilation: number; // 通気性 0-100%
+}
+
+export interface SidePanel {
+  type: 'none' | 'steel' | 'mesh' | 'glass' | 'perforated';
+  mounted: boolean;
+  color: string;
+  transparency: number;
+  ventilation: number;
+  removable: boolean;
+}
+
+export interface RackFrame {
+  material: 'steel' | 'aluminum' | 'composite';
+  color: string;
+  thickness: number; // mm
+  coating: 'powder' | 'galvanized' | 'anodized' | 'painted';
+  style: 'standard' | 'heavy-duty' | 'seismic';
+}
+
+export interface MountingPost {
+  type: 'square' | 'round' | 'channel';
+  holes: 'universal' | 'threaded' | 'cage-nut';
+  spacing: number; // mm (standard: 25.4mm for 1/2U)
+  depth: number; // mm
+}
+
+export interface RackBase {
+  type: 'fixed' | 'adjustable' | 'casters' | 'seismic';
+  height: number; // mm
+  loadCapacity: number; // kg
+  leveling: boolean;
+  antivibration: boolean;
+}
+
+export interface RackTop {
+  type: 'open' | 'solid' | 'cable-tray' | 'fan-mount';
+  cableManagement: boolean;
+  loadCapacity: number; // kg
+  fanMounts: number;
+}
+
+export interface PhysicalStructure {
+  frame: RackFrame;
+  frontDoor: RackDoor;
+  rearDoor: RackDoor;
+  leftPanel: SidePanel;
+  rightPanel: SidePanel;
+  mountingPosts: {
+    frontLeft: MountingPost;
+    frontRight: MountingPost;
+    rearLeft: MountingPost;
+    rearRight: MountingPost;
+  };
+  base: RackBase;
+  top: RackTop;
+  dimensions: {
+    externalWidth: number; // mm
+    externalDepth: number; // mm
+    externalHeight: number; // mm
+    internalWidth: number; // mm (19" = 482.6mm)
+    internalDepth: number; // mm
+    usableHeight: number; // mm
+  };
+  weight: {
+    empty: number; // kg
+    maxLoad: number; // kg
+    current: number; // kg
+  };
+  ventilation: {
+    frontAirflow: number; // CFM
+    rearAirflow: number; // CFM
+    sideAirflow: number; // CFM
+    totalCapacity: number; // CFM
+  };
+}
+
+// デフォルト値作成関数
+export const createDefaultPhysicalStructure = (): PhysicalStructure => ({
+  frame: {
+    material: 'steel',
+    color: '#2d3748',
+    thickness: 2,
+    coating: 'powder',
+    style: 'standard'
+  },
+  frontDoor: {
+    type: 'mesh',
+    locked: false,
+    opened: false,
+    color: '#2d3748',
+    transparency: 0,
+    ventilation: 80
+  },
+  rearDoor: {
+    type: 'mesh',
+    locked: false,
+    opened: false,
+    color: '#2d3748',
+    transparency: 0,
+    ventilation: 80
+  },
+  leftPanel: {
+    type: 'steel',
+    mounted: true,
+    color: '#2d3748',
+    transparency: 0,
+    ventilation: 0,
+    removable: true
+  },
+  rightPanel: {
+    type: 'steel',
+    mounted: true,
+    color: '#2d3748',
+    transparency: 0,
+    ventilation: 0,
+    removable: true
+  },
+  mountingPosts: {
+    frontLeft: {
+      type: 'square',
+      holes: 'cage-nut',
+      spacing: 25.4,
+      depth: 50
+    },
+    frontRight: {
+      type: 'square',
+      holes: 'cage-nut',
+      spacing: 25.4,
+      depth: 50
+    },
+    rearLeft: {
+      type: 'square',
+      holes: 'cage-nut',
+      spacing: 25.4,
+      depth: 50
+    },
+    rearRight: {
+      type: 'square',
+      holes: 'cage-nut',
+      spacing: 25.4,
+      depth: 50
+    }
+  },
+  base: {
+    type: 'adjustable',
+    height: 100,
+    loadCapacity: 1000,
+    leveling: true,
+    antivibration: false
+  },
+  top: {
+    type: 'cable-tray',
+    cableManagement: true,
+    loadCapacity: 50,
+    fanMounts: 0
+  },
+  dimensions: {
+    externalWidth: 600,
+    externalDepth: 1000,
+    externalHeight: 2000,
+    internalWidth: 482.6,
+    internalDepth: 900,
+    usableHeight: 1778
+  },
+  weight: {
+    empty: 150,
+    maxLoad: 1000,
+    current: 150
+  },
+  ventilation: {
+    frontAirflow: 0,
+    rearAirflow: 0,
+    sideAirflow: 0,
+    totalCapacity: 1000
+  }
+});

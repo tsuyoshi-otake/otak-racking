@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from 'react';
-import { Rack, Equipment, FloorSettings } from '../types';
+import { Rack, Equipment, FloorSettings, createDefaultPhysicalStructure } from '../types';
 import { deepCopy, autoInstallCageNuts } from '../utils';
 import { rackTypes } from '../constants';
 import { placementManager } from '../services/EquipmentPlacementManager';
@@ -92,7 +92,8 @@ const createInitialRack = (id: string, name: string, rackCount: number): Rack =>
     2: { unit: 2, type: 'slide', depth: 700, installed: true },
     5: { unit: 5, type: 'fixed', depth: 600, installed: true },
     10: { unit: 10, type: 'toolless', depth: 650, installed: true }
-  }
+  },
+  physicalStructure: createDefaultPhysicalStructure()
 });
 
 // 初期フロア設定
@@ -115,7 +116,15 @@ export const useRackState = () => {
   
   const [racks, setRacks] = useState<Record<string, Rack>>(() => {
     if (loadedState.racks && Object.keys(loadedState.racks).length > 0) {
-      return loadedState.racks;
+      // 既存のラックにphysicalStructureが存在しない場合は追加
+      const updatedRacks: Record<string, Rack> = {};
+      Object.entries(loadedState.racks).forEach(([id, rack]) => {
+        updatedRacks[id] = {
+          ...rack,
+          physicalStructure: rack.physicalStructure || createDefaultPhysicalStructure()
+        };
+      });
+      return updatedRacks;
     }
     return { 'rack-1': createInitialRack('rack-1', 'ラック #1', 0) };
   });
