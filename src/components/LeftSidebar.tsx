@@ -20,7 +20,6 @@ import { zoomLevels } from '../constants';
 import { EquipmentLibrary } from './EquipmentLibrary';
 
 interface LeftSidebarProps {
-  darkMode: boolean;
   zoomLevel: number;
   activeViewMode: string | null;
   onZoomChange: (zoom: number) => void;
@@ -31,7 +30,6 @@ interface LeftSidebarProps {
 }
 
 export const LeftSidebar: React.FC<LeftSidebarProps> = ({
-  darkMode,
   zoomLevel,
   activeViewMode,
   onZoomChange,
@@ -43,19 +41,19 @@ export const LeftSidebar: React.FC<LeftSidebarProps> = ({
   const [showEquipmentLibrary, setShowEquipmentLibrary] = useState(true);
   const [showViewModes, setShowViewModes] = useState(true);
 
-  const sidebarStyle = getSidebarStyle(darkMode);
-  const getButton = (isActive: boolean = false) => getButtonStyle(darkMode, isActive);
+  const sidebarStyle = getSidebarStyle();
+  const getButton = (isActive: boolean = false) => getButtonStyle(isActive);
 
   const viewModeButtons = [
-    { key: 'showPowerView' as const, icon: Zap, label: '電源', color: darkMode ? 'text-gray-300' : 'text-light-text-secondary' },
-    { key: 'showMountingView' as const, icon: Wrench, label: '取付', color: darkMode ? 'text-gray-300' : 'text-light-text-secondary' },
-    { key: 'showLabelView' as const, icon: Tag, label: 'ラベル', color: darkMode ? 'text-gray-300' : 'text-light-text-secondary' },
-    { key: 'showAirflowView' as const, icon: Wind, label: 'エアフロー', color: darkMode ? 'text-gray-300' : 'text-light-text-secondary' },
-    { key: 'showTemperatureView' as const, icon: Thermometer, label: '温度', color: darkMode ? 'text-gray-300' : 'text-light-text-secondary' },
-    { key: 'showCablingView' as const, icon: Cable, label: 'ケーブル', color: darkMode ? 'text-gray-300' : 'text-light-text-secondary' },
-    { key: 'showCageNutView' as const, icon: Square, label: 'ゲージナット', color: darkMode ? 'text-gray-300' : 'text-light-text-secondary' },
-    { key: 'showRailView' as const, icon: Move, label: 'レール', color: darkMode ? 'text-gray-300' : 'text-light-text-secondary' },
-    { key: 'showFloorView' as const, icon: Square, label: 'フロア', color: darkMode ? 'text-gray-300' : 'text-light-text-secondary' }
+    { key: 'showPowerView' as const, icon: Zap, label: '電源', color: 'text-gray-300' },
+    { key: 'showMountingView' as const, icon: Wrench, label: '取付', color: 'text-gray-300' },
+    { key: 'showLabelView' as const, icon: Tag, label: 'ラベル', color: 'text-gray-300' },
+    { key: 'showAirflowView' as const, icon: Wind, label: 'エアフロー', color: 'text-gray-300' },
+    { key: 'showTemperatureView' as const, icon: Thermometer, label: '温度', color: 'text-gray-300' },
+    { key: 'showCablingView' as const, icon: Cable, label: 'ケーブル', color: 'text-gray-300' },
+    { key: 'showCageNutView' as const, icon: Square, label: 'ゲージナット', color: 'text-gray-300' },
+    { key: 'showRailView' as const, icon: Move, label: 'レール', color: 'text-gray-300' },
+    { key: 'showFloorView' as const, icon: Square, label: 'フロア', color: 'text-gray-300' }
   ];
 
   return (
@@ -63,7 +61,7 @@ export const LeftSidebar: React.FC<LeftSidebarProps> = ({
       <div className="p-4 space-y-4">
         {/* ズーム制御 */}
         <div>
-          <h3 className={`text-sm font-semibold mb-2 ${darkMode ? 'text-gray-100' : 'text-light-text-primary'}`}>表示倍率</h3>
+          <h3 className="text-sm font-semibold mb-2 text-gray-100">表示倍率</h3>
           <div className="flex gap-1">
             {zoomLevels.map(zoom => (
               <button
@@ -81,7 +79,7 @@ export const LeftSidebar: React.FC<LeftSidebarProps> = ({
         <div>
           <button
             onClick={() => setShowViewModes(!showViewModes)}
-            className={`flex items-center gap-2 text-sm font-semibold mb-2 w-full ${darkMode ? 'text-gray-100' : 'text-light-text-primary'}`}
+            className="flex items-center gap-2 text-sm font-semibold mb-2 w-full text-gray-100"
           >
             {showViewModes ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
             表示モード
@@ -91,11 +89,7 @@ export const LeftSidebar: React.FC<LeftSidebarProps> = ({
             <select
               value={activeViewMode || ''}
               onChange={(e) => onActiveViewModeChange(e.target.value || null)}
-              className={`w-full p-2 border rounded text-sm ${
-                darkMode
-                  ? 'bg-gray-600 border-custom-gray text-gray-100'
-                  : 'bg-light-bg-tertiary border-light-border-primary text-light-text-primary'
-              }`}
+              className="w-full p-2 border rounded text-sm bg-gray-600 border-custom-gray text-gray-100"
             >
               <option value="">標準表示</option>
               {viewModeButtons.map(({ key, label }) => (
@@ -109,7 +103,7 @@ export const LeftSidebar: React.FC<LeftSidebarProps> = ({
 
         {/* ラック視点切り替え */}
         <div>
-          <h3 className={`text-sm font-semibold mb-2 mt-4 ${darkMode ? 'text-gray-100' : 'text-light-text-primary'}`}>ラック視点</h3>
+          <h3 className="text-sm font-semibold mb-2 mt-4 text-gray-100">ラック視点</h3>
           <div className="grid grid-cols-2 gap-2">
             {(['front', 'rear', 'left', 'right'] as const).map((p) => (
               <button
@@ -129,7 +123,7 @@ export const LeftSidebar: React.FC<LeftSidebarProps> = ({
         <div>
           <button
             onClick={() => setShowEquipmentLibrary(!showEquipmentLibrary)}
-            className={`flex items-center gap-2 text-sm font-semibold mb-2 w-full ${darkMode ? 'text-gray-100' : 'text-light-text-primary'}`}
+            className="flex items-center gap-2 text-sm font-semibold mb-2 w-full text-gray-100"
           >
             {showEquipmentLibrary ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
             機器ライブラリ
@@ -137,7 +131,6 @@ export const LeftSidebar: React.FC<LeftSidebarProps> = ({
           
           {showEquipmentLibrary && (
             <EquipmentLibrary
-              darkMode={darkMode}
               onDragStart={onDragStart}
             />
           )}

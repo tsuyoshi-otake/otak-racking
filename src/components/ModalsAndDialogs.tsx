@@ -23,11 +23,10 @@ export interface InfoModalProps { // export を追加
   title: string;
   message: string;
   onClose: () => void;
-  darkMode: boolean;
 }
 
 // +++ 新しい ConfirmModal 用の Props (簡易版) +++
-export interface ConfirmModalProps extends InfoModalProps { // export を追加
+export interface ConfirmModalProps extends Omit<InfoModalProps, 'darkMode'> { // export を追加
   onConfirm: () => void;
   confirmText?: string;
   cancelText?: string;
@@ -36,7 +35,6 @@ export interface ConfirmModalProps extends InfoModalProps { // export を追加
 
 
 interface ModalsAndDialogsProps {
-  darkMode: boolean;
   currentRack: Rack | null;
   selectedEquipment: Equipment | null;
   showEquipmentModal: boolean;
@@ -70,7 +68,6 @@ interface ModalsAndDialogsProps {
 }
 
 export const ModalsAndDialogs: React.FC<ModalsAndDialogsProps> = ({
-  darkMode,
   currentRack,
   selectedEquipment,
   showEquipmentModal,
@@ -116,29 +113,27 @@ export const ModalsAndDialogs: React.FC<ModalsAndDialogsProps> = ({
     const powerConnection = currentRack.powerConnections?.[selectedEquipment.id] || {};
     const mountingOption = currentRack.mountingOptions?.[selectedEquipment.id] || {};
 
-    const modalBg = darkMode ? 'bg-gray-800 text-white' : 'bg-white text-gray-900';
-    const inputBg = darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900';
-    const tabActiveClass = darkMode ? 'bg-gray-600 text-white' : 'bg-custom-gray text-white';
-    const tabInactiveClass = darkMode ? 'bg-gray-700 text-gray-300 hover:bg-gray-600' : 'bg-gray-200 text-gray-700 hover:bg-gray-300';
+    const modalBg = 'bg-gray-800 text-white';
+    const inputBg = 'bg-gray-700 border-gray-600 text-white';
+    const tabActiveClass = 'bg-gray-600 text-white';
+    const tabInactiveClass = 'bg-gray-700 text-gray-300 hover:bg-gray-600';
 
     return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className={`${modalBg} rounded-lg shadow-xl w-96 max-w-full max-h-[90vh] overflow-hidden`}>
         {/* ヘッダー */}
-        <div className={`p-4 border-b flex items-center justify-between ${
-          darkMode ? 'border-custom-gray' : 'border-gray-200'
-        }`}>
+        <div className="p-4 border-b flex items-center justify-between border-custom-gray">
           <h3 className="text-lg font-bold">{selectedEquipment.name}</h3>
           <button
             onClick={onCloseEquipmentModal}
-            className={`p-1 rounded hover:bg-opacity-10 hover:bg-custom-gray`}
+            className="p-1 rounded hover:bg-opacity-10 hover:bg-custom-gray"
           >
             <X size={20} />
           </button>
         </div>
 
         {/* タブ */}
-        <div className={`flex border-b ${darkMode ? 'border-custom-gray' : 'border-gray-200'}`}>
+        <div className="flex border-b border-custom-gray">
           <button
             onClick={() => setActiveTab('info')}
             className={`flex-1 p-2 text-xs flex items-center justify-center gap-1 ${
@@ -234,7 +229,7 @@ export const ModalsAndDialogs: React.FC<ModalsAndDialogsProps> = ({
                 <h4 className="font-medium mb-2 flex items-center gap-2">
                   電源接続設定
                   {selectedEquipment.dualPower && (
-                    <span className="text-xs bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200 px-2 py-0.5 rounded">
+                    <span className="text-xs bg-yellow-900 text-yellow-200 px-2 py-0.5 rounded">
                       冗長電源
                     </span>
                   )}
@@ -278,17 +273,17 @@ export const ModalsAndDialogs: React.FC<ModalsAndDialogsProps> = ({
                   )}
 
                   {/* 電源状態表示 */}
-                  <div className={`p-2 rounded ${darkMode ? 'bg-gray-700' : 'bg-gray-100'}`}>
+                  <div className="p-2 rounded bg-gray-700">
                     <div className="flex items-center gap-2 text-sm">
                       {powerConnection.primarySource && (selectedEquipment.dualPower ? powerConnection.secondarySource : true) ? (
                         <>
-                          <CheckCircle size={14} className={darkMode ? "text-green-400" : "text-green-600"} />
-                          <span className={darkMode ? "text-gray-200" : "text-gray-700"}>電源設定完了</span>
+                          <CheckCircle size={14} className="text-green-400" />
+                          <span className="text-gray-200">電源設定完了</span>
                         </>
                       ) : (
                         <>
-                          <AlertTriangle size={14} className={darkMode ? "text-yellow-400" : "text-yellow-600"} />
-                          <span className={darkMode ? "text-gray-300" : "text-gray-600"}>電源設定が不完全です</span>
+                          <AlertTriangle size={14} className="text-yellow-400" />
+                          <span className="text-gray-300">電源設定が不完全です</span>
                         </>
                       )}
                     </div>
@@ -439,21 +434,19 @@ export const ModalsAndDialogs: React.FC<ModalsAndDialogsProps> = ({
   const renderRackManagerModal = () => {
     if (!showRackManager || !racks) return null;
 
-    const modalBg = darkMode ? 'bg-gray-800 text-white' : 'bg-white text-gray-900';
+    const modalBg = 'bg-gray-800 text-white';
 
     return (
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
         <div className={`${modalBg} rounded-lg shadow-xl w-96 max-w-full max-h-[90vh] overflow-hidden`}>
-          <div className={`p-4 border-b flex items-center justify-between ${
-            darkMode ? 'border-custom-gray' : 'border-gray-200'
-          }`}>
+          <div className="p-4 border-b flex items-center justify-between border-custom-gray">
             <h3 className="text-lg font-bold flex items-center gap-2">
               <Settings size={20} />
               ラック管理
             </h3>
             <button
               onClick={onCloseRackManager}
-              className={`p-1 rounded hover:bg-opacity-10 hover:bg-custom-gray`}
+              className="p-1 rounded hover:bg-opacity-10 hover:bg-custom-gray"
             >
               <X size={20} />
             </button>
@@ -465,9 +458,7 @@ export const ModalsAndDialogs: React.FC<ModalsAndDialogsProps> = ({
                 <h4 className="font-medium">登録ラック一覧</h4>
                 <button
                   onClick={onAddRack}
-                  className={`p-2 rounded flex items-center gap-1 text-sm ${
-                    darkMode ? 'bg-gray-600 hover:bg-custom-gray' : 'bg-custom-gray hover:bg-gray-600'
-                  } text-white`}
+                  className="p-2 rounded flex items-center gap-1 text-sm bg-gray-600 hover:bg-custom-gray text-white"
                 >
                   <Plus size={14} />
                   追加
@@ -476,9 +467,7 @@ export const ModalsAndDialogs: React.FC<ModalsAndDialogsProps> = ({
 
               <div className="space-y-2">
                 {Object.values(racks).map((rack) => (
-                  <div key={rack.id} className={`p-3 border rounded flex items-center justify-between ${
-                    darkMode ? 'border-custom-gray bg-gray-700' : 'border-gray-200 bg-gray-50'
-                  }`}>
+                  <div key={rack.id} className="p-3 border rounded flex items-center justify-between border-custom-gray bg-gray-700">
                     <div>
                       <div className="font-medium">{rack.name}</div>
                       <div className="text-sm text-custom-gray">
@@ -488,18 +477,14 @@ export const ModalsAndDialogs: React.FC<ModalsAndDialogsProps> = ({
                     <div className="flex gap-1">
                       <button
                         onClick={() => onDuplicateRack?.(rack.id)}
-                        className={`p-1 rounded ${
-                          darkMode ? 'hover:bg-gray-600' : 'hover:bg-gray-200'
-                        }`}
+                        className="p-1 rounded hover:bg-gray-600"
                         title="複製"
                       >
                         <Copy size={14} />
                       </button>
                       <button
                         onClick={() => onRemoveRack?.(rack.id)}
-                        className={`p-1 rounded ${
-                          darkMode ? 'hover:bg-gray-600' : 'hover:bg-gray-200'
-                        }`}
+                        className="p-1 rounded hover:bg-gray-600"
                         title="削除"
                         disabled={Object.keys(racks).length <= 1}
                       >
@@ -520,24 +505,22 @@ export const ModalsAndDialogs: React.FC<ModalsAndDialogsProps> = ({
   const renderFloorSettingsModal = () => {
     if (!showFloorSettings || !floorSettings) return null;
 
-    const modalBg = darkMode ? 'bg-gray-800 text-white' : 'bg-white text-gray-900';
-    const inputBg = darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900';
+    const modalBg = 'bg-gray-800 text-white';
+    const inputBg = 'bg-gray-700 border-gray-600 text-white';
     
     const settings = tempFloorSettings || floorSettings;
 
     return (
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
         <div className={`${modalBg} rounded-lg shadow-xl w-96 max-w-full max-h-[90vh] overflow-hidden`}>
-          <div className={`p-4 border-b flex items-center justify-between ${
-            darkMode ? 'border-custom-gray' : 'border-gray-200'
-          }`}>
+          <div className="p-4 border-b flex items-center justify-between border-custom-gray">
             <h3 className="text-lg font-bold flex items-center gap-2">
               <Building size={20} />
               フリーアクセスフロア設定
             </h3>
             <button
               onClick={onCloseFloorSettings}
-              className={`p-1 rounded hover:bg-opacity-10 hover:bg-custom-gray`}
+              className="p-1 rounded hover:bg-opacity-10 hover:bg-custom-gray"
             >
               <X size={20} />
             </button>
@@ -693,17 +676,13 @@ export const ModalsAndDialogs: React.FC<ModalsAndDialogsProps> = ({
                   }
                   onCloseFloorSettings?.();
                 }}
-                className={`flex-1 p-2 rounded text-sm font-medium ${
-                  darkMode ? 'bg-gray-600 hover:bg-custom-gray' : 'bg-custom-gray hover:bg-gray-600'
-                } text-white`}
+                className="flex-1 p-2 rounded text-sm font-medium bg-gray-600 hover:bg-custom-gray text-white"
               >
                 保存
               </button>
               <button
                 onClick={onCloseFloorSettings}
-                className={`flex-1 p-2 rounded text-sm ${
-                  darkMode ? 'bg-gray-600 hover:bg-gray-700' : 'bg-custom-gray hover:bg-gray-600'
-                } text-white`}
+                className="flex-1 p-2 rounded text-sm bg-gray-600 hover:bg-gray-700 text-white"
               >
                 キャンセル
               </button>
@@ -718,21 +697,19 @@ export const ModalsAndDialogs: React.FC<ModalsAndDialogsProps> = ({
   const renderCoolingConfigModal = () => {
     if (!showCoolingConfig) return null;
 
-    const modalBg = darkMode ? 'bg-gray-800 text-white' : 'bg-white text-gray-900';
+    const modalBg = 'bg-gray-800 text-white';
 
     return (
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
         <div className={`${modalBg} rounded-lg shadow-xl w-96 max-w-full max-h-[90vh] overflow-hidden`}>
-          <div className={`p-4 border-b flex items-center justify-between ${
-            darkMode ? 'border-custom-gray' : 'border-gray-200'
-          }`}>
+          <div className="p-4 border-b flex items-center justify-between border-custom-gray">
             <h3 className="text-lg font-bold flex items-center gap-2">
               <Snowflake size={20} />
               冷却・空调設定
             </h3>
             <button
               onClick={onCloseCoolingConfig}
-              className={`p-1 rounded hover:bg-opacity-10 hover:bg-custom-gray`}
+              className="p-1 rounded hover:bg-opacity-10 hover:bg-custom-gray"
             >
               <X size={20} />
             </button>
@@ -754,21 +731,19 @@ export const ModalsAndDialogs: React.FC<ModalsAndDialogsProps> = ({
   const renderPowerConfigModal = () => {
     if (!showPowerConfig) return null;
 
-    const modalBg = darkMode ? 'bg-gray-800 text-white' : 'bg-white text-gray-900';
+    const modalBg = 'bg-gray-800 text-white';
 
     return (
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
         <div className={`${modalBg} rounded-lg shadow-xl w-96 max-w-full max-h-[90vh] overflow-hidden`}>
-          <div className={`p-4 border-b flex items-center justify-between ${
-            darkMode ? 'border-custom-gray' : 'border-gray-200'
-          }`}>
+          <div className="p-4 border-b flex items-center justify-between border-custom-gray">
             <h3 className="text-lg font-bold flex items-center gap-2">
               <Zap size={20} />
               電源・UPS設定
             </h3>
             <button
               onClick={onClosePowerConfig}
-              className={`p-1 rounded hover:bg-opacity-10 hover:bg-custom-gray`}
+              className="p-1 rounded hover:bg-opacity-10 hover:bg-custom-gray"
             >
               <X size={20} />
             </button>
@@ -789,16 +764,16 @@ export const ModalsAndDialogs: React.FC<ModalsAndDialogsProps> = ({
   // +++ InfoModal レンダリング関数 +++
   const renderInfoModal = () => {
     if (!infoModal || !infoModal.isOpen) return null;
-    const modalBg = darkMode ? 'bg-gray-800 text-white' : 'bg-white text-gray-900';
+    const modalBg = 'bg-gray-800 text-white';
     return (
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
         <div className={`${modalBg} rounded-lg shadow-xl w-full max-w-md`}>
-          <div className={`p-4 border-b flex items-center justify-between ${darkMode ? 'border-custom-gray' : 'border-gray-200'}`}>
+          <div className="p-4 border-b flex items-center justify-between border-custom-gray">
             <h3 className="text-lg font-bold flex items-center gap-2">
-              <Info size={20} className={darkMode ? 'text-gray-300' : 'text-gray-600'} />
+              <Info size={20} className="text-gray-300" />
               {infoModal.title}
             </h3>
-            <button onClick={infoModal.onClose} className={`p-1 rounded hover:bg-opacity-10 hover:bg-custom-gray`}>
+            <button onClick={infoModal.onClose} className="p-1 rounded hover:bg-opacity-10 hover:bg-custom-gray">
               <X size={20} />
             </button>
           </div>
@@ -807,10 +782,10 @@ export const ModalsAndDialogs: React.FC<ModalsAndDialogsProps> = ({
               <p key={index}>{line}</p>
             ))}
           </div>
-          <div className={`p-4 border-t flex justify-end ${darkMode ? 'border-custom-gray' : 'border-gray-200'}`}>
+          <div className="p-4 border-t flex justify-end border-custom-gray">
             <button
               onClick={infoModal.onClose}
-              className={`px-4 py-2 rounded text-sm font-medium ${darkMode ? 'bg-gray-600 hover:bg-custom-gray text-white' : 'bg-custom-gray hover:bg-gray-600 text-white'}`}
+              className="px-4 py-2 rounded text-sm font-medium bg-gray-600 hover:bg-custom-gray text-white"
             >
               OK
             </button>
@@ -823,13 +798,13 @@ export const ModalsAndDialogs: React.FC<ModalsAndDialogsProps> = ({
   // +++ ConfirmModal レンダリング関数 +++
   const renderConfirmModal = () => {
     if (!confirmModal || !confirmModal.isOpen) return null;
-    const modalBg = darkMode ? 'bg-gray-800 text-white' : 'bg-white text-gray-900';
+    const modalBg = 'bg-gray-800 text-white';
     return (
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
         <div className={`${modalBg} rounded-lg shadow-xl w-full max-w-md`}>
-          <div className={`p-4 border-b flex items-center justify-between ${darkMode ? 'border-custom-gray' : 'border-gray-200'}`}>
+          <div className="p-4 border-b flex items-center justify-between border-custom-gray">
             <h3 className="text-lg font-bold flex items-center gap-2">
-              <AlertTriangle size={20} className={darkMode ? 'text-yellow-400' : 'text-yellow-500'} />
+              <AlertTriangle size={20} className="text-yellow-400" />
               {confirmModal.title}
             </h3>
              {/* <button onClick={confirmModal.onClose} className={`p-1 rounded hover:bg-opacity-10 hover:bg-custom-gray`}>
@@ -841,10 +816,10 @@ export const ModalsAndDialogs: React.FC<ModalsAndDialogsProps> = ({
               <p key={index}>{line}</p>
             ))}
           </div>
-          <div className={`p-4 border-t flex justify-end gap-3 ${darkMode ? 'border-custom-gray' : 'border-gray-200'}`}>
+          <div className="p-4 border-t flex justify-end gap-3 border-custom-gray">
             <button
               onClick={confirmModal.onClose}
-              className={`px-4 py-2 rounded text-sm font-medium ${darkMode ? 'bg-gray-600 hover:bg-gray-700 text-gray-300' : 'bg-gray-200 hover:bg-gray-300 text-gray-700'}`}
+              className="px-4 py-2 rounded text-sm font-medium bg-gray-600 hover:bg-gray-700 text-gray-300"
             >
               {confirmModal.cancelText || 'キャンセル'}
             </button>
@@ -853,7 +828,7 @@ export const ModalsAndDialogs: React.FC<ModalsAndDialogsProps> = ({
                 confirmModal.onConfirm();
                 confirmModal.onClose(); // 確認後も閉じる
               }}
-              className={`px-4 py-2 rounded text-sm font-medium ${darkMode ? 'bg-gray-600 hover:bg-custom-gray text-white' : 'bg-custom-gray hover:bg-gray-600 text-white'}`}
+              className="px-4 py-2 rounded text-sm font-medium bg-gray-600 hover:bg-custom-gray text-white"
             >
               {confirmModal.confirmText || 'OK'}
             </button>

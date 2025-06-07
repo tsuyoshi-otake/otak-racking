@@ -12,7 +12,6 @@ import { RackUnit } from './RackUnit';
 
 interface RackViewProps {
   rack: Rack;
-  darkMode: boolean;
   zoomLevel: number;
   selectedRack: string;
   activeViewMode: string | null;
@@ -33,7 +32,6 @@ interface RackViewProps {
 
 export const RackView: React.FC<RackViewProps> = ({
   rack,
-  darkMode,
   zoomLevel,
   selectedRack,
   activeViewMode,
@@ -57,13 +55,13 @@ export const RackView: React.FC<RackViewProps> = ({
 
   const renderRackHeader = (view: '前面' | '背面' | '左側面' | '右側面') => (
     <div
-      className={`mb-2 p-2 border rounded-t-lg ${darkMode ? 'bg-gray-800 border-custom-gray' : 'bg-light-bg-tertiary border-light-border-primary shadow-sm'}`}
+      className="mb-2 p-2 border rounded-t-lg bg-gray-800 border-custom-gray"
       style={{
         width: `${600 * (zoomLevel / 100)}px`
       }}
     >
-      <h3 className={`font-bold text-center ${darkMode ? 'text-gray-100' : 'text-light-text-primary'}`} style={{ fontSize: `${fontSize * 1.2}px` }}>{rack.name} ({view})</h3>
-      <div className={`text-center ${darkMode ? 'text-gray-300' : 'text-light-text-secondary'}`} style={{ fontSize: `${fontSize * 0.8}px` }}>
+      <h3 className="font-bold text-center text-gray-100" style={{ fontSize: `${fontSize * 1.2}px` }}>{rack.name} ({view})</h3>
+      <div className="text-center text-gray-300" style={{ fontSize: `${fontSize * 0.8}px` }}>
         {rack.units}U / {rack.width}mm幅 × {rack.depth}mm奥行
       </div>
     </div>
@@ -75,7 +73,7 @@ export const RackView: React.FC<RackViewProps> = ({
       <div className="flex flex-col relative items-center">
         {renderRackHeader(perspective === 'front' ? '前面' : '背面')}
         <div
-          className={`border rounded-b-lg overflow-visible relative ${darkMode ? 'border-custom-gray' : 'border-light-border-primary'}`}
+          className="border rounded-b-lg overflow-visible relative border-custom-gray"
           style={{
             width: `${rackWidth}px`
           }}
@@ -98,7 +96,6 @@ export const RackView: React.FC<RackViewProps> = ({
               key={`unit-${unit}`}
               rack={rack}
               unit={unit}
-              darkMode={darkMode}
               zoomLevel={zoomLevel}
               unitHeight={unitHeight}
               fontSize={fontSize}
@@ -126,13 +123,13 @@ export const RackView: React.FC<RackViewProps> = ({
       <div className="flex flex-col">
         {renderRackHeader(sideLabel)}
         <div
-          className={`border rounded-b-lg overflow-hidden p-4 ${darkMode ? 'bg-gray-700 border-custom-gray' : 'bg-light-bg-secondary border-light-border-primary'}`}
+          className="border rounded-b-lg overflow-hidden p-4 bg-gray-700 border-custom-gray"
           style={{
             height: `${rack.units * getZoomedUnitHeight(zoomLevel)}px`,
             width: `${Math.max(150, rack.depth / (zoomLevel > 75 ? 3 : zoomLevel > 50 ? 4 : 5))}px`
           }}
         >
-          <p className={`text-center text-xs ${darkMode ? 'text-gray-400' : 'text-light-text-tertiary'}`}>側面ビュー (実装中)</p>
+          <p className="text-center text-xs text-gray-400">側面ビュー (実装中)</p>
           {Object.values(rack.equipment).filter(eq => eq.isMainUnit).map(eq => (
             <div
               key={eq.id}

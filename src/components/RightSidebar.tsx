@@ -32,7 +32,6 @@ import {
 interface RightSidebarProps { // SidebarProps を RightSidebarProps に変更
   racks: Record<string, Rack>;
   selectedRack: string;
-  darkMode: boolean;
   floorSettings: FloorSettings;
   onRackSelect: (rackId: string) => void;
   onAddRack: () => void;
@@ -48,7 +47,6 @@ interface RightSidebarProps { // SidebarProps を RightSidebarProps に変更
 export const RightSidebar: React.FC<RightSidebarProps> = ({ // コンポーネント名を RightSidebar に変更し、型も RightSidebarProps に変更
   racks,
   selectedRack,
-  darkMode,
   floorSettings,
   onRackSelect,
   onAddRack,
@@ -69,8 +67,8 @@ export const RightSidebar: React.FC<RightSidebarProps> = ({ // コンポーネ�
   const currentRackStats = currentRack ? calculateRackStats(currentRack) : null;
   const currentCoolingStats = currentRack ? calculateCoolingStats(currentRack) : null;
 
-  const sidebarStyle = getSidebarStyle(darkMode);
-  const getButton = (isActive: boolean = false) => getButtonStyle(darkMode, isActive);
+  const sidebarStyle = getSidebarStyle();
+  const getButton = (isActive: boolean = false) => getButtonStyle(isActive);
 
   // const viewModeButtons = [ // 削除
   //   { key: 'showPowerView' as const, icon: Zap, label: '電源', color: 'text-red-500' },
@@ -89,7 +87,7 @@ export const RightSidebar: React.FC<RightSidebarProps> = ({ // コンポーネ�
         {/* ラック選択・操作 */}
         <div>
           <div className="flex items-center justify-between mb-2">
-            <h2 className={`text-lg font-bold ${darkMode ? 'text-gray-100' : 'text-light-text-primary'}`}>ラック管理</h2>
+            <h2 className="text-lg font-bold text-gray-100">ラック管理</h2>
             <button
               onClick={onAddRack}
               className={`p-1 rounded ${getButton()}`}
@@ -102,11 +100,7 @@ export const RightSidebar: React.FC<RightSidebarProps> = ({ // コンポーネ�
           <select
             value={selectedRack}
             onChange={(e) => onRackSelect(e.target.value)}
-            className={`w-full p-2 border rounded mb-2 ${
-              darkMode
-                ? 'bg-gray-600 border-custom-gray text-gray-100'
-                : 'bg-light-bg-tertiary border-light-border-primary text-light-text-primary'
-            }`}
+            className="w-full p-2 border rounded mb-2 bg-gray-600 border-custom-gray text-gray-100"
           >
             <option value="all">全体表示</option>
             {Object.values(racks).map(rack => (
@@ -157,38 +151,36 @@ export const RightSidebar: React.FC<RightSidebarProps> = ({ // コンポーネ�
         <div>
           <button
             onClick={() => setShowStats(!showStats)}
-            className={`flex items-center gap-2 text-sm font-semibold mb-2 w-full ${darkMode ? 'text-gray-100' : 'text-light-text-primary'}`}
+            className="flex items-center gap-2 text-sm font-semibold mb-2 w-full text-gray-100"
           >
             {showStats ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
             統計情報
           </button>
           
           {showStats && (
-            <div className={`p-3 border rounded ${
-              darkMode ? 'bg-gray-700 border-custom-gray' : 'bg-light-bg-tertiary border-light-border-primary'
-            }`}>
+            <div className="p-3 border rounded bg-gray-700 border-custom-gray">
               {selectedRack === 'all' ? (
                 // 全体統計
                 <div className="space-y-2">
-                  <h4 className={`font-medium flex items-center gap-1 ${darkMode ? 'text-gray-100' : 'text-light-text-primary'}`}>
+                  <h4 className="font-medium flex items-center gap-1 text-gray-100">
                     <BarChart3 size={14} />
                     全体統計
                   </h4>
                   <div className="grid grid-cols-2 gap-2 text-xs">
                     <div className="flex items-center gap-1">
-                      <Server size={12} className={darkMode ? "text-gray-300" : "text-light-text-secondary"} />
+                      <Server size={12} className="text-gray-300" />
                       <span>{totalStats.rackCount}台</span>
                     </div>
                     <div className="flex items-center gap-1">
-                      <Activity size={12} className={darkMode ? "text-gray-300" : "text-light-text-secondary"} />
+                      <Activity size={12} className="text-gray-300" />
                       <span>{totalStats.totalPower}W</span>
                     </div>
                     <div className="flex items-center gap-1">
-                      <HardDrive size={12} className={darkMode ? "text-gray-300" : "text-light-text-secondary"} />
+                      <HardDrive size={12} className="text-gray-300" />
                       <span>{totalStats.usedUnits}U使用</span>
                     </div>
                     <div className="flex items-center gap-1">
-                      <Snowflake size={12} className={darkMode ? "text-gray-300" : "text-light-text-secondary"} />
+                      <Snowflake size={12} className="text-gray-300" />
                       <span>{Math.round(totalStats.totalHeat/1000)}kBTU</span>
                     </div>
                   </div>
@@ -200,25 +192,25 @@ export const RightSidebar: React.FC<RightSidebarProps> = ({ // コンポーネ�
               ) : currentRackStats && currentCoolingStats ? (
                 // 個別ラック統計
                 <div className="space-y-2">
-                  <h4 className={`font-medium flex items-center gap-1 ${darkMode ? 'text-gray-100' : 'text-light-text-primary'}`}>
+                  <h4 className="font-medium flex items-center gap-1 text-gray-100">
                     <Server size={14} />
                     {currentRack.name}
                   </h4>
                   <div className="grid grid-cols-2 gap-2 text-xs">
                     <div className="flex items-center gap-1">
-                      <Activity size={12} className={darkMode ? "text-gray-300" : "text-light-text-secondary"} />
+                      <Activity size={12} className="text-gray-300" />
                       <span>{currentRackStats.totalPower}W</span>
                     </div>
                     <div className="flex items-center gap-1">
-                      <Snowflake size={12} className={darkMode ? "text-gray-300" : "text-light-text-secondary"} />
+                      <Snowflake size={12} className="text-gray-300" />
                       <span>{Math.round(currentRackStats.totalHeat/1000)}kBTU</span>
                     </div>
                     <div className="flex items-center gap-1">
-                      <HardDrive size={12} className={darkMode ? "text-gray-300" : "text-light-text-secondary"} />
+                      <HardDrive size={12} className="text-gray-300" />
                       <span>{currentRackStats.usedUnits}U</span>
                     </div>
                     <div className="flex items-center gap-1">
-                      <Square size={12} className={darkMode ? "text-gray-300" : "text-light-text-secondary"} />
+                      <Square size={12} className="text-gray-300" />
                       <span>{currentRackStats.availableUnits}U空</span>
                     </div>
                   </div>
@@ -235,7 +227,7 @@ export const RightSidebar: React.FC<RightSidebarProps> = ({ // コンポーネ�
                   </div>
                 </div>
               ) : (
-                <div className={`text-xs text-center ${darkMode ? 'text-gray-400' : 'text-light-text-tertiary'}`}>
+                <div className="text-xs text-center text-gray-400">
                   統計データなし
                 </div>
               )}
@@ -245,7 +237,7 @@ export const RightSidebar: React.FC<RightSidebarProps> = ({ // コンポーネ�
 
         {/* 設定・管理機能 */}
         <div>
-          <h3 className={`text-sm font-semibold mb-2 ${darkMode ? 'text-gray-100' : 'text-light-text-primary'}`}>設定・管理</h3>
+          <h3 className="text-sm font-semibold mb-2 text-gray-100">設定・管理</h3>
           <div className="space-y-2">
             <button
               onClick={onShowRackManager}
@@ -280,11 +272,9 @@ export const RightSidebar: React.FC<RightSidebarProps> = ({ // コンポーネ�
 
         {/* フロア設定表示 */}
         {floorSettings.hasAccessFloor && (
-          <div className={`p-3 border rounded ${
-            darkMode ? 'bg-gray-700 border-custom-gray' : 'bg-light-bg-tertiary border-light-border-primary'
-          }`}>
-            <h4 className={`text-sm font-medium mb-2 flex items-center gap-1 ${darkMode ? 'text-gray-100' : 'text-light-text-primary'}`}>
-              <Square size={12} className={darkMode ? "text-gray-300" : "text-light-text-secondary"} />
+          <div className="p-3 border rounded bg-gray-700 border-custom-gray">
+            <h4 className="text-sm font-medium mb-2 flex items-center gap-1 text-gray-100">
+              <Square size={12} className="text-gray-300" />
               フリーアクセスフロア
             </h4>
             <div className="text-xs space-y-1">

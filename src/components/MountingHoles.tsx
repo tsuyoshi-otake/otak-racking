@@ -1,12 +1,12 @@
 import React from 'react';
 import { Rack } from '../types';
+import { getZoomedCageNutSize } from '../utils';
 
 interface MountingHolesProps {
   rack: Rack;
   unit: number;
   zoomLevel: number;
   unitHeight: number;
-  darkMode: boolean;
   perspective: 'front' | 'rear';
   onCageNutInstall?: (unit: number, side: string, position: string, nutType: string) => void;
   onCageNutRemove?: (unit: number, side: string, position: string) => void;
@@ -19,7 +19,6 @@ export const MountingHoles: React.FC<MountingHolesProps> = ({
   unit,
   zoomLevel,
   unitHeight,
-  darkMode,
   perspective,
   onCageNutInstall,
   onCageNutRemove,
@@ -37,7 +36,7 @@ export const MountingHoles: React.FC<MountingHolesProps> = ({
   const rails = rack.rails?.[unit];
   const railSide = perspective === 'front' ? 'front' : 'rear';
 
-  const holeSize = Math.max(8, 16 * (zoomLevel / 100));
+  const cageNutSize = getZoomedCageNutSize(zoomLevel);
   const frameOffset = 20 * (zoomLevel / 100);
 
   // レールスロットを描画する関数
@@ -63,13 +62,11 @@ export const MountingHoles: React.FC<MountingHolesProps> = ({
           width: `${slotWidth}px`,
           height: `${slotHeight}px`,
           backgroundColor: hasRail
-            ? darkMode
-              ? 'rgba(71, 85, 105, 0.95)' // ダークスチール（設置済み）
-              : 'rgba(148, 163, 184, 0.9)'
+            ? 'rgba(71, 85, 105, 0.95)' // ダークスチール（設置済み）
             : 'transparent', // 未使用時は透過
           border: hasRail
-            ? `1px solid ${darkMode ? 'rgba(51, 65, 85, 1)' : 'rgba(100, 116, 139, 1)'}`
-            : `1px dashed ${darkMode ? 'rgba(71, 85, 105, 0.4)' : 'rgba(148, 163, 184, 0.5)'}`,
+            ? '1px solid rgba(51, 65, 85, 1)'
+            : '1px dashed rgba(71, 85, 105, 0.4)',
           borderRadius: '2px',
           boxShadow: hasRail ? 'inset 0 2px 4px rgba(0,0,0,0.5), 0 1px 2px rgba(255,255,255,0.1)' : 'none',
         }}
@@ -87,9 +84,7 @@ export const MountingHoles: React.FC<MountingHolesProps> = ({
           <div
             className="absolute inset-0 flex items-center justify-center"
             style={{
-              background: darkMode
-                ? 'linear-gradient(180deg, rgba(100, 116, 139, 0.3) 0%, rgba(71, 85, 105, 0.5) 50%, rgba(51, 65, 85, 0.3) 100%)'
-                : 'linear-gradient(180deg, rgba(203, 213, 225, 0.4) 0%, rgba(148, 163, 184, 0.6) 50%, rgba(100, 116, 139, 0.4) 100%)',
+              background: 'linear-gradient(180deg, rgba(100, 116, 139, 0.3) 0%, rgba(71, 85, 105, 0.5) 50%, rgba(51, 65, 85, 0.3) 100%)',
               borderRadius: '1px',
               margin: '1px',
             }}
@@ -116,7 +111,7 @@ export const MountingHoles: React.FC<MountingHolesProps> = ({
       <div
         className="absolute"
         style={{
-          [position]: `-${frameOffset - holeSize / 2}px`,
+          [position]: `-${frameOffset - cageNutSize / 2}px`,
           top: vertical === 'top' ? '2px' : vertical === 'middle' ? '50%' : undefined,
           bottom: vertical === 'bottom' ? '2px' : undefined,
           transform: vertical === 'middle' ? 'translateY(-50%)' : undefined,
@@ -126,22 +121,16 @@ export const MountingHoles: React.FC<MountingHolesProps> = ({
         <div
           className={`relative border ${isRailFixed ? '' : 'cursor-pointer'} ${
             isRailFixed
-              ? darkMode
-                ? 'border-gray-600'
-                : 'bg-gradient-to-br from-slate-400 via-slate-500 to-slate-600 border-slate-700'
+              ? 'border-gray-600'
               : nut
-                ? darkMode
-                  ? 'bg-gradient-to-br from-zinc-600 via-zinc-700 to-zinc-800 border-zinc-500'
-                  : 'bg-gradient-to-br from-zinc-400 via-zinc-500 to-zinc-600 border-zinc-700'
-                : darkMode
-                  ? 'bg-gradient-to-br from-gray-900 via-black to-gray-950 border-gray-800'
-                  : 'bg-gradient-to-br from-gray-200 via-gray-300 to-gray-400 border-custom-gray'
+                ? 'bg-gradient-to-br from-zinc-600 via-zinc-700 to-zinc-800 border-zinc-500'
+                : 'bg-gradient-to-br from-gray-900 via-black to-gray-950 border-gray-800'
           }`}
           style={{
-            width: `${holeSize}px`,
-            height: `${holeSize}px`,
+            width: cageNutSize,
+            height: cageNutSize,
             borderRadius: '2px',
-            backgroundColor: isRailFixed && darkMode ? '#242d40' : undefined,
+            backgroundColor: isRailFixed ? '#242d40' : undefined,
             boxShadow: isRailFixed
               ? 'inset 0 2px 4px rgba(0,0,0,0.6), 0 1px 2px rgba(255,255,255,0.05)'
               : nut
@@ -166,14 +155,10 @@ export const MountingHoles: React.FC<MountingHolesProps> = ({
             // レール固定用のビス表現
             <div className="w-full h-full flex items-center justify-center">
               <div
-                className={`${
-                  darkMode
-                    ? 'bg-gradient-to-br from-gray-400 to-gray-600'
-                    : 'bg-gradient-to-br from-slate-500 to-slate-700'
-                }`}
+                className="bg-gradient-to-br from-gray-400 to-gray-600"
                 style={{
-                  width: `${Math.max(4, holeSize * 0.3)}px`,
-                  height: `${Math.max(4, holeSize * 0.3)}px`,
+                  width: `${Math.max(4, cageNutSize * 0.3)}px`,
+                  height: `${Math.max(4, cageNutSize * 0.3)}px`,
                   borderRadius: '50%',
                   boxShadow: 'inset 0 1px 2px rgba(0,0,0,0.5), 0 1px 1px rgba(255,255,255,0.1)',
                 }}
@@ -186,7 +171,7 @@ export const MountingHoles: React.FC<MountingHolesProps> = ({
                   }}
                 >
                   <div
-                    className={darkMode ? 'bg-gray-800' : 'bg-slate-900'}
+                    className="bg-gray-800"
                     style={{
                       width: '1px',
                       height: '60%',
@@ -194,7 +179,7 @@ export const MountingHoles: React.FC<MountingHolesProps> = ({
                     }}
                   />
                   <div
-                    className={darkMode ? 'bg-gray-800' : 'bg-slate-900'}
+                    className="bg-gray-800"
                     style={{
                       width: '60%',
                       height: '1px',
@@ -207,14 +192,10 @@ export const MountingHoles: React.FC<MountingHolesProps> = ({
           ) : nut ? (
             <div className="w-full h-full flex items-center justify-center">
               <div
-                className={`rounded-full ${
-                  darkMode
-                    ? 'bg-gradient-to-br from-slate-500 to-slate-700'
-                    : 'bg-gradient-to-br from-slate-300 to-slate-500'
-                }`}
+                className="rounded-full bg-gradient-to-br from-slate-500 to-slate-700"
                 style={{
-                  width: `${Math.max(6, holeSize * 0.4)}px`,
-                  height: `${Math.max(6, holeSize * 0.4)}px`,
+                  width: `${Math.max(6, cageNutSize * 0.4)}px`,
+                  height: `${Math.max(6, cageNutSize * 0.4)}px`,
                   boxShadow: 'inset 0 1px 2px rgba(0,0,0,0.3), 0 1px 1px rgba(255,255,255,0.2)',
                 }}
               />

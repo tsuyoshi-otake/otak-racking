@@ -137,9 +137,9 @@ export const useRackState = () => {
     const stateToSave = {
       racks,
       selectedRack,
-      floorSettings
+      floorSettings,
     };
-    saveAppState(stateToSave);
+    // saveAppState(stateToSave); // App.tsx に移動したためコメントアウト
   }, [racks, selectedRack, floorSettings]);
 
   // ラック追加

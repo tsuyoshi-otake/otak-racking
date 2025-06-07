@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Moon, Sun } from 'lucide-react';
 import { Equipment, PhysicalStructure } from './types';
 import { useRackState } from './hooks/useRackState';
 import { useDragAndDrop, DraggedItem } from './hooks/useDragAndDrop';
@@ -16,7 +15,6 @@ function App() {
   const loadedState = loadAppState();
   
   // 基本状態
-  const [darkMode, setDarkMode] = useState(() => loadedState.darkMode ?? false);
   const [zoomLevel, setZoomLevel] = useState(() => loadedState.zoomLevel ?? 100);
   const [selectedEquipment, setSelectedEquipment] = useState<Equipment | null>(null);
   const [showEquipmentModal, setShowEquipmentModal] = useState(false);
@@ -66,7 +64,7 @@ function App() {
   } = useRackState();
 // モーダル表示関数
   const showInfoModal = (title: string, message: string) => {
-    setInfoModal({ isOpen: true, title, message, onClose: () => setInfoModal(null), darkMode });
+    setInfoModal({ isOpen: true, title, message, onClose: () => setInfoModal(null) });
   };
 
   const showConfirmModal = (
@@ -85,7 +83,6 @@ function App() {
         setConfirmModal(null); // 確認後も閉じる
       },
       onClose: () => setConfirmModal(null),
-      darkMode,
       confirmText,
       cancelText
     });
@@ -94,7 +91,6 @@ function App() {
   // LocalStorageに状態保存
   useEffect(() => {
     const appState = {
-      darkMode,
       zoomLevel,
       selectedRack,
       activeViewMode,
@@ -103,7 +99,7 @@ function App() {
       floorSettings
     };
     saveAppState(appState);
-  }, [darkMode, zoomLevel, selectedRack, activeViewMode, rackViewPerspective, racks, floorSettings]);
+  }, [zoomLevel, selectedRack, activeViewMode, rackViewPerspective, racks, floorSettings]);
 
   // ドラッグ&ドロップ
   const {
@@ -196,38 +192,23 @@ function App() {
   const layoutDimensions = calculateLayoutDimensions(rackIds.length);
 
   return (
-    <div className={`min-h-screen ${darkMode ? 'dark' : ''}`}>
-      <div className={`min-h-screen ${darkMode ? 'bg-gray-800 text-gray-100' : 'bg-light-bg-primary text-light-text-primary'}`}>
+    <div className="min-h-screen dark">
+      <div className="min-h-screen bg-gray-800 text-gray-100">
         {/* ヘッダー */}
-        <header className={`border-b p-4 ${
-          darkMode ? 'border-custom-gray bg-gray-700' : 'border-light-border-primary bg-light-bg-secondary'
-        }`}>
+        <header className="border-b p-4 border-custom-gray bg-gray-700">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className={`text-2xl font-bold ${darkMode ? 'text-gray-100' : 'text-light-text-primary'}`}>otak-racking</h1>
-              <p className={`text-sm ${darkMode ? 'text-gray-300' : 'text-light-text-secondary'}`}>
+              <h1 className="text-2xl font-bold text-gray-100">otak-racking</h1>
+              <p className="text-sm text-gray-300">
                 データセンター・サーバールーム設計支援ツール
               </p>
             </div>
             
             <div className="flex items-center gap-4">
               {/* ズーム表示 */}
-              <span className={`text-sm ${darkMode ? 'text-gray-300' : 'text-light-text-secondary'}`}>
+              <span className="text-sm text-gray-300">
                 {zoomLevel}%
               </span>
-              
-              {/* ダークモード切り替え */}
-              <button
-                onClick={() => setDarkMode(!darkMode)}
-                className={`p-2 rounded transition-colors ${
-                  darkMode
-                    ? 'bg-gray-600 text-gray-200 hover:bg-custom-gray'
-                    : 'bg-light-bg-tertiary text-light-text-primary hover:bg-light-bg-hover border border-light-border-primary'
-                }`}
-                title={darkMode ? 'ライトモードに切り替え' : 'ダークモードに切り替え'}
-              >
-                {darkMode ? <Sun size={20} /> : <Moon size={20} />}
-              </button>
             </div>
           </div>
         </header>
@@ -236,7 +217,6 @@ function App() {
       <div className="flex h-[calc(100vh-80px)]">
         {/* 左サイドバー */}
         <LeftSidebar
-          darkMode={darkMode}
           zoomLevel={zoomLevel}
           activeViewMode={activeViewMode}
           onZoomChange={setZoomLevel}
@@ -251,11 +231,9 @@ function App() {
           {selectedRack === 'all' ? (
             // 全体表示
             <div className="space-y-6">
-              <div className={`p-4 border rounded-lg ${
-                darkMode ? 'bg-gray-700 border-custom-gray' : 'bg-light-bg-tertiary border-light-border-primary shadow-sm'
-              }`}>
-                <h2 className={`text-xl font-bold mb-2 ${darkMode ? 'text-gray-100' : 'text-light-text-primary'}`}>全体レイアウト</h2>
-                <p className={`text-sm ${darkMode ? 'text-gray-300' : 'text-light-text-secondary'}`}>
+              <div className="p-4 border rounded-lg bg-gray-700 border-custom-gray">
+                <h2 className="text-xl font-bold mb-2 text-gray-100">全体レイアウト</h2>
+                <p className="text-sm text-gray-300">
                   {Object.keys(racks).length}台のラックを表示中
                 </p>
               </div>
@@ -270,7 +248,6 @@ function App() {
                   <div key={rack.id} className="flex-shrink-0">
                     <RackView
                       rack={rack}
-                      darkMode={darkMode}
                       zoomLevel={zoomLevel}
                       selectedRack={selectedRack}
                       activeViewMode={activeViewMode}
@@ -289,7 +266,6 @@ function App() {
                 <div className="w-full max-w-md">
                   <RackView
                     rack={currentRack}
-                    darkMode={darkMode}
                     zoomLevel={zoomLevel}
                     selectedRack={selectedRack}
                     activeViewMode={activeViewMode}
@@ -327,7 +303,6 @@ function App() {
         <RightSidebar
           racks={racks}
           selectedRack={selectedRack}
-          darkMode={darkMode}
           floorSettings={floorSettings}
           onRackSelect={setSelectedRack}
           onAddRack={addRack}
@@ -343,7 +318,6 @@ function App() {
 
       {/* モーダル・ダイアログ */}
       <ModalsAndDialogs
-        darkMode={darkMode}
         currentRack={currentRack}
         selectedEquipment={selectedEquipment}
         showEquipmentModal={showEquipmentModal}

@@ -7,7 +7,8 @@ import {
   getEmptyUnitClass,
   getUnitNumClass,
   getPowerStatus,
-  getEquipmentDisplayName
+  getEquipmentDisplayName,
+  getZoomedMarginLeft
 } from '../utils';
 import { getEquipmentIcon, getAirflowIcon, getMountingIcon } from './RackIcons';
 import { MountingHoles } from './MountingHoles';
@@ -15,7 +16,6 @@ import { MountingHoles } from './MountingHoles';
 interface RackUnitProps {
   rack: Rack;
   unit: number;
-  darkMode: boolean;
   zoomLevel: number;
   unitHeight: number;
   fontSize: number;
@@ -37,7 +37,6 @@ interface RackUnitProps {
 export const RackUnit: React.FC<RackUnitProps> = ({
   rack,
   unit,
-  darkMode,
   zoomLevel,
   unitHeight,
   fontSize,
@@ -82,7 +81,7 @@ export const RackUnit: React.FC<RackUnitProps> = ({
     }
     
     if (activeViewMode === 'showPowerView') {
-      const status = getPowerStatus(item, rack.powerConnections, darkMode);
+      const status = getPowerStatus(item, rack.powerConnections);
       powerStatus = React.createElement(
         status.icon === 'CircleCheck' ? CheckCircle :
         status.icon === 'AlertCircle' ? AlertCircle : XCircle,
@@ -101,33 +100,33 @@ export const RackUnit: React.FC<RackUnitProps> = ({
     
     if (activeViewMode === 'showTemperatureView') {
       const unitTemp = coolingStats.temperatureMap[unit] || rack.environment.ambientTemp;
-      const tempColor = unitTemp > 30 ? 'text-red-500' : unitTemp > 25 ? 'text-yellow-500' : (darkMode ? 'text-gray-300' : 'text-gray-600');
+      const tempColor = unitTemp > 30 ? 'text-red-500' : unitTemp > 25 ? 'text-yellow-500' : 'text-gray-300';
       temperatureStatus = <Thermometer size={12} className={tempColor} />;
     }
   }
 
   if (activeViewMode === 'showCageNutView') {
     if (cageNutStatus.isComplete) {
-      cageNutDisplay = <CheckCircle size={12} className={darkMode ? "text-green-400" : "text-green-600"} />;
+      cageNutDisplay = <CheckCircle size={12} className="text-green-400" />;
     } else if (cageNutStatus.installed > 0) {
-      cageNutDisplay = <AlertCircle size={12} className={darkMode ? "text-yellow-400" : "text-yellow-600"} />;
+      cageNutDisplay = <AlertCircle size={12} className="text-yellow-400" />;
     } else {
-      cageNutDisplay = <XCircle size={12} className={darkMode ? "text-gray-400" : "text-custom-gray"} />;
+      cageNutDisplay = <XCircle size={12} className="text-gray-400" />;
     }
   }
 
   // レール表示処理
   if (activeViewMode === 'showRailView') {
     if (railStatus && (railStatus.frontLeft?.installed || railStatus.frontRight?.installed)) {
-      railDisplay = <Move size={12} className={darkMode ? "text-blue-400" : "text-blue-600"} />;
+      railDisplay = <Move size={12} className="text-blue-400" />;
     } else {
-      railDisplay = <XCircle size={12} className={darkMode ? "text-gray-400" : "text-custom-gray"} />;
+      railDisplay = <XCircle size={12} className="text-gray-400" />;
     }
   }
 
-  const unitBorderClass = getUnitBorderClass(darkMode);
-  const emptyUnitClass = getEmptyUnitClass(darkMode);
-  const unitNumClass = getUnitNumClass(darkMode);
+  const unitBorderClass = getUnitBorderClass();
+  const emptyUnitClass = getEmptyUnitClass();
+  const unitNumClass = getUnitNumClass();
 
   return (
     <div
@@ -137,10 +136,7 @@ export const RackUnit: React.FC<RackUnitProps> = ({
       } ${
         item && !isMainUnit ? `border-t-0 ${emptyUnitClass}` : ''
       }`}
-      style={{
-        height: `${unitHeight}px`,
-        fontSize: `${fontSize}px`
-      }}
+      style={{ height: unitHeight }}
       onDragOver={(isEmpty || (item && !isMainUnit)) && selectedRack !== 'all' ? onDragOver : undefined}
       onDrop={(isEmpty || (item && !isMainUnit)) && selectedRack !== 'all' ? (e) => onDrop?.(e, unit) : undefined}
       onClick={() => {
@@ -150,7 +146,12 @@ export const RackUnit: React.FC<RackUnitProps> = ({
       }}
     >
       <div className="flex items-center gap-1">
-        <span className={`font-mono ${unitNumClass} ml-6`}>{unit}</span>
+        <span
+          className={`font-mono ${unitNumClass}`}
+          style={{ fontSize: fontSize, marginLeft: getZoomedMarginLeft(zoomLevel) }}
+        >
+          {unit}
+        </span>
         {activeViewMode === 'showCageNutView' && (
           <div className="flex gap-0.5">
             <div className="flex flex-col gap-0.5" title={`ゲージナット: ${cageNutStatus.installed}/8`}>
@@ -159,7 +160,7 @@ export const RackUnit: React.FC<RackUnitProps> = ({
                   <div
                     key={i}
                     className={`w-1 h-1 rounded-full ${
-                      cageNutStatus.installed > i ? (darkMode ? 'bg-gray-300' : 'bg-gray-600') : (darkMode ? 'bg-gray-600' : 'bg-gray-300')
+                      cageNutStatus.installed > i ? 'bg-gray-300' : 'bg-gray-600'
                     }`}
                   />
                 ))}
@@ -169,7 +170,7 @@ export const RackUnit: React.FC<RackUnitProps> = ({
                   <div
                     key={i}
                     className={`w-1 h-1 rounded-full ${
-                      cageNutStatus.installed > i ? (darkMode ? 'bg-gray-300' : 'bg-gray-600') : (darkMode ? 'bg-gray-600' : 'bg-gray-300')
+                      cageNutStatus.installed > i ? 'bg-gray-300' : 'bg-gray-600'
                     }`}
                   />
                 ))}
@@ -185,7 +186,6 @@ export const RackUnit: React.FC<RackUnitProps> = ({
           unit={unit}
           zoomLevel={zoomLevel}
           unitHeight={unitHeight}
-          darkMode={darkMode}
           perspective="front"
           onCageNutInstall={onCageNutInstall}
           onCageNutRemove={onCageNutRemove}
@@ -197,7 +197,7 @@ export const RackUnit: React.FC<RackUnitProps> = ({
       {item && isMainUnit && (
         <div
           className={`absolute inset-0 flex items-center justify-between px-2 ${
-            ['showPowerView', 'showMountingView', 'showLabelView', 'showCablingView', 'showCageNutView', 'showRailView'].includes(activeViewMode ?? '') ? `border-2 border-dashed ${darkMode ? 'border-gray-400' : 'border-custom-gray'}` : ''
+            ['showPowerView', 'showMountingView', 'showLabelView', 'showCablingView', 'showCageNutView', 'showRailView'].includes(activeViewMode ?? '') ? 'border-2 border-dashed border-gray-400' : ''
           }`}
           style={{
             backgroundColor: item.color, 
@@ -231,4 +231,3 @@ export const RackUnit: React.FC<RackUnitProps> = ({
     </div>
   );
 };
-export {};

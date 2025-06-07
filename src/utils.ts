@@ -1,5 +1,5 @@
 import { Rack, Equipment, RackStats, TotalStats, CoolingStats, CageNutStatus, PowerSources } from './types';
-import { rackTypes } from './constants';
+import { rackTypes, BASE_UNIT_HEIGHT, BASE_FONT_SIZE, BASE_MARGIN_LEFT, BASE_CAGE_NUT_SIZE } from './constants';
 import { placementManager } from './services/EquipmentPlacementManager';
 
 /**
@@ -196,13 +196,19 @@ export const calculateLayoutDimensions = (rackCount: number, windowWidth: number
  * ズーム計算ユーティリティ
  */
 export const getZoomedUnitHeight = (zoomLevel: number): number => {
-  // リアルな比率に修正 (幅600pxに対して、1Uの高さを約55.2pxに設定)
-  return Math.max(16, (55.2 * zoomLevel) / 100);
+  return Math.max(16, (BASE_UNIT_HEIGHT * zoomLevel) / 100);
 };
 
 export const getZoomedFontSize = (zoomLevel: number): number => {
-  const baseFontSize = 12;
-  return Math.max(8, (baseFontSize * zoomLevel) / 100);
+  return Math.max(8, (BASE_FONT_SIZE * zoomLevel) / 100);
+};
+
+export const getZoomedMarginLeft = (zoomLevel: number): number => {
+  return (BASE_MARGIN_LEFT * zoomLevel) / 100;
+};
+
+export const getZoomedCageNutSize = (zoomLevel: number): number => {
+  return BASE_CAGE_NUT_SIZE * (zoomLevel / 250);
 };
 
 /**
@@ -296,40 +302,40 @@ export const autoInstallCageNuts = (unit: number, nutType: string = 'm6') => {
 /**
  * スタイルヘルパー関数
  */
-export const getContainerStyle = (darkMode: boolean): string => {
-  return darkMode ? 'bg-gray-800 text-gray-100' : 'bg-light-bg-primary text-light-text-primary';
+export const getContainerStyle = (): string => {
+  return 'bg-gray-800 text-gray-100';
 };
 
-export const getSidebarStyle = (darkMode: boolean): string => {
-  return darkMode ? 'bg-gray-700 border-custom-gray text-gray-100' : 'bg-light-bg-secondary border-light-border-primary text-light-text-primary';
+export const getSidebarStyle = (): string => {
+  return 'bg-gray-700 border-custom-gray text-gray-100';
 };
 
-export const getButtonStyle = (darkMode: boolean, isActive: boolean = false): string => {
+export const getButtonStyle = (isActive: boolean = false): string => {
   if (isActive) {
-    return darkMode ? 'bg-custom-gray text-white' : 'bg-light-accent text-white hover:bg-light-accent-hover';
+    return 'bg-custom-gray text-white';
   }
-  return darkMode ? 'bg-gray-600 text-gray-200 hover:bg-custom-gray' : 'bg-light-bg-tertiary text-light-text-primary hover:bg-light-bg-hover border border-light-border-primary';
+  return 'bg-gray-600 text-gray-200 hover:bg-custom-gray';
 };
 
 /**
  * ユニット表示ヘルパー
  */
-export const getUnitBorderClass = (darkMode: boolean): string => {
-  return darkMode ? 'border-custom-gray' : 'border-light-border-primary';
+export const getUnitBorderClass = (): string => {
+  return 'border-custom-gray';
 };
 
-export const getEmptyUnitClass = (darkMode: boolean): string => {
-  return darkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-light-bg-secondary hover:bg-light-bg-hover';
+export const getEmptyUnitClass = (): string => {
+  return 'bg-gray-700 hover:bg-gray-600';
 };
 
-export const getUnitNumClass = (darkMode: boolean): string => {
-  return darkMode ? 'text-gray-300' : 'text-light-text-tertiary';
+export const getUnitNumClass = (): string => {
+  return 'text-gray-300';
 };
 
 /**
  * 電源状態チェック
  */
-export const getPowerStatus = (equipment: Equipment, powerConnections: any, darkMode: boolean = false) => {
+export const getPowerStatus = (equipment: Equipment, powerConnections: any) => {
   const connections = powerConnections[equipment.id] || {};
   
   if (equipment.dualPower) {
@@ -337,16 +343,16 @@ export const getPowerStatus = (equipment: Equipment, powerConnections: any, dark
     const hasSecondary = connections.secondarySource;
     
     if (hasPrimary && hasSecondary) {
-      return { status: 'ok', icon: 'CircleCheck', color: darkMode ? 'text-green-400' : 'text-green-600' };
+      return { status: 'ok', icon: 'CircleCheck', color: 'text-green-400' };
     } else if (hasPrimary || hasSecondary) {
-      return { status: 'warning', icon: 'AlertCircle', color: darkMode ? 'text-yellow-400' : 'text-yellow-600' };
+      return { status: 'warning', icon: 'AlertCircle', color: 'text-yellow-400' };
     } else {
       return { status: 'error', icon: 'XCircle', color: 'text-red-500' };
     }
   } else {
     const hasPrimary = connections.primarySource;
     if (hasPrimary) {
-      return { status: 'ok', icon: 'CircleCheck', color: darkMode ? 'text-green-400' : 'text-green-600' };
+      return { status: 'ok', icon: 'CircleCheck', color: 'text-green-400' };
     } else {
       return { status: 'error', icon: 'XCircle', color: 'text-red-500' };
     }

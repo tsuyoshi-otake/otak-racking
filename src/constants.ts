@@ -1,5 +1,10 @@
 import { RackType, Equipment } from './types';
 
+// 基本サイズ定義
+export const BASE_UNIT_HEIGHT = 32; // 1Uの基本高さ (px)
+export const BASE_FONT_SIZE = 12; // 基本フォントサイズ (px)
+export const BASE_MARGIN_LEFT = 24; // U番号の基本左マージン (px)
+export const BASE_CAGE_NUT_SIZE = 16; // ケージナットの基本サイズ (px)
 // ラック種類ライブラリ
 export const rackTypes: Record<string, RackType> = {
   '42u-standard': { 
