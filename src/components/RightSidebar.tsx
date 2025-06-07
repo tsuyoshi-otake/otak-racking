@@ -5,14 +5,7 @@ import {
   Trash2,
   RotateCcw,
   Settings,
-  Eye,
-  EyeOff,
   Zap,
-  Wrench,
-  Tag,
-  Wind,
-  Thermometer,
-  Cable,
   Square,
   BarChart3,
   Server,
@@ -24,7 +17,6 @@ import {
   ChevronRight
 } from 'lucide-react';
 import { Rack, FloorSettings } from '../types'; // FloorSettingsを追加
-import { RackViewPerspective } from '../App'; // App.tsx から型をインポート
 import {
   calculateTotalStats,
   calculateRackStats,
@@ -32,8 +24,6 @@ import {
   getSidebarStyle,
   getButtonStyle
 } from '../utils';
-import { zoomLevels } from '../constants';
-import { EquipmentLibrary } from './EquipmentLibrary';
 
 // ViewModes は App.tsx で activeViewMode として管理されるため、
 // ここでの Props は activeViewMode とその更新関数になる
@@ -113,9 +103,9 @@ export const RightSidebar: React.FC<RightSidebarProps> = ({ // コンポーネ�
             value={selectedRack}
             onChange={(e) => onRackSelect(e.target.value)}
             className={`w-full p-2 border rounded mb-2 ${
-              darkMode 
-                ? 'bg-gray-700 border-gray-600 text-white' 
-                : 'bg-white border-gray-300 text-gray-900'
+              darkMode
+                ? 'bg-gray-600 border-gray-500 text-gray-200'
+                : 'bg-gray-300 border-gray-400 text-gray-700'
             }`}
           >
             <option value="all">全体表示</option>
@@ -175,7 +165,7 @@ export const RightSidebar: React.FC<RightSidebarProps> = ({ // コンポーネ�
           
           {showStats && (
             <div className={`p-3 border rounded ${
-              darkMode ? 'bg-gray-700 border-gray-600' : 'bg-gray-50 border-gray-200'
+              darkMode ? 'bg-gray-600 border-gray-500' : 'bg-gray-300 border-gray-400'
             }`}>
               {selectedRack === 'all' ? (
                 // 全体統計
@@ -186,19 +176,19 @@ export const RightSidebar: React.FC<RightSidebarProps> = ({ // コンポーネ�
                   </h4>
                   <div className="grid grid-cols-2 gap-2 text-xs">
                     <div className="flex items-center gap-1">
-                      <Server size={12} className="text-blue-400" />
+                      <Server size={12} className={darkMode ? "text-gray-400" : "text-gray-600"} />
                       <span>{totalStats.rackCount}台</span>
                     </div>
                     <div className="flex items-center gap-1">
-                      <Activity size={12} className="text-red-400" />
+                      <Activity size={12} className={darkMode ? "text-gray-400" : "text-gray-600"} />
                       <span>{totalStats.totalPower}W</span>
                     </div>
                     <div className="flex items-center gap-1">
-                      <HardDrive size={12} className="text-green-400" />
+                      <HardDrive size={12} className={darkMode ? "text-gray-400" : "text-gray-600"} />
                       <span>{totalStats.usedUnits}U使用</span>
                     </div>
                     <div className="flex items-center gap-1">
-                      <Snowflake size={12} className="text-cyan-400" />
+                      <Snowflake size={12} className={darkMode ? "text-gray-400" : "text-gray-600"} />
                       <span>{Math.round(totalStats.totalHeat/1000)}kBTU</span>
                     </div>
                   </div>
@@ -216,19 +206,19 @@ export const RightSidebar: React.FC<RightSidebarProps> = ({ // コンポーネ�
                   </h4>
                   <div className="grid grid-cols-2 gap-2 text-xs">
                     <div className="flex items-center gap-1">
-                      <Activity size={12} className="text-red-400" />
+                      <Activity size={12} className={darkMode ? "text-gray-400" : "text-gray-600"} />
                       <span>{currentRackStats.totalPower}W</span>
                     </div>
                     <div className="flex items-center gap-1">
-                      <Snowflake size={12} className="text-cyan-400" />
+                      <Snowflake size={12} className={darkMode ? "text-gray-400" : "text-gray-600"} />
                       <span>{Math.round(currentRackStats.totalHeat/1000)}kBTU</span>
                     </div>
                     <div className="flex items-center gap-1">
-                      <HardDrive size={12} className="text-green-400" />
+                      <HardDrive size={12} className={darkMode ? "text-gray-400" : "text-gray-600"} />
                       <span>{currentRackStats.usedUnits}U</span>
                     </div>
                     <div className="flex items-center gap-1">
-                      <Square size={12} className="text-gray-400" />
+                      <Square size={12} className={darkMode ? "text-gray-400" : "text-gray-600"} />
                       <span>{currentRackStats.availableUnits}U空</span>
                     </div>
                   </div>
@@ -237,7 +227,7 @@ export const RightSidebar: React.FC<RightSidebarProps> = ({ // コンポーネ�
                     <div>平均温度: {currentCoolingStats.avgTemp}°C</div>
                     <div>冷却効率: {currentCoolingStats.coolingEfficiency}%</div>
                     {currentCoolingStats.airflowIssues.length > 0 && (
-                      <div className="flex items-center gap-1 text-orange-400">
+                      <div className="flex items-center gap-1 text-gray-500">
                         <AlertTriangle size={12} />
                         <span>{currentCoolingStats.airflowIssues.length}件の問題</span>
                       </div>
@@ -291,10 +281,10 @@ export const RightSidebar: React.FC<RightSidebarProps> = ({ // コンポーネ�
         {/* フロア設定表示 */}
         {floorSettings.hasAccessFloor && (
           <div className={`p-3 border rounded ${
-            darkMode ? 'bg-gray-700 border-gray-600' : 'bg-blue-50 border-blue-200'
+            darkMode ? 'bg-gray-600 border-gray-500' : 'bg-gray-300 border-gray-400'
           }`}>
             <h4 className="text-sm font-medium mb-2 flex items-center gap-1">
-              <Square size={12} className="text-indigo-500" />
+              <Square size={12} className={darkMode ? "text-gray-400" : "text-gray-600"} />
               フリーアクセスフロア
             </h4>
             <div className="text-xs space-y-1">

@@ -64,14 +64,14 @@ export const MountingHoles: React.FC<MountingHolesProps> = ({
           height: `${slotHeight}px`,
           backgroundColor: hasRail
             ? darkMode
-              ? 'rgba(192, 192, 192, 0.9)' // 銀色（設置済み）
-              : 'rgba(192, 192, 192, 0.8)'
+              ? 'rgba(71, 85, 105, 0.95)' // ダークスチール（設置済み）
+              : 'rgba(148, 163, 184, 0.9)'
             : 'transparent', // 未使用時は透過
           border: hasRail
-            ? `1px solid ${darkMode ? 'rgba(169, 169, 169, 0.9)' : 'rgba(169, 169, 169, 0.8)'}`
-            : `1px dashed ${darkMode ? 'rgba(156, 163, 175, 0.3)' : 'rgba(156, 163, 175, 0.5)'}`,
+            ? `1px solid ${darkMode ? 'rgba(51, 65, 85, 1)' : 'rgba(100, 116, 139, 1)'}`
+            : `1px dashed ${darkMode ? 'rgba(71, 85, 105, 0.4)' : 'rgba(148, 163, 184, 0.5)'}`,
           borderRadius: '2px',
-          boxShadow: hasRail ? 'inset 0 1px 3px rgba(0,0,0,0.3)' : 'none',
+          boxShadow: hasRail ? 'inset 0 2px 4px rgba(0,0,0,0.5), 0 1px 2px rgba(255,255,255,0.1)' : 'none',
         }}
         title={`${position === 'left' ? '左' : '右'}レールスロット: ${hasRail ? 'レール設置済み（クリックで削除）' : 'クリックでレール設置'}`}
         onClick={(e) => {
@@ -88,8 +88,8 @@ export const MountingHoles: React.FC<MountingHolesProps> = ({
             className="absolute inset-0 flex items-center justify-center"
             style={{
               background: darkMode
-                ? 'linear-gradient(180deg, rgba(211, 211, 211, 0.4) 0%, rgba(192, 192, 192, 0.6) 50%, rgba(169, 169, 169, 0.4) 100%)'
-                : 'linear-gradient(180deg, rgba(220, 220, 220, 0.4) 0%, rgba(192, 192, 192, 0.6) 50%, rgba(169, 169, 169, 0.4) 100%)',
+                ? 'linear-gradient(180deg, rgba(100, 116, 139, 0.3) 0%, rgba(71, 85, 105, 0.5) 50%, rgba(51, 65, 85, 0.3) 100%)'
+                : 'linear-gradient(180deg, rgba(203, 213, 225, 0.4) 0%, rgba(148, 163, 184, 0.6) 50%, rgba(100, 116, 139, 0.4) 100%)',
               borderRadius: '1px',
               margin: '1px',
             }}
@@ -127,25 +127,25 @@ export const MountingHoles: React.FC<MountingHolesProps> = ({
           className={`relative border ${isRailFixed ? '' : 'cursor-pointer'} ${
             isRailFixed
               ? darkMode
-                ? 'bg-gradient-to-br from-zinc-600 via-zinc-700 to-zinc-800 border-zinc-500'
-                : 'bg-gradient-to-br from-zinc-400 via-zinc-500 to-zinc-600 border-zinc-700'
+                ? 'bg-gradient-to-br from-slate-600 via-slate-700 to-slate-800 border-slate-500'
+                : 'bg-gradient-to-br from-slate-400 via-slate-500 to-slate-600 border-slate-700'
               : nut
                 ? darkMode
-                  ? 'bg-gradient-to-br from-gray-500 via-gray-600 to-gray-700 border-gray-400'
-                  : 'bg-gradient-to-br from-gray-300 via-gray-400 to-gray-500 border-gray-600'
+                  ? 'bg-gradient-to-br from-zinc-600 via-zinc-700 to-zinc-800 border-zinc-500'
+                  : 'bg-gradient-to-br from-zinc-400 via-zinc-500 to-zinc-600 border-zinc-700'
                 : darkMode
-                  ? 'bg-gradient-to-br from-gray-800 via-gray-900 to-black border-gray-700'
-                  : 'bg-gradient-to-br from-gray-100 via-gray-200 to-gray-300 border-gray-400'
+                  ? 'bg-gradient-to-br from-gray-900 via-black to-gray-950 border-gray-800'
+                  : 'bg-gradient-to-br from-gray-200 via-gray-300 to-gray-400 border-gray-500'
           }`}
           style={{
             width: `${holeSize}px`,
             height: `${holeSize}px`,
             borderRadius: '2px',
             boxShadow: isRailFixed
-              ? 'inset 0 2px 4px rgba(0,0,0,0.5)'
+              ? 'inset 0 2px 4px rgba(0,0,0,0.6), 0 1px 2px rgba(255,255,255,0.05)'
               : nut
-                ? 'inset 0 2px 4px rgba(0,0,0,0.3)'
-                : 'inset 0 2px 4px rgba(0,0,0,0.1)',
+                ? 'inset 0 2px 4px rgba(0,0,0,0.4), 0 1px 2px rgba(255,255,255,0.1)'
+                : 'inset 0 2px 4px rgba(0,0,0,0.2)',
             opacity: isRailFixed ? 0.8 : 1,
           }}
           title={title}
@@ -167,14 +167,14 @@ export const MountingHoles: React.FC<MountingHolesProps> = ({
               <div
                 className={`${
                   darkMode
-                    ? 'bg-gradient-to-br from-gray-300 to-gray-500'
-                    : 'bg-gradient-to-br from-gray-400 to-gray-600'
+                    ? 'bg-gradient-to-br from-slate-400 to-slate-600'
+                    : 'bg-gradient-to-br from-slate-500 to-slate-700'
                 }`}
                 style={{
                   width: `${Math.max(4, holeSize * 0.3)}px`,
                   height: `${Math.max(4, holeSize * 0.3)}px`,
                   borderRadius: '50%',
-                  boxShadow: 'inset 0 1px 2px rgba(0,0,0,0.4)',
+                  boxShadow: 'inset 0 1px 2px rgba(0,0,0,0.5), 0 1px 1px rgba(255,255,255,0.1)',
                 }}
               >
                 {/* ビスの十字溝 */}
@@ -185,7 +185,7 @@ export const MountingHoles: React.FC<MountingHolesProps> = ({
                   }}
                 >
                   <div
-                    className={darkMode ? 'bg-gray-700' : 'bg-gray-800'}
+                    className={darkMode ? 'bg-slate-800' : 'bg-slate-900'}
                     style={{
                       width: '1px',
                       height: '60%',
@@ -193,7 +193,7 @@ export const MountingHoles: React.FC<MountingHolesProps> = ({
                     }}
                   />
                   <div
-                    className={darkMode ? 'bg-gray-700' : 'bg-gray-800'}
+                    className={darkMode ? 'bg-slate-800' : 'bg-slate-900'}
                     style={{
                       width: '60%',
                       height: '1px',
@@ -208,13 +208,13 @@ export const MountingHoles: React.FC<MountingHolesProps> = ({
               <div
                 className={`rounded-full ${
                   darkMode
-                    ? 'bg-gradient-to-br from-zinc-400 to-zinc-600'
-                    : 'bg-gradient-to-br from-zinc-200 to-zinc-400'
+                    ? 'bg-gradient-to-br from-slate-500 to-slate-700'
+                    : 'bg-gradient-to-br from-slate-300 to-slate-500'
                 }`}
                 style={{
                   width: `${Math.max(6, holeSize * 0.4)}px`,
                   height: `${Math.max(6, holeSize * 0.4)}px`,
-                  boxShadow: 'inset 0 1px 2px rgba(0,0,0,0.2)',
+                  boxShadow: 'inset 0 1px 2px rgba(0,0,0,0.3), 0 1px 1px rgba(255,255,255,0.2)',
                 }}
               />
             </div>

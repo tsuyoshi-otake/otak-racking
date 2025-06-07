@@ -55,8 +55,8 @@ export const RailManager: React.FC<RailManagerProps> = ({
                 onClick={() => handleInstallRail('left', rail.value)}
                 className={`px-2 py-1 text-xs rounded transition-colors ${
                   darkMode
-                    ? 'bg-indigo-600 hover:bg-indigo-700 text-white'
-                    : 'bg-indigo-500 hover:bg-indigo-600 text-white'
+                    ? 'bg-gray-600 hover:bg-gray-700 text-white'
+                    : 'bg-gray-500 hover:bg-gray-600 text-white'
                 }`}
                 title={`左側に${rail.label}を設置`}
               >
@@ -74,8 +74,8 @@ export const RailManager: React.FC<RailManagerProps> = ({
               onClick={() => handleRemoveRail('left')}
               className={`px-2 py-1 text-xs rounded transition-colors ${
                 darkMode
-                  ? 'bg-red-600 hover:bg-red-700 text-white'
-                  : 'bg-red-500 hover:bg-red-600 text-white'
+                  ? 'bg-gray-700 hover:bg-gray-800 text-white'
+                  : 'bg-gray-600 hover:bg-gray-700 text-white'
               }`}
               title="左レールを削除"
             >
@@ -97,8 +97,8 @@ export const RailManager: React.FC<RailManagerProps> = ({
                 onClick={() => handleInstallRail('right', rail.value)}
                 className={`px-2 py-1 text-xs rounded transition-colors ${
                   darkMode
-                    ? 'bg-indigo-600 hover:bg-indigo-700 text-white'
-                    : 'bg-indigo-500 hover:bg-indigo-600 text-white'
+                    ? 'bg-gray-600 hover:bg-gray-700 text-white'
+                    : 'bg-gray-500 hover:bg-gray-600 text-white'
                 }`}
                 title={`右側に${rail.label}を設置`}
               >
@@ -116,8 +116,8 @@ export const RailManager: React.FC<RailManagerProps> = ({
               onClick={() => handleRemoveRail('right')}
               className={`px-2 py-1 text-xs rounded transition-colors ${
                 darkMode
-                  ? 'bg-red-600 hover:bg-red-700 text-white'
-                  : 'bg-red-500 hover:bg-red-600 text-white'
+                  ? 'bg-gray-700 hover:bg-gray-800 text-white'
+                  : 'bg-gray-600 hover:bg-gray-700 text-white'
               }`}
               title="右レールを削除"
             >

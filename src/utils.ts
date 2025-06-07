@@ -60,8 +60,6 @@ export const calculateTotalStats = (racks: Record<string, Rack>): TotalStats => 
  * 冷却・エアフロー計算
  */
 export const calculateCoolingStats = (rack: Rack): CoolingStats => {
-  const equipmentArray = Object.values(rack.equipment).filter(item => item.isMainUnit || !item.startUnit);
-  
   let totalHeatGeneration = 0;
   let totalCFM = 0;
   let totalCoolingCapacity = 0;
@@ -299,18 +297,18 @@ export const autoInstallCageNuts = (unit: number, nutType: string = 'm6') => {
  * スタイルヘルパー関数
  */
 export const getContainerStyle = (darkMode: boolean): string => {
-  return darkMode ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-900';
+  return darkMode ? 'bg-gray-800 text-gray-200' : 'bg-gray-300 text-gray-700';
 };
 
 export const getSidebarStyle = (darkMode: boolean): string => {
-  return darkMode ? 'bg-gray-800 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900';
+  return darkMode ? 'bg-gray-700 border-gray-600 text-gray-200' : 'bg-gray-200 border-gray-300 text-gray-700';
 };
 
 export const getButtonStyle = (darkMode: boolean, isActive: boolean = false): string => {
   if (isActive) {
-    return darkMode ? 'bg-blue-500 text-white' : 'bg-blue-600 text-white';
+    return darkMode ? 'bg-gray-600 text-gray-100' : 'bg-gray-500 text-white';
   }
-  return darkMode ? 'bg-gray-700 text-gray-300 hover:bg-gray-600' : 'bg-gray-100 text-gray-700 hover:bg-gray-200';
+  return darkMode ? 'bg-gray-700 text-gray-300 hover:bg-gray-600' : 'bg-gray-200 text-gray-700 hover:bg-gray-300';
 };
 
 /**
@@ -321,7 +319,7 @@ export const getUnitBorderClass = (darkMode: boolean): string => {
 };
 
 export const getEmptyUnitClass = (darkMode: boolean): string => {
-  return darkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-50 hover:bg-gray-100';
+  return darkMode ? 'bg-gray-600 hover:bg-gray-500' : 'bg-gray-400 hover:bg-gray-500';
 };
 
 export const getUnitNumClass = (darkMode: boolean): string => {
@@ -339,16 +337,16 @@ export const getPowerStatus = (equipment: Equipment, powerConnections: any) => {
     const hasSecondary = connections.secondarySource;
     
     if (hasPrimary && hasSecondary) {
-      return { status: 'ok', icon: 'CircleCheck', color: 'text-green-500' };
+      return { status: 'ok', icon: 'CircleCheck', color: 'text-gray-500' };
     } else if (hasPrimary || hasSecondary) {
-      return { status: 'warning', icon: 'AlertCircle', color: 'text-yellow-500' };
+      return { status: 'warning', icon: 'AlertCircle', color: 'text-orange-500' };
     } else {
       return { status: 'error', icon: 'XCircle', color: 'text-red-500' };
     }
   } else {
     const hasPrimary = connections.primarySource;
     if (hasPrimary) {
-      return { status: 'ok', icon: 'CircleCheck', color: 'text-green-500' };
+      return { status: 'ok', icon: 'CircleCheck', color: 'text-gray-500' };
     } else {
       return { status: 'error', icon: 'XCircle', color: 'text-red-500' };
     }

@@ -193,19 +193,19 @@ function App() {
     <div className={`min-h-screen ${containerStyle} ${darkMode ? 'dark' : ''}`}>
       {/* ヘッダー */}
       <header className={`border-b p-4 ${
-        darkMode ? 'border-gray-600 bg-gray-800' : 'border-gray-300 bg-white'
+        darkMode ? 'border-gray-600 bg-gray-700' : 'border-gray-300 bg-gray-200'
       }`}>
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold">otak-racking</h1>
-            <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+            <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
               データセンター・サーバールーム設計支援ツール
             </p>
           </div>
           
           <div className="flex items-center gap-4">
             {/* ズーム表示 */}
-            <span className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+            <span className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
               {zoomLevel}%
             </span>
             
@@ -213,9 +213,9 @@ function App() {
             <button
               onClick={() => setDarkMode(!darkMode)}
               className={`p-2 rounded transition-colors ${
-                darkMode 
-                  ? 'bg-gray-700 text-yellow-400 hover:bg-gray-600' 
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                darkMode
+                  ? 'bg-gray-600 text-gray-300 hover:bg-gray-500'
+                  : 'bg-gray-300 text-gray-600 hover:bg-gray-400'
               }`}
               title={darkMode ? 'ライトモードに切り替え' : 'ダークモードに切り替え'}
             >
@@ -245,10 +245,10 @@ function App() {
             // 全体表示
             <div className="space-y-6">
               <div className={`p-4 border rounded-lg ${
-                darkMode ? 'bg-gray-800 border-gray-600' : 'bg-gray-50 border-gray-200'
+                darkMode ? 'bg-gray-700 border-gray-600' : 'bg-gray-300 border-gray-400'
               }`}>
                 <h2 className="text-xl font-bold mb-2">全体レイアウト</h2>
-                <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
                   {Object.keys(racks).length}台のラックを表示中
                 </p>
               </div>

@@ -101,27 +101,27 @@ export const RackUnit: React.FC<RackUnitProps> = ({
     
     if (activeViewMode === 'showTemperatureView') {
       const unitTemp = coolingStats.temperatureMap[unit] || rack.environment.ambientTemp;
-      const tempColor = unitTemp > 30 ? 'text-red-500' : unitTemp > 25 ? 'text-yellow-500' : 'text-green-500';
+      const tempColor = unitTemp > 30 ? 'text-gray-800' : unitTemp > 25 ? 'text-gray-700' : (darkMode ? 'text-gray-400' : 'text-gray-600');
       temperatureStatus = <Thermometer size={12} className={tempColor} />;
     }
   }
 
   if (activeViewMode === 'showCageNutView') {
     if (cageNutStatus.isComplete) {
-      cageNutDisplay = <CheckCircle size={12} className="text-green-500" />;
+      cageNutDisplay = <CheckCircle size={12} className={darkMode ? "text-gray-400" : "text-gray-600"} />;
     } else if (cageNutStatus.installed > 0) {
-      cageNutDisplay = <AlertCircle size={12} className="text-yellow-500" />;
+      cageNutDisplay = <AlertCircle size={12} className={darkMode ? "text-gray-500" : "text-gray-600"} />;
     } else {
-      cageNutDisplay = <XCircle size={12} className="text-red-500" />;
+      cageNutDisplay = <XCircle size={12} className={darkMode ? "text-gray-500" : "text-gray-400"} />;
     }
   }
 
   // レール表示処理
   if (activeViewMode === 'showRailView') {
     if (railStatus && (railStatus.frontLeft?.installed || railStatus.frontRight?.installed)) {
-      railDisplay = <Move size={12} className="text-blue-500" />;
+      railDisplay = <Move size={12} className={darkMode ? "text-gray-400" : "text-gray-600"} />;
     } else {
-      railDisplay = <XCircle size={12} className="text-gray-400" />;
+      railDisplay = <XCircle size={12} className={darkMode ? "text-gray-500" : "text-gray-400"} />;
     }
   }
 
@@ -156,20 +156,20 @@ export const RackUnit: React.FC<RackUnitProps> = ({
             <div className="flex flex-col gap-0.5" title={`ゲージナット: ${cageNutStatus.installed}/8`}>
               <div className="flex gap-0.5">
                 {[0, 1, 2, 3].map((i) => (
-                  <div 
-                    key={i} 
+                  <div
+                    key={i}
                     className={`w-1 h-1 rounded-full ${
-                      cageNutStatus.installed > i ? 'bg-green-500' : 'bg-gray-300 dark:bg-gray-600'
+                      cageNutStatus.installed > i ? (darkMode ? 'bg-gray-400' : 'bg-gray-600') : 'bg-gray-300 dark:bg-gray-600'
                     }`}
                   />
                 ))}
               </div>
               <div className="flex gap-0.5">
                 {[4, 5, 6, 7].map((i) => (
-                  <div 
-                    key={i} 
+                  <div
+                    key={i}
                     className={`w-1 h-1 rounded-full ${
-                      cageNutStatus.installed > i ? 'bg-green-400' : 'bg-gray-300 dark:bg-gray-600'
+                      cageNutStatus.installed > i ? (darkMode ? 'bg-gray-400' : 'bg-gray-600') : 'bg-gray-300 dark:bg-gray-600'
                     }`}
                   />
                 ))}
@@ -197,7 +197,7 @@ export const RackUnit: React.FC<RackUnitProps> = ({
       {item && isMainUnit && (
         <div
           className={`absolute inset-0 flex items-center justify-between px-2 ${
-            ['showPowerView', 'showMountingView', 'showLabelView', 'showCablingView', 'showCageNutView', 'showRailView'].includes(activeViewMode ?? '') ? 'border-2 border-dashed border-blue-400' : ''
+            ['showPowerView', 'showMountingView', 'showLabelView', 'showCablingView', 'showCageNutView', 'showRailView'].includes(activeViewMode ?? '') ? `border-2 border-dashed ${darkMode ? 'border-gray-500' : 'border-gray-400'}` : ''
           }`}
           style={{
             backgroundColor: item.color, 
@@ -221,7 +221,7 @@ export const RackUnit: React.FC<RackUnitProps> = ({
                 e.stopPropagation();
                 onEquipmentRemove?.(unit);
               }}
-              className="text-white hover:text-red-200 ml-1"
+              className="text-white hover:text-gray-300 ml-1"
             >
               <Trash2 size={Math.max(8, fontSize - 2)} />
             </button>

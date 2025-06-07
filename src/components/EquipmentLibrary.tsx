@@ -38,11 +38,10 @@ export const EquipmentLibrary: React.FC<EquipmentLibraryProps> = ({
       draggable
       onDragStart={(e) => onDragStart(e, item)}
       className={`p-2 border rounded-lg cursor-move transition-shadow hover:shadow-md ${
-        darkMode 
-          ? 'border-gray-600 bg-gray-700 hover:shadow-lg' 
-          : 'border-gray-200 bg-white'
+        darkMode
+          ? 'border-gray-600 bg-gray-700 hover:shadow-lg border-l-4 border-l-gray-500'
+          : 'border-gray-200 bg-white border-l-4 border-l-gray-400'
       } ${item.pduType || item.nutType ? 'border-dashed' : ''}`}
-      style={{ borderLeft: `4px solid ${item.color}` }}
     >
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
@@ -69,14 +68,14 @@ export const EquipmentLibrary: React.FC<EquipmentLibraryProps> = ({
           </span>
           {item.dualPower && (
             <span className={`text-xs px-0.5 py-0.5 rounded flex items-center ${
-              darkMode ? 'bg-yellow-800 text-yellow-200' : 'bg-yellow-100 text-yellow-800'
+              darkMode ? 'bg-gray-600 text-gray-300' : 'bg-gray-200 text-gray-700'
             }`}>
               <Zap size={10} />
             </span>
           )}
           {item.pduType && (
             <span className={`text-xs px-0.5 py-0.5 rounded flex items-center ${
-              darkMode ? 'bg-red-800 text-red-200' : 'bg-red-100 text-red-800'
+              darkMode ? 'bg-gray-600 text-gray-300' : 'bg-gray-200 text-gray-700'
             }`} title="特殊配電">
               <Power size={8} />
             </span>
@@ -106,7 +105,7 @@ export const EquipmentLibrary: React.FC<EquipmentLibraryProps> = ({
             )}
             
             {item.mountingNotes && (
-              <div className="mt-1 text-orange-600 dark:text-orange-400">
+              <div className="mt-1 text-gray-600 dark:text-gray-400">
                 <strong>設置注意:</strong> {item.mountingNotes}
               </div>
             )}
@@ -117,27 +116,27 @@ export const EquipmentLibrary: React.FC<EquipmentLibraryProps> = ({
   );
 
   const getEquipmentIcon = (type: string, darkMode: boolean) => {
-    const iconClass = darkMode ? 'text-blue-400' : 'text-blue-600';
+    const iconClass = darkMode ? 'text-gray-400' : 'text-gray-600';
     const size = 14;
 
     switch (type) {
       case 'server':
         return <Server size={size} className={iconClass} />;
       case 'network':
-        return <Network size={size} className={darkMode ? 'text-green-400' : 'text-green-600'} />;
+        return <Network size={size} className={iconClass} />;
       case 'security':
-        return <Shield size={size} className={darkMode ? 'text-red-400' : 'text-red-600'} />;
+        return <Shield size={size} className={iconClass} />;
       case 'storage':
         return <HardDrive size={size} className={iconClass} />;
       case 'pdu':
       case 'ups':
-        return <Zap size={size} className={darkMode ? 'text-red-400' : 'text-red-600'} />;
+        return <Zap size={size} className={iconClass} />;
       case 'power':
-        return <Activity size={size} className={darkMode ? 'text-red-400' : 'text-red-600'} />;
+        return <Activity size={size} className={iconClass} />;
       case 'mounting':
-        return <Wrench size={size} className={darkMode ? 'text-purple-400' : 'text-purple-600'} />;
+        return <Wrench size={size} className={iconClass} />;
       case 'rail':
-        return <Move size={size} className={darkMode ? 'text-gray-400' : 'text-gray-600'} />;
+        return <Move size={size} className={iconClass} />;
       default:
         return <Server size={size} className={iconClass} />;
     }
@@ -211,7 +210,7 @@ export const EquipmentLibrary: React.FC<EquipmentLibraryProps> = ({
               {renderEquipmentCard(item)}
               {item.nutType && (
                 <div className={`mt-1 text-xs px-2 py-1 rounded ${
-                  darkMode ? 'bg-blue-900/30 text-blue-300' : 'bg-blue-50 text-blue-700'
+                  darkMode ? 'bg-gray-700 text-gray-300' : 'bg-gray-100 text-gray-700'
                 }`}>
                   💡 ドラッグしてユニットにドロップすると8個まとめて設置されます
                 </div>

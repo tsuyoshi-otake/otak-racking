@@ -118,8 +118,8 @@ export const ModalsAndDialogs: React.FC<ModalsAndDialogsProps> = ({
 
     const modalBg = darkMode ? 'bg-gray-800 text-white' : 'bg-white text-gray-900';
     const inputBg = darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900';
-    const tabActiveClass = darkMode ? 'bg-blue-600 text-white' : 'bg-blue-500 text-white';
-    const tabInactiveClass = darkMode ? 'bg-gray-700 text-gray-300 hover:bg-gray-600' : 'bg-gray-100 text-gray-700 hover:bg-gray-200';
+    const tabActiveClass = darkMode ? 'bg-gray-600 text-white' : 'bg-gray-500 text-white';
+    const tabInactiveClass = darkMode ? 'bg-gray-700 text-gray-300 hover:bg-gray-600' : 'bg-gray-200 text-gray-700 hover:bg-gray-300';
 
     return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -282,13 +282,13 @@ export const ModalsAndDialogs: React.FC<ModalsAndDialogsProps> = ({
                     <div className="flex items-center gap-2 text-sm">
                       {powerConnection.primarySource && (selectedEquipment.dualPower ? powerConnection.secondarySource : true) ? (
                         <>
-                          <CheckCircle size={14} className="text-green-500" />
-                          <span className="text-green-600 dark:text-green-400">電源設定完了</span>
+                          <CheckCircle size={14} className={darkMode ? "text-gray-400" : "text-gray-600"} />
+                          <span className={darkMode ? "text-gray-300" : "text-gray-700"}>電源設定完了</span>
                         </>
                       ) : (
                         <>
-                          <AlertTriangle size={14} className="text-orange-500" />
-                          <span className="text-orange-600 dark:text-orange-400">電源設定が不完全です</span>
+                          <AlertTriangle size={14} className="text-gray-500" />
+                          <span className="text-gray-600 dark:text-gray-400">電源設定が不完全です</span>
                         </>
                       )}
                     </div>
@@ -466,7 +466,7 @@ export const ModalsAndDialogs: React.FC<ModalsAndDialogsProps> = ({
                 <button
                   onClick={onAddRack}
                   className={`p-2 rounded flex items-center gap-1 text-sm ${
-                    darkMode ? 'bg-blue-600 hover:bg-blue-700' : 'bg-blue-500 hover:bg-blue-600'
+                    darkMode ? 'bg-gray-600 hover:bg-gray-500' : 'bg-gray-500 hover:bg-gray-600'
                   } text-white`}
                 >
                   <Plus size={14} />
@@ -694,7 +694,7 @@ export const ModalsAndDialogs: React.FC<ModalsAndDialogsProps> = ({
                   onCloseFloorSettings?.();
                 }}
                 className={`flex-1 p-2 rounded text-sm font-medium ${
-                  darkMode ? 'bg-blue-600 hover:bg-blue-700' : 'bg-blue-500 hover:bg-blue-600'
+                  darkMode ? 'bg-gray-600 hover:bg-gray-500' : 'bg-gray-500 hover:bg-gray-600'
                 } text-white`}
               >
                 保存
@@ -795,7 +795,7 @@ export const ModalsAndDialogs: React.FC<ModalsAndDialogsProps> = ({
         <div className={`${modalBg} rounded-lg shadow-xl w-full max-w-md`}>
           <div className={`p-4 border-b flex items-center justify-between ${darkMode ? 'border-gray-600' : 'border-gray-200'}`}>
             <h3 className="text-lg font-bold flex items-center gap-2">
-              <Info size={20} className={darkMode ? 'text-blue-400' : 'text-blue-600'} />
+              <Info size={20} className={darkMode ? 'text-gray-400' : 'text-gray-600'} />
               {infoModal.title}
             </h3>
             <button onClick={infoModal.onClose} className={`p-1 rounded hover:bg-opacity-10 hover:bg-gray-500`}>
@@ -810,7 +810,7 @@ export const ModalsAndDialogs: React.FC<ModalsAndDialogsProps> = ({
           <div className={`p-4 border-t flex justify-end ${darkMode ? 'border-gray-600' : 'border-gray-200'}`}>
             <button
               onClick={infoModal.onClose}
-              className={`px-4 py-2 rounded text-sm font-medium ${darkMode ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'bg-blue-500 hover:bg-blue-600 text-white'}`}
+              className={`px-4 py-2 rounded text-sm font-medium ${darkMode ? 'bg-gray-600 hover:bg-gray-500 text-white' : 'bg-gray-500 hover:bg-gray-600 text-white'}`}
             >
               OK
             </button>
@@ -853,7 +853,7 @@ export const ModalsAndDialogs: React.FC<ModalsAndDialogsProps> = ({
                 confirmModal.onConfirm();
                 confirmModal.onClose(); // 確認後も閉じる
               }}
-              className={`px-4 py-2 rounded text-sm font-medium ${darkMode ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'bg-blue-500 hover:bg-blue-600 text-white'}`}
+              className={`px-4 py-2 rounded text-sm font-medium ${darkMode ? 'bg-gray-600 hover:bg-gray-500 text-white' : 'bg-gray-500 hover:bg-gray-600 text-white'}`}
             >
               {confirmModal.confirmText || 'OK'}
             </button>

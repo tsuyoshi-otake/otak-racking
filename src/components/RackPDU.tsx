@@ -55,7 +55,7 @@ export const RackPDU: React.FC<RackPDUProps> = ({
       return (
         <div
           key={`pdu-${index}`}
-          className={`absolute border-2 border-red-500 bg-red-600 opacity-80 hover:opacity-100 transition-opacity cursor-pointer`}
+          className={`absolute border-2 border-gray-600 bg-gray-700 opacity-80 hover:opacity-100 transition-opacity cursor-pointer`}
           style={positionStyle}
           title={`${pdu.equipment.name} (${pdu.position})`}
         >
@@ -68,7 +68,7 @@ export const RackPDU: React.FC<RackPDUProps> = ({
           {/* PDUコンセント表現 */}
           <div className="absolute right-0 top-2 bottom-2 w-1 flex flex-col justify-around">
             {Array.from({ length: Math.floor(pduHeight / 20) }, (_, i) => (
-              <div key={i} className="w-1 h-1 bg-yellow-400 rounded-full" />
+              <div key={i} className="w-1 h-1 bg-gray-400 rounded-full" />
             ))}
           </div>
         </div>

@@ -54,12 +54,12 @@ export const getAirflowIcon = (airflow: string, size: number) => {
   const iconProps = { size };
   
   switch (airflow) {
-    case 'front-to-rear': return <ArrowRight {...iconProps} className="text-blue-400" />;
-    case 'rear-to-front': return <ArrowLeft {...iconProps} className="text-green-400" />;
-    case 'side-to-side': return <ArrowUp {...iconProps} className="text-yellow-400" />;
-    case 'intake': return <ArrowDown {...iconProps} className="text-cyan-400" />;
-    case 'exhaust': return <ArrowUp {...iconProps} className="text-orange-400" />;
-    case 'blocking': return <Square {...iconProps} className="text-red-400" />;
+    case 'front-to-rear': return <ArrowRight {...iconProps} className="text-gray-500" />;
+    case 'rear-to-front': return <ArrowLeft {...iconProps} className="text-gray-600" />;
+    case 'side-to-side': return <ArrowUp {...iconProps} className="text-gray-500" />;
+    case 'intake': return <ArrowDown {...iconProps} className="text-gray-600" />;
+    case 'exhaust': return <ArrowUp {...iconProps} className="text-gray-700" />;
+    case 'blocking': return <Square {...iconProps} className="text-gray-800" />;
     default: return <Wind {...iconProps} className="text-gray-400" />;
   }
 };
@@ -68,18 +68,18 @@ export const getAirflowIcon = (airflow: string, size: number) => {
 export const getMountingIcon = (mountingType: string, needsRails: boolean, size: number) => {
   switch (mountingType) {
     case 'slide-rail':
-      return <Settings size={size} className="text-purple-400" />;
+      return <Settings size={size} className="text-gray-600" />;
     case 'fixed-rail':
-      return <Settings size={size} className="text-blue-400" />;
+      return <Settings size={size} className="text-gray-500" />;
     case 'toolless-rail':
-      return <Settings size={size} className="text-green-400" />;
+      return <Settings size={size} className="text-gray-600" />;
     case 'shelf':
-      return <Package size={size} className="text-yellow-400" />;
+      return <Package size={size} className="text-gray-700" />;
     case 'direct':
-      return <Wrench size={size} className="text-orange-400" />;
+      return <Wrench size={size} className="text-gray-700" />;
     default:
       return needsRails ?
-        <AlertCircle size={size} className="text-red-400" /> :
+        <AlertCircle size={size} className="text-gray-800" /> :
         <CheckCircle size={size} className="text-gray-400" />;
   }
 };

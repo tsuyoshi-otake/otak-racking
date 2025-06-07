@@ -120,7 +120,7 @@ export const RackStructure: React.FC<RackStructureProps> = ({
           )}
           
           {structure.frontDoor.type === 'glass' && (
-            <div className="w-full h-full bg-blue-100 bg-opacity-30 border-2 border-gray-400">
+            <div className="w-full h-full bg-gray-100 bg-opacity-30 border-2 border-gray-400">
               <div className="absolute top-2 right-2">
                 <Eye size={16} className="text-gray-600" />
               </div>
@@ -151,9 +151,9 @@ export const RackStructure: React.FC<RackStructureProps> = ({
           {/* ロック表示 */}
           <div className="absolute top-4 right-4">
             {structure.frontDoor.locked ? (
-              <Lock size={16} className="text-red-500" />
+              <Lock size={16} className="text-gray-700" />
             ) : (
-              <Unlock size={16} className="text-green-500" />
+              <Unlock size={16} className="text-gray-500" />
             )}
           </div>
 
@@ -202,9 +202,9 @@ export const RackStructure: React.FC<RackStructureProps> = ({
           
           <div className="absolute top-4 left-4">
             {structure.rearDoor.locked ? (
-              <Lock size={16} className="text-red-500" />
+              <Lock size={16} className="text-gray-700" />
             ) : (
-              <Unlock size={16} className="text-green-500" />
+              <Unlock size={16} className="text-gray-500" />
             )}
           </div>
         </div>
