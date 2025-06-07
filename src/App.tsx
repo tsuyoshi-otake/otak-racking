@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Moon, Sun, Maximize } from 'lucide-react';
-import { Equipment, FloorSettings, PhysicalStructure } from './types';
+import { Moon, Sun } from 'lucide-react';
+import { Equipment, PhysicalStructure } from './types';
 import { useRackState } from './hooks/useRackState';
 import { useDragAndDrop, DraggedItem } from './hooks/useDragAndDrop';
 import { LeftSidebar } from './components/LeftSidebar'; // Sidebar を LeftSidebar に変更
@@ -32,7 +32,6 @@ function App() {
 
   // モーダル状態
   const [showRackManager, setShowRackManager] = useState(false);
-  const [showEquipmentInfo, setShowEquipmentInfo] = useState<string | null>(null);
   const [showFloorSettings, setShowFloorSettings] = useState(false);
   const [showCoolingConfig, setShowCoolingConfig] = useState(false);
   const [showPowerConfig, setShowPowerConfig] = useState(false);
@@ -62,6 +61,8 @@ function App() {
     autoInstallCageNutsForUnit,
     installCageNut,
     removeCageNut,
+    installRail,
+    removeRail,
   } = useRackState();
 // モーダル表示関数
   const showInfoModal = (title: string, message: string) => {
@@ -123,40 +124,6 @@ function App() {
   // アクティブなビューモード変更
   const handleActiveViewModeChange = (mode: string | null) => {
     setActiveViewMode(mode);
-  };
-
-const handleZoomFit = () => {
-    const leftSidebarWidth = 320; // 左サイドバーの幅 (w-80)
-    const rightSidebarWidth = 320; // 右サイドバーの幅 (w-80)
-    const totalSidebarWidth = leftSidebarWidth + rightSidebarWidth;
-    const headerHeight = 80;  // ヘッダーの高さ
-    const margin = 40; // ビューポート計算時の余裕マージン
-
-    if (selectedRack === 'all') {
-      const rackIds = Object.keys(racks);
-      // calculateLayoutDimensions は window.innerWidth を内部で参照するため、
-      // ここで渡す必要はありません。
-      const layout = calculateLayoutDimensions(rackIds.length);
-      const viewportWidth = window.innerWidth - totalSidebarWidth - margin; // sidebarWidth を totalSidebarWidth に変更
-      const viewportHeight = window.innerHeight - headerHeight - margin;
-      
-      const referenceRackHeight = (42 * 32) + 100; // 42Uラックの高さ + パディング等
-
-      const widthBasedZoom = Math.floor((viewportWidth / layout.totalContentWidth) * 100);
-      const heightBasedZoom = Math.floor((viewportHeight / referenceRackHeight) * 100);
-      
-      // ズームレベルが極端に小さくならないように最小値を設定 (例: 20%)
-      // また、大きくなりすぎないように最大値も設定 (例: 75%)
-      const optimalZoom = Math.min(75, Math.max(20, Math.min(widthBasedZoom, heightBasedZoom)));
-      setZoomLevel(optimalZoom);
-    } else if (currentRack) {
-      const viewportHeight = window.innerHeight - headerHeight - margin;
-      const rackContentHeight = (currentRack.units * 32) + 100; // ラックのコンテンツ高さ + パディング等
-      
-      // こちらも最小・最大値を設定 (例: 20% - 100%)
-      const optimalZoom = Math.min(100, Math.max(20, Math.floor((viewportHeight / rackContentHeight) * 100)));
-      setZoomLevel(optimalZoom);
-    }
   };
 
   // 物理構造更新関数
@@ -336,6 +303,12 @@ const handleZoomFit = () => {
                     perspective={rackViewPerspective}
                     showConfirmModal={showConfirmModal}
                     onUpdatePhysicalStructure={handleUpdatePhysicalStructure}
+                    onRailInstall={(unit, railType) =>
+                      installRail(selectedRack, unit, railType as any)
+                    }
+                    onRailRemove={(unit) =>
+                      removeRail(selectedRack, unit)
+                    }
                   />
                 </div>
               </div>

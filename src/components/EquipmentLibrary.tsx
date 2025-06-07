@@ -18,7 +18,6 @@ import {
   storageEquipment,
   powerEquipment,
   mountingEquipment,
-  railEquipment,
   otherEquipment
 } from '../constants';
 
@@ -217,28 +216,6 @@ export const EquipmentLibrary: React.FC<EquipmentLibraryProps> = ({
                   💡 ドラッグしてユニットにドロップすると8個まとめて設置されます
                 </div>
               )}
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* レール */}
-      <div>
-        <h3 className={`text-sm font-semibold mb-2 flex items-center gap-1 ${
-          darkMode ? 'text-gray-300' : 'text-gray-700'
-        }`}>
-          <Move size={14} />
-          レール
-        </h3>
-        <div className="space-y-2">
-          {railEquipment.map((item) => (
-            <div key={item.id}>
-              {renderEquipmentCard(item)}
-              <div className={`mt-1 text-xs px-2 py-1 rounded ${
-                darkMode ? 'bg-orange-900/30 text-orange-300' : 'bg-orange-50 text-orange-700'
-              }`}>
-                ⚠️ 耳部分の金具でケージナットを横断します。ケージナットの取り外しが必要です
-              </div>
             </div>
           ))}
         </div>

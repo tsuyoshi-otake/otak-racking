@@ -27,6 +27,8 @@ interface RackViewProps {
   perspective: RackViewPerspective;
   showConfirmModal?: (title: string, message: string, onConfirm: () => void, confirmText?: string, cancelText?: string) => void;
   onUpdatePhysicalStructure?: (updates: Partial<PhysicalStructure>) => void;
+  onRailInstall?: (unit: number, railType: string) => void;
+  onRailRemove?: (unit: number) => void;
 }
 
 export const RackView: React.FC<RackViewProps> = ({
@@ -45,7 +47,9 @@ export const RackView: React.FC<RackViewProps> = ({
   perspective,
   draggedItem,
   showConfirmModal,
-  onUpdatePhysicalStructure
+  onUpdatePhysicalStructure,
+  onRailInstall,
+  onRailRemove
 }) => {
   const unitHeight = getZoomedUnitHeight(zoomLevel);
   const fontSize = getZoomedFontSize(zoomLevel);
@@ -106,6 +110,8 @@ export const RackView: React.FC<RackViewProps> = ({
               onCageNutRemove={onCageNutRemove}
               onAutoInstallCageNuts={onAutoInstallCageNuts}
               showConfirmModal={showConfirmModal}
+              onRailInstall={onRailInstall}
+              onRailRemove={onRailRemove}
             />
           ))}
         </div>

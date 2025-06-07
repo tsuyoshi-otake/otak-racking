@@ -30,6 +30,8 @@ interface RackUnitProps {
   onCageNutRemove?: (unit: number, side: string, position: string) => void;
   onAutoInstallCageNuts?: (unit: number, nutType: string) => void;
   showConfirmModal?: (title: string, message: string, onConfirm: () => void, confirmText?: string, cancelText?: string) => void;
+  onRailInstall?: (unit: number, railType: string) => void;
+  onRailRemove?: (unit: number) => void;
 }
 
 export const RackUnit: React.FC<RackUnitProps> = ({
@@ -49,7 +51,9 @@ export const RackUnit: React.FC<RackUnitProps> = ({
   onCageNutInstall,
   onCageNutRemove,
   onAutoInstallCageNuts,
-  showConfirmModal
+  showConfirmModal,
+  onRailInstall,
+  onRailRemove
 }) => {
   const item = rack.equipment[unit];
   const isEmpty = !item;
@@ -185,6 +189,8 @@ export const RackUnit: React.FC<RackUnitProps> = ({
           perspective="front"
           onCageNutInstall={onCageNutInstall}
           onCageNutRemove={onCageNutRemove}
+          onRailInstall={onRailInstall}
+          onRailRemove={onRailRemove}
         />
       )}
       

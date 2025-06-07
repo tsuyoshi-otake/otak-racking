@@ -462,94 +462,6 @@ export const mountingEquipment: Equipment[] = [
   }
 ];
 
-// レール機器
-export const railEquipment: Equipment[] = [
-  {
-    id: 'rail-1u',
-    name: '1Uサーバー用レール',
-    height: 1,
-    depth: 900,
-    power: 0,
-    heat: 0,
-    weight: 2.5,
-    type: 'rail',
-    color: '#374151',
-    dualPower: false,
-    airflow: 'natural',
-    cfm: 0,
-    heatGeneration: 0,
-    description: '1Uサーバー専用スライドレール。耳部分の金具でケージナットを横断して取り付け。ケージナットの取り外しが必要。',
-    specifications: {
-      supportHeight: '1U',
-      maxWeight: '25kg',
-      material: 'スチール製',
-      extension: 'フルエクステンション',
-      mounting: '耳金具でラック柱横断固定',
-      compatibility: '19インチラック専用'
-    },
-    mountingNotes: 'ケージナット取り外し必須。左右ペアで使用。機器重量要確認。',
-    mountingMethod: 'direct',
-    requiresRails: false,
-    requiresCageNuts: false
-  },
-  {
-    id: 'rail-2u',
-    name: '2Uサーバー用レール',
-    height: 2,
-    depth: 900,
-    power: 0,
-    heat: 0,
-    weight: 4.0,
-    type: 'rail',
-    color: '#374151',
-    dualPower: false,
-    airflow: 'natural',
-    cfm: 0,
-    heatGeneration: 0,
-    description: '2Uサーバー専用スライドレール。2U分の高さにわたる耳部分の金具でケージナットを横断して取り付け。',
-    specifications: {
-      supportHeight: '2U',
-      maxWeight: '40kg',
-      material: 'スチール製（強化タイプ）',
-      extension: 'フルエクステンション',
-      mounting: '2U耳金具でラック柱横断固定',
-      compatibility: '19インチラック専用'
-    },
-    mountingNotes: 'ケージナット取り外し必須。2U分の固定点確保。重量機器対応。',
-    mountingMethod: 'direct',
-    requiresRails: false,
-    requiresCageNuts: false
-  },
-  {
-    id: 'rail-4u',
-    name: '4Uサーバー用レール',
-    height: 4,
-    depth: 900,
-    power: 0,
-    heat: 0,
-    weight: 8.0,
-    type: 'rail',
-    color: '#374151',
-    dualPower: false,
-    airflow: 'natural',
-    cfm: 0,
-    heatGeneration: 0,
-    description: '4Uサーバー専用スライドレール。4U分の高さにわたる大型耳部分の金具でケージナットを横断して取り付け。',
-    specifications: {
-      supportHeight: '4U',
-      maxWeight: '80kg',
-      material: 'スチール製（重荷重対応）',
-      extension: 'フルエクステンション',
-      mounting: '4U大型耳金具でラック柱横断固定',
-      compatibility: '19インチラック専用'
-    },
-    mountingNotes: 'ケージナット取り外し必須。4U分の固定点確保。重量機器専用設計。',
-    mountingMethod: 'direct',
-    requiresRails: false,
-    requiresCageNuts: false
-  }
-];
-
 // その他機器
 export const otherEquipment: Equipment[] = [
   {
@@ -642,7 +554,6 @@ export const equipmentLibrary: Equipment[] = [
   ...storageEquipment,
   ...powerEquipment,
   ...mountingEquipment,
-  ...railEquipment,
   ...otherEquipment
 ];
 

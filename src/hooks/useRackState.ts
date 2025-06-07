@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from 'react';
-import { Rack, Equipment, FloorSettings, createDefaultPhysicalStructure } from '../types';
+import { Rack, Equipment, FloorSettings, createDefaultPhysicalStructure, RailType } from '../types';
 import { deepCopy, autoInstallCageNuts } from '../utils';
 import { rackTypes } from '../constants';
 import { placementManager } from '../services/EquipmentPlacementManager';
@@ -365,6 +365,92 @@ export const useRackState = () => {
     });
   }, []);
 
+  // レール設置
+  const installRail = useCallback(
+    (rackId: string, unit: number, railType: RailType) => {
+      setRacks(prev => {
+        const rack = prev[rackId];
+        if (!rack) return prev;
+
+        const railUnits = parseInt(railType);
+        const newRails = { ...rack.rails };
+
+        // レールが占有するユニット範囲を設定
+        for (let u = unit; u < unit + railUnits && u <= rack.units; u++) {
+          newRails[u] = {
+            frontLeft: {
+              installed: true,
+              railType: railType,
+              startUnit: unit,
+              endUnit: unit + railUnits - 1,
+              railId: `rail-${railType}-${unit}-left`
+            },
+            frontRight: {
+              installed: true,
+              railType: railType,
+              startUnit: unit,
+              endUnit: unit + railUnits - 1,
+              railId: `rail-${railType}-${unit}-right`
+            },
+            rearLeft: {
+              installed: true,
+              railType: railType,
+              startUnit: unit,
+              endUnit: unit + railUnits - 1,
+              railId: `rail-${railType}-${unit}-rear-left`
+            },
+            rearRight: {
+              installed: true,
+              railType: railType,
+              startUnit: unit,
+              endUnit: unit + railUnits - 1,
+              railId: `rail-${railType}-${unit}-rear-right`
+            }
+          };
+        }
+
+        return {
+          ...prev,
+          [rackId]: {
+            ...rack,
+            rails: newRails
+          }
+        };
+      });
+    },
+    []
+  );
+
+  // レール削除
+  const removeRail = useCallback(
+    (rackId: string, unit: number) => {
+      setRacks(prev => {
+        const rack = prev[rackId];
+        if (!rack || !rack.rails[unit]) return prev;
+
+        const railConfig = rack.rails[unit];
+        const startUnit = railConfig.frontLeft?.startUnit || unit;
+        const endUnit = railConfig.frontLeft?.endUnit || unit;
+
+        const newRails = { ...rack.rails };
+
+        // レールが占有していたユニット範囲をクリア
+        for (let u = startUnit; u <= endUnit && u <= rack.units; u++) {
+          delete newRails[u];
+        }
+
+        return {
+          ...prev,
+          [rackId]: {
+            ...rack,
+            rails: newRails
+          }
+        };
+      });
+    },
+    []
+  );
+
   return {
     // State
     racks,
@@ -388,6 +474,8 @@ export const useRackState = () => {
     removeCageNut,
     autoInstallCageNutsForUnit,
     updateEnvironment,
+    installRail,
+    removeRail,
     
     // Computed
     currentRack: racks[selectedRack] || racks[Object.keys(racks)[0]]
