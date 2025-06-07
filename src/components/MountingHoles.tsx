@@ -23,10 +23,10 @@ export const MountingHoles: React.FC<MountingHolesProps> = ({
   onCageNutRemove
 }) => {
   const cageNuts = rack.cageNuts[unit] || {
-    frontLeft: { top: null, bottom: null },
-    frontRight: { top: null, bottom: null },
-    rearLeft: { top: null, bottom: null },
-    rearRight: { top: null, bottom: null }
+    frontLeft: { top: null, middle: null, bottom: null },
+    frontRight: { top: null, middle: null, bottom: null },
+    rearLeft: { top: null, middle: null, bottom: null },
+    rearRight: { top: null, middle: null, bottom: null }
   };
 
   const railInstallation = rack.railInstallations?.[unit];
@@ -41,7 +41,7 @@ export const MountingHoles: React.FC<MountingHolesProps> = ({
 
     return (
       <div
-        className={`absolute border cursor-pointer ${
+        className={`absolute border ${railInstallation ? 'cursor-not-allowed' : 'cursor-pointer'} ${
           nut
             ? 'bg-gradient-to-br from-gray-600 via-gray-700 to-gray-800 border-gray-500'
             : darkMode
@@ -62,6 +62,7 @@ export const MountingHoles: React.FC<MountingHolesProps> = ({
         }}
         title={title}
         onClick={(e) => {
+          if (railInstallation) return;
           e.stopPropagation();
           if (nut) {
             onCageNutRemove?.(unit, nutSide, vertical);
@@ -88,49 +89,6 @@ export const MountingHoles: React.FC<MountingHolesProps> = ({
 
   return (
     <>
-      {/* レール表現 */}
-      {railInstallation && railInstallation.installed && (
-        <>
-          {/* 左レール */}
-          <div
-            className="absolute bg-gradient-to-r from-gray-400 to-gray-600 border border-gray-500 opacity-90"
-            style={{
-              width: `${3 * (zoomLevel / 100)}px`,
-              height: `${unitHeight - 4}px`,
-              left: `-${8 * (zoomLevel / 100)}px`,
-              top: `2px`,
-              borderRadius: '1px'
-            }}
-            title={`左レール: ${railInstallation.type}`}
-          >
-            <div className="w-full h-full flex flex-col justify-around">
-              {Array.from({ length: 3 }, (_, i) => (
-                <div key={i} className="w-full h-0.5 bg-gray-700" />
-              ))}
-            </div>
-          </div>
-          
-          {/* 右レール */}
-          <div
-            className="absolute bg-gradient-to-r from-gray-400 to-gray-600 border border-gray-500 opacity-90"
-            style={{
-              width: `${3 * (zoomLevel / 100)}px`,
-              height: `${unitHeight - 4}px`,
-              right: `-${8 * (zoomLevel / 100)}px`,
-              top: `2px`,
-              borderRadius: '1px'
-            }}
-            title={`右レール: ${railInstallation.type}`}
-          >
-            <div className="w-full h-full flex flex-col justify-around">
-              {Array.from({ length: 3 }, (_, i) => (
-                <div key={i} className="w-full h-0.5 bg-gray-700" />
-              ))}
-            </div>
-          </div>
-        </>
-      )}
-
       {/* 取り付け穴 */}
       {renderHole(perspective, 'left', 'top')}
       {renderHole(perspective, 'left', 'middle')}

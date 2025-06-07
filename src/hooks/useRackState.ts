@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from 'react';
-import { Rack, Equipment, FloorSettings, createDefaultPhysicalStructure } from '../types';
+import { Rack, Equipment, FloorSettings, createDefaultPhysicalStructure, RailInstallation } from '../types';
 import { deepCopy, autoInstallCageNuts } from '../utils';
 import { rackTypes } from '../constants';
 import { placementManager } from '../services/EquipmentPlacementManager';
@@ -87,12 +87,7 @@ const createInitialRack = (id: string, name: string, rackCount: number): Rack =>
       orientation: 'vertical'
     }
   ],
-  railInstallations: {
-    1: { unit: 1, type: 'slide', depth: 700, installed: true },
-    2: { unit: 2, type: 'slide', depth: 700, installed: true },
-    5: { unit: 5, type: 'fixed', depth: 600, installed: true },
-    10: { unit: 10, type: 'toolless', depth: 650, installed: true }
-  },
+  railInstallations: {},
   physicalStructure: createDefaultPhysicalStructure()
 });
 
@@ -218,22 +213,17 @@ export const useRackState = () => {
     if (!currentRack) return;
 
     try {
-      // ラックのディープコピーを作成（Reactの不変性を保つため）
-      const rackCopy = deepCopy(currentRack);
-      
-      // 新しいEquipmentPlacementManagerを使用して配置を試行
-      const result = await placementManager.placeEquipment(rackCopy, startUnit, equipment, {
-        autoInstallCageNuts: true // デフォルトで自動設置を有効にする
+      const result = await placementManager.placeEquipment(currentRack, startUnit, equipment, {
+        autoInstallCageNuts: true
       });
 
-      if (result.success) {
-        // 配置が成功した場合、ラック状態を更新
+      if (result.success && result.updatedRack) {
+        const newRack = result.updatedRack;
         setRacks(prev => ({
           ...prev,
-          [rackId]: rackCopy // 変更されたコピーを反映
+          [rackId]: newRack
         }));
       } else {
-        // 配置が失敗した場合、エラーメッセージを表示
         console.error('機器の配置に失敗しました:', result.validation.errors);
         // TODO: ユーザーにエラーメッセージを表示する仕組みを追加
       }
@@ -248,20 +238,15 @@ export const useRackState = () => {
     if (!currentRack) return;
 
     try {
-      // ラックのディープコピーを作成（Reactの不変性を保つため）
-      const rackCopy = deepCopy(currentRack);
-      
-      // 新しいEquipmentPlacementManagerを使用して削除を試行
-      const result = await placementManager.removeEquipment(rackCopy, unit);
+      const result = await placementManager.removeEquipment(currentRack, unit);
 
-      if (result.success) {
-        // 削除が成功した場合、ラック状態を更新
+      if (result.success && result.updatedRack) {
+        const newRack = result.updatedRack;
         setRacks(prev => ({
           ...prev,
-          [rackId]: rackCopy // 変更されたコピーを反映
+          [rackId]: newRack
         }));
       } else {
-        // 削除が失敗した場合、エラーメッセージを表示
         console.error('機器の削除に失敗しました:', result.validation.errors);
       }
     } catch (error) {
@@ -342,24 +327,25 @@ export const useRackState = () => {
       return { ...prev, [rackId]: newRack };
     });
   }, []);
-const installRail = useCallback((rackId: string, unit: number, type: 'slide' | 'fixed' | 'toolless', depth: number) => {
-    setRacks(prev => {
-      const newRacks = deepCopy(prev);
-      const rack = newRacks[rackId];
-      if (rack) {
-        if (!rack.railInstallations) {
-          rack.railInstallations = {};
+
+  const installRail = useCallback((rackId: string, unit: number, type: 'slide' | 'fixed' | 'toolless', depth: number) => {
+      setRacks(prev => {
+        const newRacks = deepCopy(prev);
+        const rack = newRacks[rackId];
+        if (rack) {
+          if (!rack.railInstallations) {
+            rack.railInstallations = {};
+          }
+          rack.railInstallations[unit] = {
+            unit,
+            type,
+            depth,
+            installed: true
+          };
         }
-        rack.railInstallations[unit] = {
-          unit,
-          type,
-          depth,
-          installed: true
-        };
-      }
-      return newRacks;
-    });
-  }, []);
+        return newRacks;
+      });
+    }, []);
 
   const removeRail = useCallback((rackId: string, unit: number) => {
     setRacks(prev => {

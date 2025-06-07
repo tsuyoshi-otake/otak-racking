@@ -52,6 +52,7 @@ export interface PlacementResult {
   position?: PlacementPosition;
   validation: PlacementValidation;
   appliedChanges: PlacementChange[];
+  updatedRack?: Rack;
 }
 
 export interface PlacementChange {

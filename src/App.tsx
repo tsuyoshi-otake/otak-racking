@@ -10,19 +10,6 @@ import { ModalsAndDialogs, InfoModalProps, ConfirmModalProps } from './component
 import { calculateLayoutDimensions, getContainerStyle } from './utils';
 import { loadAppState, saveAppState } from './utils/localStorage';
 
-// ViewModes インターフェースは Sidebar で定義されているものを使用するため、ここでは削除またはコメントアウト
-// interface ViewModes {
-//   showPowerView: boolean;
-//   showMountingView: boolean;
-//   showLabelView: boolean;
-//   showAirflowView: boolean;
-//   showTemperatureView: boolean;
-//   showCablingView: boolean;
-//   showCageNutView: boolean;
-//   showFloorView: boolean;
-// }
-
-
 export type RackViewPerspective = 'front' | 'rear' | 'left' | 'right';
 function App() {
   // LocalStorageから初期状態を読み込み
@@ -42,8 +29,6 @@ function App() {
   const [activeViewMode, setActiveViewMode] = useState<string | null>(() =>
     loadedState.activeViewMode ?? null
   );
-
-  // フリーアクセスフロア設定（useRackStateから取得）
 
   // モーダル状態
   const [showRackManager, setShowRackManager] = useState(false);
@@ -76,7 +61,8 @@ function App() {
     autoInstallCageNutsForUnit,
     installCageNut,
     removeCageNut,
-    installRail
+    installRail,
+    removeRail
   } = useRackState();
 // モーダル表示関数
   const showInfoModal = (title: string, message: string) => {
@@ -288,11 +274,11 @@ const handleZoomFit = () => {
                       darkMode={darkMode}
                       zoomLevel={zoomLevel}
                       selectedRack={selectedRack}
-                      // viewModes={viewModes} // 古いpropsを削除
-                      activeViewMode={activeViewMode} // 新しいpropsを追加
+                      activeViewMode={activeViewMode}
                       onEquipmentClick={handleEquipmentClick}
                       perspective={rackViewPerspective}
                       showConfirmModal={showConfirmModal}
+                      onInstallRail={(_rackId, unit, type, depth) => installRail(rack.id, unit, type, depth)}
                     />
                   </div>
                 ))}
@@ -322,7 +308,7 @@ const handleZoomFit = () => {
                     onAutoInstallCageNuts={(unit, nutType) =>
                       autoInstallCageNutsForUnit(selectedRack, unit, nutType)
                     }
-                    onInstallRail={(unit, type, depth) =>
+                    onInstallRail={(_rackId, unit, type, depth) =>
                       installRail(selectedRack, unit, type, depth)
                     }
                     draggedItem={draggedItem as DraggedItem | null}

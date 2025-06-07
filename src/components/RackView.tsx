@@ -9,6 +9,7 @@ import {
 import { RackStructure } from './RackStructure';
 import { RackPDU } from './RackPDU';
 import { RackUnit } from './RackUnit';
+import { Rail } from './Rail';
 
 interface RackViewProps {
   rack: Rack;
@@ -24,7 +25,7 @@ interface RackViewProps {
   onCageNutInstall?: (unit: number, side: string, position: string, nutType: string) => void;
   onCageNutRemove?: (unit: number, side: string, position: string) => void;
   onAutoInstallCageNuts?: (unit: number, nutType: string) => void;
-  onInstallRail?: (unit: number, type: 'slide' | 'fixed' | 'toolless', depth: number) => void;
+  onInstallRail?: (rackId: string, unit: number, type: 'slide' | 'fixed' | 'toolless', depth: number) => void;
   perspective: RackViewPerspective;
   showConfirmModal?: (title: string, message: string, onConfirm: () => void, confirmText?: string, cancelText?: string) => void;
   onUpdatePhysicalStructure?: (updates: Partial<PhysicalStructure>) => void;
@@ -68,13 +69,14 @@ export const RackView: React.FC<RackViewProps> = ({
   );
 
   if (perspective === 'front' || perspective === 'rear') {
+    const rackWidth = 600 * (zoomLevel / 100);
     return (
       <div className="flex flex-col relative items-center">
         {renderRackHeader(perspective === 'front' ? '前面' : '背面')}
         <div
           className={`border rounded-b-lg overflow-visible relative ${darkMode ? 'border-gray-600' : 'border-gray-300'}`}
           style={{
-            width: `${600 * (zoomLevel / 100)}px`
+            width: `${rackWidth}px`
           }}
         >
           <RackStructure
@@ -85,9 +87,24 @@ export const RackView: React.FC<RackViewProps> = ({
             onUpdatePhysicalStructure={onUpdatePhysicalStructure}
           />
           <RackPDU rack={rack} zoomLevel={zoomLevel} unitHeight={unitHeight} />
+          
+          {/* レールを描画 */}
+          {rack.railInstallations && Object.values(rack.railInstallations).map(rail => (
+            <Rail
+              key={`rail-${rail.unit}`}
+              rack={rack}
+              rail={rail}
+              unitHeight={unitHeight}
+              zoomLevel={zoomLevel}
+              rackWidth={rackWidth}
+              totalUnits={rack.units}
+              darkMode={darkMode}
+            />
+          ))}
+
           {Array.from({ length: rack.units }, (_, i) => rack.units - i).map(unit => (
             <RackUnit
-              key={unit}
+              key={`unit-${unit}`}
               rack={rack}
               unit={unit}
               darkMode={darkMode}
@@ -104,7 +121,7 @@ export const RackView: React.FC<RackViewProps> = ({
               onCageNutInstall={onCageNutInstall}
               onCageNutRemove={onCageNutRemove}
               onAutoInstallCageNuts={onAutoInstallCageNuts}
-              onInstallRail={onInstallRail}
+              onInstallRail={(unit, type, depth) => onInstallRail?.(rack.id, unit, type, depth)}
               showConfirmModal={showConfirmModal}
             />
           ))}

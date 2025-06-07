@@ -41,13 +41,16 @@ export class EquipmentPlacementManager {
     equipment: Equipment,
     options: PlacementOptions = {}
   ): Promise<PlacementResult> {
+    // 不変性を保つためにラックのディープコピーを作成
+    const rackCopy = JSON.parse(JSON.stringify(rack));
+
     const position: PlacementPosition = {
       startUnit,
       endUnit: startUnit + equipment.height - 1
     };
 
     const context: PlacementContext = {
-      rack,
+      rack: rackCopy,
       position,
       equipment,
       options
@@ -60,7 +63,8 @@ export class EquipmentPlacementManager {
         success: validation.isValid,
         position,
         validation,
-        appliedChanges: []
+        appliedChanges: [],
+        updatedRack: rack
       };
     }
 
@@ -71,7 +75,8 @@ export class EquipmentPlacementManager {
       return {
         success: false,
         validation,
-        appliedChanges: []
+        appliedChanges: [],
+        updatedRack: rack
       };
     }
 
@@ -85,7 +90,8 @@ export class EquipmentPlacementManager {
       return {
         success: false,
         validation,
-        appliedChanges: []
+        appliedChanges: [],
+        updatedRack: rack
       };
     }
 
@@ -96,7 +102,8 @@ export class EquipmentPlacementManager {
       success: true,
       position,
       validation,
-      appliedChanges: changes
+      appliedChanges: changes,
+      updatedRack: rackCopy
     };
   }
 
@@ -241,7 +248,10 @@ export class EquipmentPlacementManager {
    * 機器の削除
    */
   async removeEquipment(rack: Rack, unit: number): Promise<PlacementResult> {
-    const equipment = rack.equipment[unit];
+    // 不変性を保つためにラックのディープコピーを作成
+    const rackCopy = JSON.parse(JSON.stringify(rack));
+    const equipment = rackCopy.equipment[unit];
+
     if (!equipment) {
       return {
         success: false,
@@ -255,7 +265,8 @@ export class EquipmentPlacementManager {
           }],
           warnings: []
         },
-        appliedChanges: []
+        appliedChanges: [],
+        updatedRack: rack
       };
     }
 
@@ -263,8 +274,8 @@ export class EquipmentPlacementManager {
 
     // 機器を全ユニットから削除
     for (let u = equipment.startUnit!; u <= equipment.endUnit!; u++) {
-      const removedEquipment = rack.equipment[u];
-      delete rack.equipment[u];
+      const removedEquipment = rackCopy.equipment[u];
+      delete rackCopy.equipment[u];
       
       changes.push({
         type: 'equipment',
@@ -275,35 +286,40 @@ export class EquipmentPlacementManager {
     }
 
     // 関連設定を削除
-    delete rack.powerConnections[equipment.id];
-    delete rack.mountingOptions[equipment.id];
-    delete rack.labels[equipment.id];
+    const oldPowerConnection = rackCopy.powerConnections[equipment.id];
+    const oldMountingOption = rackCopy.mountingOptions[equipment.id];
+    const oldLabel = rackCopy.labels[equipment.id];
+
+    delete rackCopy.powerConnections[equipment.id];
+    delete rackCopy.mountingOptions[equipment.id];
+    delete rackCopy.labels[equipment.id];
 
     changes.push(
       {
         type: 'power',
         action: 'remove',
         target: equipment.id,
-        oldValue: rack.powerConnections[equipment.id]
+        oldValue: oldPowerConnection
       },
       {
         type: 'mounting',
         action: 'remove',
         target: equipment.id,
-        oldValue: rack.mountingOptions[equipment.id]
+        oldValue: oldMountingOption
       },
       {
         type: 'label',
         action: 'remove',
         target: equipment.id,
-        oldValue: rack.labels[equipment.id]
+        oldValue: oldLabel
       }
     );
 
     return {
       success: true,
       validation: { isValid: true, errors: [], warnings: [] },
-      appliedChanges: changes
+      appliedChanges: changes,
+      updatedRack: rackCopy
     };
   }
 
@@ -493,8 +509,7 @@ export class EquipmentPlacementManager {
         const warnings: PlacementWarning[] = [];
         
         // レールが不要で、特定のタイプ以外の機器のみチェック
-        if (!equipment.needsRails &&
-            equipment.type !== 'mounting' &&
+        if (equipment.type !== 'mounting' &&
             equipment.type !== 'shelf' &&
             equipment.type !== 'spiritual' &&
             equipment.type !== 'panel') {
@@ -540,13 +555,13 @@ export class EquipmentPlacementManager {
     if (!cageNuts) return false;
     
     const positions = [
-      cageNuts.frontLeft?.top, cageNuts.frontLeft?.bottom,
-      cageNuts.frontRight?.top, cageNuts.frontRight?.bottom,
-      cageNuts.rearLeft?.top, cageNuts.rearLeft?.bottom,
-      cageNuts.rearRight?.top, cageNuts.rearRight?.bottom
+      cageNuts.frontLeft?.top, cageNuts.frontLeft?.middle, cageNuts.frontLeft?.bottom,
+      cageNuts.frontRight?.top, cageNuts.frontRight?.middle, cageNuts.frontRight?.bottom,
+      cageNuts.rearLeft?.top, cageNuts.rearLeft?.middle, cageNuts.rearLeft?.bottom,
+      cageNuts.rearRight?.top, cageNuts.rearRight?.middle, cageNuts.rearRight?.bottom
     ];
     
-    return positions.filter(Boolean).length === 8;
+    return positions.filter(Boolean).length === 12;
   }
 
   private createCompleteCageNutConfig(nutType: string) {

@@ -29,7 +29,27 @@ describe('EquipmentPlacementManager', () => {
     position: { row: 'A', column: 1 },
     cabling: { external: {}, overhead: {}, underfloor: {} },
     housing: { type: 'full', startUnit: 1, endUnit: 42, frontPanel: 'perforated', rearPanel: 'perforated' },
-    environment: { ambientTemp: 22, humidity: 45, pressureDiff: 0.2 }
+    pduPlacements: [],
+    railInstallations: {},
+    environment: { ambientTemp: 22, humidity: 45, pressureDiff: 0.2 },
+    physicalStructure: {
+      frame: { material: 'steel', color: '#2d3748', thickness: 2, coating: 'powder', style: 'standard' },
+      frontDoor: { type: 'mesh', locked: false, opened: false, color: '#2d3748', transparency: 0, ventilation: 80 },
+      rearDoor: { type: 'mesh', locked: false, opened: false, color: '#2d3748', transparency: 0, ventilation: 80 },
+      leftPanel: { type: 'steel', mounted: true, color: '#2d3748', transparency: 0, ventilation: 0, removable: true },
+      rightPanel: { type: 'steel', mounted: true, color: '#2d3748', transparency: 0, ventilation: 0, removable: true },
+      mountingPosts: {
+        frontLeft: { type: 'square', holes: 'cage-nut', spacing: 25.4, depth: 50 },
+        frontRight: { type: 'square', holes: 'cage-nut', spacing: 25.4, depth: 50 },
+        rearLeft: { type: 'square', holes: 'cage-nut', spacing: 25.4, depth: 50 },
+        rearRight: { type: 'square', holes: 'cage-nut', spacing: 25.4, depth: 50 }
+      },
+      base: { type: 'adjustable', height: 100, loadCapacity: 1000, leveling: true, antivibration: false },
+      top: { type: 'cable-tray', cableManagement: true, loadCapacity: 50, fanMounts: 0 },
+      dimensions: { externalWidth: 600, externalDepth: 1000, externalHeight: 2000, internalWidth: 482.6, internalDepth: 900, usableHeight: 1778 },
+      weight: { empty: 150, maxLoad: 1000, current: 150 },
+      ventilation: { frontAirflow: 0, rearAirflow: 0, sideAirflow: 0, totalCapacity: 1000 }
+    }
   });
 
   const create2UServer = (): Equipment => ({
@@ -114,7 +134,8 @@ describe('EquipmentPlacementManager', () => {
       expect(result.position).toEqual({ startUnit: 1, endUnit: 1 });
       expect(result.validation.isValid).toBe(true);
       expect(result.validation.errors).toHaveLength(0);
-      expect(result.appliedChanges).toHaveLength(4); // equipment, power, mounting, label
+      expect(result.updatedRack).toBeDefined();
+      expect(result.updatedRack?.equipment[1]).toBeDefined();
     });
 
     it('空のラックに2Uサーバーを配置できる', async () => {
@@ -124,10 +145,12 @@ describe('EquipmentPlacementManager', () => {
       expect(result.success).toBe(true);
       expect(result.position).toEqual({ startUnit: 1, endUnit: 2 });
       expect(result.validation.isValid).toBe(true);
-      expect(testRack.equipment[1]).toBeDefined();
-      expect(testRack.equipment[2]).toBeDefined();
-      expect(testRack.equipment[1].isMainUnit).toBe(true);
-      expect(testRack.equipment[2].isMainUnit).toBe(false);
+      expect(result.updatedRack).toBeDefined();
+      const updatedRack = result.updatedRack!;
+      expect(updatedRack.equipment[1]).toBeDefined();
+      expect(updatedRack.equipment[2]).toBeDefined();
+      expect(updatedRack.equipment[1].isMainUnit).toBe(true);
+      expect(updatedRack.equipment[2].isMainUnit).toBe(false);
     });
   });
 
@@ -139,17 +162,19 @@ describe('EquipmentPlacementManager', () => {
       // 3-4Uに最初の2Uサーバーを設置
       const result1 = await manager.placeEquipment(testRack, 3, server1);
       expect(result1.success).toBe(true);
+      expect(result1.updatedRack).toBeDefined();
       
       // 1-2Uに2番目の2Uサーバーを設置
-      const result2 = await manager.placeEquipment(testRack, 1, server2);
+      const result2 = await manager.placeEquipment(result1.updatedRack!, 1, server2);
       expect(result2.success).toBe(true);
       expect(result2.position).toEqual({ startUnit: 1, endUnit: 2 });
       
       // 設置状態の確認
-      expect(testRack.equipment[1].isMainUnit).toBe(true);
-      expect(testRack.equipment[2].isMainUnit).toBe(false);
-      expect(testRack.equipment[3].isMainUnit).toBe(true);
-      expect(testRack.equipment[4].isMainUnit).toBe(false);
+      const finalRack = result2.updatedRack!;
+      expect(finalRack.equipment[1].isMainUnit).toBe(true);
+      expect(finalRack.equipment[2].isMainUnit).toBe(false);
+      expect(finalRack.equipment[3].isMainUnit).toBe(true);
+      expect(finalRack.equipment[4].isMainUnit).toBe(false);
     });
 
     it('2-3Uに2Uサーバー設置後、1Uに1Uサーバーを設置できる', async () => {
@@ -159,9 +184,10 @@ describe('EquipmentPlacementManager', () => {
       // 2-3Uに2Uサーバーを設置
       const result1 = await manager.placeEquipment(testRack, 2, server2U);
       expect(result1.success).toBe(true);
+      expect(result1.updatedRack).toBeDefined();
       
       // 1Uに1Uサーバーを設置
-      const result2 = await manager.placeEquipment(testRack, 1, server1U);
+      const result2 = await manager.placeEquipment(result1.updatedRack!, 1, server1U);
       expect(result2.success).toBe(true);
       expect(result2.position).toEqual({ startUnit: 1, endUnit: 1 });
     });
@@ -173,9 +199,10 @@ describe('EquipmentPlacementManager', () => {
       // 1-2Uに2Uサーバーを設置
       const result1 = await manager.placeEquipment(testRack, 1, server2U);
       expect(result1.success).toBe(true);
+      expect(result1.updatedRack).toBeDefined();
       
       // 2Uに1Uサーバーを設置しようとする
-      const result2 = await manager.placeEquipment(testRack, 2, server1U);
+      const result2 = await manager.placeEquipment(result1.updatedRack!, 2, server1U);
       expect(result2.success).toBe(false);
       expect(result2.validation.errors).toHaveLength(1);
       expect(result2.validation.errors[0].code).toBe('UNIT_OCCUPIED');
@@ -206,12 +233,13 @@ describe('EquipmentPlacementManager', () => {
       const server2 = { ...create1UServer(), id: 'server-1u-second' };
       
       // 1Uに設置
-      await manager.placeEquipment(testRack, 1, server1);
+      const result1 = await manager.placeEquipment(testRack, 1, server1);
+      expect(result1.updatedRack).toBeDefined();
       
       // 同じ1Uに再度設置しようとする
-      const result = await manager.placeEquipment(testRack, 1, server2);
-      expect(result.success).toBe(false);
-      expect(result.validation.errors[0].code).toBe('UNIT_OCCUPIED');
+      const result2 = await manager.placeEquipment(result1.updatedRack!, 1, server2);
+      expect(result2.success).toBe(false);
+      expect(result2.validation.errors[0].code).toBe('UNIT_OCCUPIED');
     });
   });
 
@@ -231,9 +259,10 @@ describe('EquipmentPlacementManager', () => {
       // 1Uに棚板を設置
       const result1 = await manager.placeEquipment(testRack, 1, shelf);
       expect(result1.success).toBe(true);
+      expect(result1.updatedRack).toBeDefined();
       
       // 2Uに神棚を設置
-      const result2 = await manager.placeEquipment(testRack, 2, kamidana);
+      const result2 = await manager.placeEquipment(result1.updatedRack!, 2, kamidana);
       expect(result2.success).toBe(true);
     });
   });
@@ -247,9 +276,10 @@ describe('EquipmentPlacementManager', () => {
       });
       
       expect(result.success).toBe(true);
-      expect(testRack.cageNuts[1]).toBeDefined();
-      expect(testRack.cageNuts[1].frontLeft.top).toBe('m6');
-      expect(testRack.cageNuts[1].frontLeft.bottom).toBe('m6');
+      const updatedRack = result.updatedRack!;
+      expect(updatedRack.cageNuts[1]).toBeDefined();
+      expect(updatedRack.cageNuts[1].frontLeft.top).toBe('m6');
+      expect(updatedRack.cageNuts[1].frontLeft.bottom).toBe('m6');
       
       // 変更履歴にゲージナット設置が含まれることを確認
       const cageNutChanges = result.appliedChanges.filter(c => c.type === 'cagenut');
@@ -262,21 +292,24 @@ describe('EquipmentPlacementManager', () => {
       const server = create2UServer();
       
       // 設置
-      await manager.placeEquipment(testRack, 1, server);
-      expect(testRack.equipment[1]).toBeDefined();
-      expect(testRack.equipment[2]).toBeDefined();
+      const placeResult = await manager.placeEquipment(testRack, 1, server);
+      expect(placeResult.success).toBe(true);
+      const rackAfterPlace = placeResult.updatedRack!;
+      expect(rackAfterPlace.equipment[1]).toBeDefined();
+      expect(rackAfterPlace.equipment[2]).toBeDefined();
       
       // 削除
-      const result = await manager.removeEquipment(testRack, 1);
-      expect(result.success).toBe(true);
-      expect(testRack.equipment[1]).toBeUndefined();
-      expect(testRack.equipment[2]).toBeUndefined();
+      const removeResult = await manager.removeEquipment(rackAfterPlace, 1);
+      expect(removeResult.success).toBe(true);
+      const rackAfterRemove = removeResult.updatedRack!;
+      expect(rackAfterRemove.equipment[1]).toBeUndefined();
+      expect(rackAfterRemove.equipment[2]).toBeUndefined();
       
       // 関連設定も削除されることを確認
-      const equipmentId = result.appliedChanges.find(c => c.type === 'equipment')?.oldValue?.id;
-      expect(testRack.powerConnections[equipmentId!]).toBeUndefined();
-      expect(testRack.mountingOptions[equipmentId!]).toBeUndefined();
-      expect(testRack.labels[equipmentId!]).toBeUndefined();
+      const equipmentId = removeResult.appliedChanges.find(c => c.type === 'equipment')?.oldValue?.id;
+      expect(rackAfterRemove.powerConnections[equipmentId!]).toBeUndefined();
+      expect(rackAfterRemove.mountingOptions[equipmentId!]).toBeUndefined();
+      expect(rackAfterRemove.labels[equipmentId!]).toBeUndefined();
     });
 
     it('存在しない機器の削除を適切にエラーハンドリングする', async () => {
@@ -297,7 +330,7 @@ describe('EquipmentPlacementManager', () => {
       expect(result.success).toBe(true);
       expect(result.validation.isValid).toBe(true);
       expect(result.appliedChanges).toHaveLength(0);
-      expect(testRack.equipment[1]).toBeUndefined(); // 実際には配置されない
+      expect(result.updatedRack?.equipment[1]).toBeUndefined(); // 実際には配置されない
     });
   });
 
@@ -321,15 +354,17 @@ describe('EquipmentPlacementManager', () => {
       
       expect(result.success).toBe(true);
       expect(result.validation.warnings).toHaveLength(1); // 警告は残るが配置される
+      expect(result.updatedRack?.equipment[1]).toBeDefined();
     });
   });
 
   describe('ラック占有状況取得テスト', () => {
     it('正しい占有状況を取得できる', async () => {
       const server = create2UServer();
-      await manager.placeEquipment(testRack, 1, server);
+      const result = await manager.placeEquipment(testRack, 1, server);
+      const updatedRack = result.updatedRack!;
       
-      const occupancy = manager.getRackOccupancy(testRack);
+      const occupancy = manager.getRackOccupancy(updatedRack);
       
       expect(occupancy[1]).not.toBeNull();
       expect(occupancy[1]?.isMainUnit).toBe(true);
