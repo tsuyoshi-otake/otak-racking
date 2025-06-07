@@ -77,11 +77,14 @@ export class EquipmentPlacementManager {
       };
     }
 
-    // 警告がある場合の処理（autoInstallCageNutsが有効な場合はゲージナット警告を無視）
+    // 警告がある場合の処理
     const shouldIgnoreWarnings = options.skipWarnings ||
                                  options.forceOverride ||
                                  (options.autoInstallCageNuts &&
-                                  validation.warnings.every(w => w.code === 'CAGE_NUT_MISSING'));
+                                  (equipment.requiresCageNuts || equipment.mountingMethod === 'cage-nuts') &&
+                                  validation.warnings.every(w => w.code === 'CAGE_NUT_MISSING')) ||
+                                 // レール要求警告は設置を阻害しない（警告のみ）
+                                 validation.warnings.every(w => w.code === 'RAILS_REQUIRED');
     
     if (validation.warnings.length > 0 && !shouldIgnoreWarnings) {
       return {
@@ -142,6 +145,11 @@ export class EquipmentPlacementManager {
   private async executePlacement(context: PlacementContext): Promise<PlacementChange[]> {
     const changes: PlacementChange[] = [];
     const { rack, position, equipment, options } = context;
+
+    // レール機器の場合は特別な処理
+    if (equipment.type === 'rail') {
+      return this.executeRailPlacement(context);
+    }
 
     // 機器をラックに配置
     const equipmentId = `${equipment.id}-${Date.now()}`;
@@ -223,8 +231,9 @@ export class EquipmentPlacementManager {
     });
 
 
-    // ゲージナット自動設置
-    if (options.autoInstallCageNuts) {
+    // ケージナット自動設置（ケージナットが必要な機器のみ）
+    if (options.autoInstallCageNuts &&
+        (equipment.requiresCageNuts || equipment.mountingMethod === 'cage-nuts')) {
       for (let unit = position.startUnit; unit <= position.endUnit; unit++) {
         if (!this.hasCompleteCageNuts(rack, unit)) {
           rack.cageNuts[unit] = this.createCompleteCageNutConfig('m6');
@@ -269,6 +278,22 @@ export class EquipmentPlacementManager {
     }
 
     const changes: PlacementChange[] = [];
+
+    // レール機器の場合は特別な処理
+    if (equipment.type === 'rail') {
+      for (let u = equipment.startUnit!; u <= equipment.endUnit!; u++) {
+        // レール情報を削除
+        if (rackCopy.rails[u]) {
+          delete rackCopy.rails[u];
+          changes.push({
+            type: 'equipment',
+            action: 'remove',
+            target: `rail-${u}`,
+            oldValue: rackCopy.rails[u]
+          });
+        }
+      }
+    }
 
     // 機器を全ユニットから削除
     for (let u = equipment.startUnit!; u <= equipment.endUnit!; u++) {
@@ -440,7 +465,8 @@ export class EquipmentPlacementManager {
       this.createCapacityConstraint(),
       this.createOccupancyConstraint(),
       this.createShelfRequirementConstraint(),
-      this.createCageNutConstraint()
+      this.createCageNutConstraint(),
+      this.createRailConflictConstraint()
     ];
   }
 
@@ -578,21 +604,19 @@ export class EquipmentPlacementManager {
   }
 
   /**
-   * ゲージナット制約
+   * 取り付け方法制約（ケージナット・レール）
    */
   private createCageNutConstraint(): PlacementConstraint {
     return {
-      id: 'cage-nut',
-      name: 'ゲージナットチェック',
+      id: 'mounting-method',
+      name: '取り付け方法チェック',
       priority: 5,
       validate: (rack: Rack, position: PlacementPosition, equipment: Equipment): PlacementValidation => {
         const warnings: PlacementWarning[] = [];
+        const errors: PlacementError[] = [];
         
-        // レールが不要で、特定のタイプ以外の機器のみチェック
-        if (equipment.type !== 'mounting' &&
-            equipment.type !== 'shelf' &&
-            equipment.type !== 'spiritual' &&
-            equipment.type !== 'panel') {
+        // ケージナットが必要な機器のチェック
+        if (equipment.requiresCageNuts || equipment.mountingMethod === 'cage-nuts') {
           const missingUnits: number[] = [];
           
           for (let unit = position.startUnit; unit <= position.endUnit; unit++) {
@@ -604,14 +628,81 @@ export class EquipmentPlacementManager {
           if (missingUnits.length > 0) {
             warnings.push({
               code: 'CAGE_NUT_MISSING',
-              message: `ユニット ${missingUnits.join(', ')} にゲージナットが不足しています`,
+              message: `${equipment.name}はケージナットで固定します。ユニット ${missingUnits.join(', ')} にケージナットが不足しています`,
               affectedUnits: missingUnits,
-              suggestion: '自動設置オプションを有効にするか、事前にゲージナットを設置してください'
+              suggestion: '自動設置オプションを有効にするか、事前にケージナットを設置してください'
             });
           }
         }
         
-        return { isValid: true, errors: [], warnings };
+        // レールが必要な機器のチェック（サーバー、ストレージ）
+        if (equipment.requiresRails || equipment.mountingMethod === 'rails') {
+          warnings.push({
+            code: 'RAILS_REQUIRED',
+            message: `${equipment.name}にはスライドレールが必要です`,
+            affectedUnits: [position.startUnit],
+            suggestion: 'レールキットを事前に設置してください。重量機器の場合は耐荷重の確認も必要です'
+          });
+        }
+        
+        return { isValid: errors.length === 0, errors, warnings };
+      }
+    };
+  }
+
+  /**
+   * レールとケージナットの競合制約
+   */
+  private createRailConflictConstraint(): PlacementConstraint {
+    return {
+      id: 'rail-conflict',
+      name: 'レール・ケージナット競合チェック',
+      priority: 6,
+      validate: (rack: Rack, position: PlacementPosition, equipment: Equipment): PlacementValidation => {
+        const warnings: PlacementWarning[] = [];
+        const errors: PlacementError[] = [];
+
+        // レール機器を設置する場合のケージナット競合チェック
+        if (equipment.type === 'rail') {
+          const conflictUnits: number[] = [];
+          
+          for (let unit = position.startUnit; unit <= position.endUnit; unit++) {
+            if (this.hasCompleteCageNuts(rack, unit)) {
+              conflictUnits.push(unit);
+            }
+          }
+          
+          if (conflictUnits.length > 0) {
+            warnings.push({
+              code: 'CAGE_NUT_CONFLICT',
+              message: `レール設置のため、ユニット ${conflictUnits.join(', ')} のケージナットを取り外す必要があります`,
+              affectedUnits: conflictUnits,
+              suggestion: 'レールの耳部分の金具がケージナットを横断するため、既存のケージナットは使用できません'
+            });
+          }
+        }
+
+        // ケージナット機器を設置する場合のレール競合チェック
+        if (equipment.type === 'mounting' && equipment.nutType) {
+          const conflictUnits: number[] = [];
+          
+          for (let unit = position.startUnit; unit <= position.endUnit; unit++) {
+            if (this.hasRailInstalled(rack, unit)) {
+              conflictUnits.push(unit);
+            }
+          }
+          
+          if (conflictUnits.length > 0) {
+            warnings.push({
+              code: 'RAIL_CONFLICT',
+              message: `ユニット ${conflictUnits.join(', ')} にはレールが設置されているため、ケージナットを設置できません`,
+              affectedUnits: conflictUnits,
+              suggestion: 'レールを取り外してからケージナットを設置してください'
+            });
+          }
+        }
+
+        return { isValid: errors.length === 0, errors, warnings };
       }
     };
   }
@@ -651,6 +742,83 @@ export class EquipmentPlacementManager {
       rearLeft: { top: nutType, middle: nutType, bottom: nutType },
       rearRight: { top: nutType, middle: nutType, bottom: nutType }
     };
+  }
+
+  private hasRailInstalled(rack: Rack, unit: number): boolean {
+    const rails = rack.rails[unit];
+    if (!rails) return false;
+    
+    return rails.frontLeft.installed ||
+           rails.frontRight.installed ||
+           rails.rearLeft.installed ||
+           rails.rearRight.installed;
+  }
+
+  /**
+   * レール設置の特別な処理
+   */
+  private async executeRailPlacement(context: PlacementContext): Promise<PlacementChange[]> {
+    const changes: PlacementChange[] = [];
+    const { rack, position, equipment } = context;
+    const equipmentId = `${equipment.id}-${Date.now()}`;
+
+    // レール情報をrack.railsに追加
+    for (let unit = position.startUnit; unit <= position.endUnit; unit++) {
+      if (!rack.rails[unit]) {
+        rack.rails[unit] = {
+          frontLeft: { installed: false, railType: null, startUnit: null, endUnit: null, railId: null },
+          frontRight: { installed: false, railType: null, startUnit: null, endUnit: null, railId: null },
+          rearLeft: { installed: false, railType: null, startUnit: null, endUnit: null, railId: null },
+          rearRight: { installed: false, railType: null, startUnit: null, endUnit: null, railId: null }
+        };
+      }
+
+      // レール設置情報を更新（左右のレール）
+      const railType = equipment.height === 1 ? '1u' : equipment.height === 2 ? '2u' : '4u';
+      rack.rails[unit].frontLeft = {
+        installed: true,
+        railType,
+        startUnit: position.startUnit,
+        endUnit: position.endUnit,
+        railId: equipmentId
+      };
+      rack.rails[unit].frontRight = {
+        installed: true,
+        railType,
+        startUnit: position.startUnit,
+        endUnit: position.endUnit,
+        railId: equipmentId
+      };
+
+      changes.push({
+        type: 'equipment',
+        action: 'add',
+        target: `rail-${unit}`,
+        newValue: rack.rails[unit]
+      });
+    }
+
+    // 通常の機器設置処理も実行
+    for (let unit = position.startUnit; unit <= position.endUnit; unit++) {
+      const equipmentPlacement: Equipment = {
+        ...equipment,
+        id: equipmentId,
+        startUnit: position.startUnit,
+        endUnit: position.endUnit,
+        isMainUnit: unit === position.startUnit
+      };
+
+      rack.equipment[unit] = equipmentPlacement;
+
+      changes.push({
+        type: 'equipment',
+        action: 'add',
+        target: unit.toString(),
+        newValue: equipmentPlacement
+      });
+    }
+
+    return changes;
   }
 }
 

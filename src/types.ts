@@ -22,6 +22,11 @@ export interface Equipment {
   endUnit?: number;
   isMainUnit?: boolean;
   
+  // 取り付け方法
+  mountingMethod?: 'rails' | 'cage-nuts' | 'shelf' | 'direct';
+  requiresRails?: boolean;
+  requiresCageNuts?: boolean;
+  
   // 特殊プロパティ
   pduType?: string;
   nutType?: string;
@@ -129,6 +134,7 @@ export interface Rack {
   mountingOptions: Record<string, MountingOption>;
   labels: Record<string, Label>;
   cageNuts: Record<number, CageNutConfig>;
+  rails: Record<number, RailConfiguration>; // レール配置情報
   partInventory: Record<string, Equipment>;
   fans: FanConfig;
   position: Position;
@@ -209,7 +215,28 @@ export interface LayoutDimensions {
 }
 
 // 定数型
-export type EquipmentType = 'server' | 'network' | 'security' | 'storage' | 'pdu' | 'ups' | 'power' | 'console' | 'monitoring' | 'cooling' | 'shelf' | 'spiritual' | 'cable' | 'mounting' | 'panel' | 'other';
+export type EquipmentType = 'server' | 'network' | 'security' | 'storage' | 'pdu' | 'ups' | 'power' | 'console' | 'monitoring' | 'cooling' | 'shelf' | 'spiritual' | 'cable' | 'mounting' | 'panel' | 'rail' | 'other';
+
+// 取り付け方法の型定義
+export type MountingMethod = 'rails' | 'cage-nuts' | 'shelf' | 'direct';
+
+// レール関連の型定義
+export interface RailConfiguration {
+  frontLeft: RailPosition;
+  frontRight: RailPosition;
+  rearLeft: RailPosition;
+  rearRight: RailPosition;
+}
+
+export interface RailPosition {
+  installed: boolean;
+  railType: string | null; // '1u', '2u', '4u' など
+  startUnit: number | null;
+  endUnit: number | null;
+  railId: string | null;
+}
+
+export type RailType = '1u' | '2u' | '4u';
 
 export type AirflowDirection = 'front-to-rear' | 'rear-to-front' | 'side-to-side' | 'intake' | 'exhaust' | 'blocking' | 'natural';
 

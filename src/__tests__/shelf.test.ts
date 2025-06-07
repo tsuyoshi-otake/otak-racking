@@ -13,10 +13,10 @@ describe('棚板のテスト', () => {
     width: 600,
     equipment: {},
     cageNuts: {},
+    rails: {},
     powerConnections: {},
     labels: {},
     mountingOptions: {},
-    railInventory: {},
     partInventory: {},
     fans: { count: 4, rpm: 3000 },
     position: { row: 'A', column: 1 },
@@ -183,8 +183,8 @@ describe('棚板のテスト', () => {
     it('全ての棚板はレール不要', () => {
       const { standardShelf, ventedShelf } = getShelfEquipment();
       
-      expect(standardShelf.needsRails).toBe(false);
-      expect(ventedShelf.needsRails).toBe(false);
+      expect(standardShelf.requiresRails).toBe(false);
+      expect(ventedShelf.requiresRails).toBe(false);
     });
 
     it('全ての棚板は電力不要', () => {

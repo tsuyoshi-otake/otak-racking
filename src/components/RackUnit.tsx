@@ -1,5 +1,5 @@
 import React from 'react';
-import { Trash2, CheckCircle, AlertCircle, XCircle, Thermometer } from 'lucide-react';
+import { Trash2, CheckCircle, AlertCircle, XCircle, Thermometer, Move } from 'lucide-react';
 import { Rack, Equipment, CoolingStats } from '../types';
 import {
   getCageNutStatus,
@@ -55,12 +55,14 @@ export const RackUnit: React.FC<RackUnitProps> = ({
   const isEmpty = !item;
   const isMainUnit = item?.isMainUnit;
   const cageNutStatus = getCageNutStatus(unit, rack);
+  const railStatus = rack.rails && rack.rails[unit];
 
   let powerStatus = null;
   let mountingStatus = null;
   let airflowStatus = null;
   let temperatureStatus = null;
   let cageNutDisplay = null;
+  let railDisplay = null;
   let displayName = '';
   
   if (item && isMainUnit) {
@@ -107,6 +109,15 @@ export const RackUnit: React.FC<RackUnitProps> = ({
       cageNutDisplay = <AlertCircle size={12} className="text-yellow-500" />;
     } else {
       cageNutDisplay = <XCircle size={12} className="text-red-500" />;
+    }
+  }
+
+  // レール表示処理
+  if (activeViewMode === 'showRailView') {
+    if (railStatus && (railStatus.frontLeft?.installed || railStatus.frontRight?.installed)) {
+      railDisplay = <Move size={12} className="text-blue-500" />;
+    } else {
+      railDisplay = <XCircle size={12} className="text-gray-400" />;
     }
   }
 
@@ -180,7 +191,7 @@ export const RackUnit: React.FC<RackUnitProps> = ({
       {item && isMainUnit && (
         <div
           className={`absolute inset-0 flex items-center justify-between px-2 ${
-            ['showPowerView', 'showMountingView', 'showLabelView', 'showCablingView', 'showCageNutView'].includes(activeViewMode ?? '') ? 'border-2 border-dashed border-blue-400' : ''
+            ['showPowerView', 'showMountingView', 'showLabelView', 'showCablingView', 'showCageNutView', 'showRailView'].includes(activeViewMode ?? '') ? 'border-2 border-dashed border-blue-400' : ''
           }`}
           style={{
             backgroundColor: item.color, 
@@ -195,6 +206,7 @@ export const RackUnit: React.FC<RackUnitProps> = ({
             {airflowStatus && <span className="ml-1">{airflowStatus}</span>}
             {temperatureStatus && <span className="ml-1">{temperatureStatus}</span>}
             {cageNutDisplay && <span className="ml-1">{cageNutDisplay}</span>}
+            {railDisplay && <span className="ml-1">{railDisplay}</span>}
           </div>
           <div className="flex gap-1 items-center">
             {getEquipmentIcon(item.type, Math.max(10, fontSize))}

@@ -13,10 +13,10 @@ describe('負荷分散装置のテスト', () => {
     width: 600,
     equipment: {},
     cageNuts: {},
+    rails: {},
     powerConnections: {},
     labels: {},
     mountingOptions: {},
-    railInventory: {},
     partInventory: {},
     fans: { count: 4, rpm: 3000 },
     position: { row: 'A', column: 1 },
@@ -67,7 +67,7 @@ describe('負荷分散装置のテスト', () => {
       expect(loadBalancer.heat).toBe(683);
       expect(loadBalancer.weight).toBe(12);
       expect(loadBalancer.dualPower).toBe(true);
-      expect(loadBalancer.needsRails).toBe(false);
+      expect(loadBalancer.requiresRails).toBe(false);
       expect(loadBalancer.airflow).toBe('front-to-rear');
       expect(loadBalancer.cfm).toBe(60);
     });
@@ -165,7 +165,7 @@ describe('負荷分散装置のテスト', () => {
         type: 'server',
         color: '#4F46E5',
         dualPower: true,
-        needsRails: true,
+        requiresRails: true,
         airflow: 'front-to-rear',
         cfm: 65,
         heatGeneration: 1024,
@@ -205,7 +205,7 @@ describe('負荷分散装置のテスト', () => {
     it('ロードバランサーはレール不要で設置できる', () => {
       const loadBalancer = getLoadBalancer();
       
-      expect(loadBalancer.needsRails).toBe(false);
+      expect(loadBalancer.requiresRails).toBe(false);
     });
 
     it('ロードバランサーの奥行きが適切である', () => {

@@ -18,6 +18,7 @@ const createInitialRack = (id: string, name: string, rackCount: number): Rack =>
   mountingOptions: {},
   labels: {},
   cageNuts: {},
+  rails: {},
   partInventory: {},
   fans: { count: 4, rpm: 3000 },
   position: { row: 'A', column: rackCount + 1 },

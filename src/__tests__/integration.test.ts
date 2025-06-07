@@ -24,13 +24,32 @@ describe('新しい機器設置システム統合テスト', () => {
     mountingOptions: {},
     labels: {},
     cageNuts: {},
-    railInventory: {},
+    rails: {},
     partInventory: {},
     fans: { count: 4, rpm: 3000 },
     position: { row: 'A', column: 1 },
     cabling: { external: {}, overhead: {}, underfloor: {} },
     housing: { type: 'full', startUnit: 1, endUnit: 42, frontPanel: 'perforated', rearPanel: 'perforated' },
-    environment: { ambientTemp: 22, humidity: 45, pressureDiff: 0.2 }
+    environment: { ambientTemp: 22, humidity: 45, pressureDiff: 0.2 },
+    pduPlacements: [],
+    physicalStructure: {
+      frame: { material: 'steel', color: '#2d3748', thickness: 2, coating: 'powder', style: 'standard' },
+      frontDoor: { type: 'mesh', locked: false, opened: false, color: '#2d3748', transparency: 0, ventilation: 80 },
+      rearDoor: { type: 'mesh', locked: false, opened: false, color: '#2d3748', transparency: 0, ventilation: 80 },
+      leftPanel: { type: 'steel', mounted: true, color: '#2d3748', transparency: 0, ventilation: 0, removable: true },
+      rightPanel: { type: 'steel', mounted: true, color: '#2d3748', transparency: 0, ventilation: 0, removable: true },
+      mountingPosts: {
+        frontLeft: { type: 'square', holes: 'cage-nut', spacing: 25.4, depth: 50 },
+        frontRight: { type: 'square', holes: 'cage-nut', spacing: 25.4, depth: 50 },
+        rearLeft: { type: 'square', holes: 'cage-nut', spacing: 25.4, depth: 50 },
+        rearRight: { type: 'square', holes: 'cage-nut', spacing: 25.4, depth: 50 }
+      },
+      base: { type: 'adjustable', height: 100, loadCapacity: 1000, leveling: true, antivibration: false },
+      top: { type: 'cable-tray', cableManagement: true, loadCapacity: 50, fanMounts: 0 },
+      dimensions: { externalWidth: 600, externalDepth: 1000, externalHeight: 2000, internalWidth: 482.6, internalDepth: 900, usableHeight: 1778 },
+      weight: { empty: 150, maxLoad: 1000, current: 150 },
+      ventilation: { frontAirflow: 0, rearAirflow: 0, sideAirflow: 0, totalCapacity: 1000 }
+    }
   });
 
   const create2UServer = (): Equipment => ({
@@ -44,7 +63,9 @@ describe('新しい機器設置システム統合テスト', () => {
     type: 'server',
     color: '#7C3AED',
     dualPower: true,
-    needsRails: true,
+    requiresRails: true,
+    mountingMethod: 'rails' as const,
+    requiresCageNuts: false,
     airflow: 'front-to-rear',
     cfm: 120,
     heatGeneration: 1707,
@@ -62,7 +83,9 @@ describe('新しい機器設置システム統合テスト', () => {
     type: 'server',
     color: '#4F46E5',
     dualPower: true,
-    needsRails: true,
+    requiresRails: true,
+    mountingMethod: 'rails' as const,
+    requiresCageNuts: false,
     airflow: 'front-to-rear',
     cfm: 65,
     heatGeneration: 1024,
@@ -76,7 +99,7 @@ describe('新しい機器設置システム統合テスト', () => {
 
       // Step 1: 3-4Uに最初の2Uサーバーを設置
       const result1 = await manager.placeEquipment(testRack, 3, server1, {
-        autoInstallCageNuts: true
+        skipWarnings: true
       });
       expect(result1.success).toBe(true);
       expect(testRack.equipment[3]).toBeDefined();
@@ -86,7 +109,7 @@ describe('新しい機器設置システム統合テスト', () => {
 
       // Step 2: 1-2Uに2番目の2Uサーバーを設置
       const result2 = await manager.placeEquipment(testRack, 1, server2, {
-        autoInstallCageNuts: true
+        skipWarnings: true
       });
       expect(result2.success).toBe(true);
       expect(testRack.equipment[1]).toBeDefined();
@@ -107,7 +130,7 @@ describe('新しい機器設置システム統合テスト', () => {
       const server2 = { ...create2UServer(), id: 'server-2u-second' };
 
       // Step 1: 3-4Uに最初の2Uサーバーを設置
-      await manager.placeEquipment(testRack, 3, server1, { autoInstallCageNuts: true });
+      await manager.placeEquipment(testRack, 3, server1, { skipWarnings: true });
 
       // Step 2: utils関数を使って1-2Uの配置可能性をチェック
       const checkResult = await canPlaceEquipmentAdvanced(testRack, 1, server2);
@@ -115,7 +138,7 @@ describe('新しい機器設置システム統合テスト', () => {
       expect(checkResult.warnings).toBeDefined();
 
       // Step 3: 実際に配置
-      const result = await manager.placeEquipment(testRack, 1, server2, { autoInstallCageNuts: true });
+      const result = await manager.placeEquipment(testRack, 1, server2, { skipWarnings: true });
       expect(result.success).toBe(true);
     });
 
@@ -125,15 +148,15 @@ describe('新しい機器設置システム統合テスト', () => {
       const server1U2 = { ...create1UServer(), id: 'server-1u-second' };
 
       // 1-2Uに2Uサーバーを設置
-      const result1 = await manager.placeEquipment(testRack, 1, server2U, { autoInstallCageNuts: true });
+      const result1 = await manager.placeEquipment(testRack, 1, server2U, { skipWarnings: true });
       expect(result1.success).toBe(true);
 
       // 3Uに1Uサーバーを設置
-      const result2 = await manager.placeEquipment(testRack, 3, server1U1, { autoInstallCageNuts: true });
+      const result2 = await manager.placeEquipment(testRack, 3, server1U1, { skipWarnings: true });
       expect(result2.success).toBe(true);
 
       // 4Uに別の1Uサーバーを設置
-      const result3 = await manager.placeEquipment(testRack, 4, server1U2, { autoInstallCageNuts: true });
+      const result3 = await manager.placeEquipment(testRack, 4, server1U2, { skipWarnings: true });
       expect(result3.success).toBe(true);
 
       // 配置状態確認
@@ -154,10 +177,10 @@ describe('新しい機器設置システム統合テスト', () => {
       const server2 = { ...create1UServer(), id: 'server-1u-conflict' };
 
       // 1-2Uに2Uサーバーを設置
-      await manager.placeEquipment(testRack, 1, server1, { autoInstallCageNuts: true });
+      await manager.placeEquipment(testRack, 1, server1, { skipWarnings: true });
 
       // 2Uに1Uサーバーを設置しようとする（占有されているため失敗すべき）
-      const result = await manager.placeEquipment(testRack, 2, server2, { autoInstallCageNuts: true });
+      const result = await manager.placeEquipment(testRack, 2, server2, { skipWarnings: true });
       expect(result.success).toBe(false);
       expect(result.validation.errors[0].code).toBe('UNIT_OCCUPIED');
       expect(result.validation.errors[0].affectedUnits).toContain(2);
@@ -168,10 +191,10 @@ describe('新しい機器設置システム統合テスト', () => {
       const server2 = { ...create2UServer(), id: 'server-2u-adjacent' };
 
       // 1-2Uに2Uサーバーを設置
-      await manager.placeEquipment(testRack, 1, server1, { autoInstallCageNuts: true });
+      await manager.placeEquipment(testRack, 1, server1, { skipWarnings: true });
 
       // 3-4Uに別の2Uサーバーを設置（隣接するが重複しない）
-      const result = await manager.placeEquipment(testRack, 3, server2, { autoInstallCageNuts: true });
+      const result = await manager.placeEquipment(testRack, 3, server2, { skipWarnings: true });
       expect(result.success).toBe(true);
     });
   });
@@ -181,7 +204,7 @@ describe('新しい機器設置システム統合テスト', () => {
       const server = create2UServer();
 
       // 1-2Uに2Uサーバーを設置
-      await manager.placeEquipment(testRack, 1, server, { autoInstallCageNuts: true });
+      await manager.placeEquipment(testRack, 1, server, { skipWarnings: true });
       expect(testRack.equipment[1]).toBeDefined();
       expect(testRack.equipment[2]).toBeDefined();
 
@@ -194,7 +217,7 @@ describe('新しい機器設置システム統合テスト', () => {
 
       // 削除後に同じ場所に新しい機器を設置できる
       const newServer = { ...create2UServer(), id: 'server-2u-new' };
-      const result = await manager.placeEquipment(updatedRack, 1, newServer, { autoInstallCageNuts: true });
+      const result = await manager.placeEquipment(updatedRack, 1, newServer, { skipWarnings: true });
       expect(result.success).toBe(true);
     });
 
@@ -204,9 +227,9 @@ describe('新しい機器設置システム統合テスト', () => {
       const server3 = create1UServer();
 
       // 複数機器を設置
-      await manager.placeEquipment(testRack, 1, server1, { autoInstallCageNuts: true });
-      await manager.placeEquipment(testRack, 3, server2, { autoInstallCageNuts: true });
-      await manager.placeEquipment(testRack, 5, server3, { autoInstallCageNuts: true });
+      await manager.placeEquipment(testRack, 1, server1, { skipWarnings: true });
+      await manager.placeEquipment(testRack, 3, server2, { skipWarnings: true });
+      await manager.placeEquipment(testRack, 5, server3, { skipWarnings: true });
 
       // 中間の機器を削除
       const removeResult = await manager.removeEquipment(testRack, 3);
@@ -223,14 +246,14 @@ describe('新しい機器設置システム統合テスト', () => {
 
       // 削除された場所に新しい機器を設置できる
       const newServer = { ...create1UServer(), id: 'server-1u-replacement' };
-      const result = await manager.placeEquipment(updatedRack, 3, newServer, { autoInstallCageNuts: true });
+      const result = await manager.placeEquipment(updatedRack, 3, newServer, { skipWarnings: true });
       expect(result.success).toBe(true);
     });
   });
 
   describe('自動ゲージナット設置', () => {
     it('レール不要機器の自動ゲージナット設置', async () => {
-      const server = { ...create1UServer(), needsRails: false };
+      const server = { ...create1UServer(), requiresRails: false, mountingMethod: 'cage-nuts' as const, requiresCageNuts: true };
 
       const result = await manager.placeEquipment(testRack, 1, server, { 
         autoInstallCageNuts: true 
@@ -253,8 +276,8 @@ describe('新しい機器設置システム統合テスト', () => {
       const server1U = create1UServer();
 
       // 機器を設置
-      await manager.placeEquipment(testRack, 1, server2U, { autoInstallCageNuts: true });
-      await manager.placeEquipment(testRack, 4, server1U, { autoInstallCageNuts: true });
+      await manager.placeEquipment(testRack, 1, server2U, { skipWarnings: true });
+      await manager.placeEquipment(testRack, 4, server1U, { skipWarnings: true });
 
       const occupancy = manager.getRackOccupancy(testRack);
 

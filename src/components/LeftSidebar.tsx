@@ -8,7 +8,8 @@ import {
   Cable,
   Square,
   ChevronDown,
-  ChevronRight
+  ChevronRight,
+  Move
 } from 'lucide-react';
 import { RackViewPerspective } from '../App'; // App.tsx から型をインポート
 import {
@@ -53,6 +54,7 @@ export const LeftSidebar: React.FC<LeftSidebarProps> = ({
     { key: 'showTemperatureView' as const, icon: Thermometer, label: '温度', color: 'text-orange-500' },
     { key: 'showCablingView' as const, icon: Cable, label: 'ケーブル', color: 'text-cyan-500' },
     { key: 'showCageNutView' as const, icon: Square, label: 'ゲージナット', color: 'text-gray-500' },
+    { key: 'showRailView' as const, icon: Move, label: 'レール', color: 'text-blue-600' },
     { key: 'showFloorView' as const, icon: Square, label: 'フロア', color: 'text-indigo-500' }
   ];
 
