@@ -11,11 +11,52 @@ interface RailProps {
   darkMode: boolean;
 }
 
-/**
- * このコンポーネントはレール設置のロジックをトリガーするために存在しますが、
- * 視覚的な表現は MountingHoles.tsx が担当します。
- * そのため、このコンポーネントは何もレンダリングしません。
- */
-export const Rail: React.FC<RailProps> = () => {
-  return <></>;
+export const Rail: React.FC<RailProps> = ({
+  rack,
+  rail,
+  unitHeight,
+  zoomLevel,
+  rackWidth,
+  totalUnits,
+  darkMode,
+}) => {
+  const railHeight = (rail.endUnit - rail.startUnit + 1) * unitHeight;
+  const topPosition = (totalUnits - rail.endUnit) * unitHeight;
+
+  const railColor = darkMode ? 'bg-gray-500' : 'bg-gray-400';
+  const railBorderStyle = darkMode ? 'border-gray-400' : 'border-gray-500';
+
+  return (
+    <div
+      className={`absolute left-0 w-full`}
+      style={{
+        top: `${topPosition}px`,
+        height: `${railHeight}px`,
+        pointerEvents: 'none', // 機器のドラッグ＆ドロップを妨げないように
+      }}
+    >
+      {/* Left Rail */}
+      <div
+        className={`absolute ${railColor} ${railBorderStyle} border-r-2`}
+        style={{
+          left: '20px', // ラックの柱の内側に表示
+          width: '10px',
+          height: '100%',
+          opacity: 0.7,
+        }}
+        title={`Rail for ${rail.equipmentId || 'Unassigned'}`}
+      />
+      {/* Right Rail */}
+      <div
+        className={`absolute ${railColor} ${railBorderStyle} border-l-2`}
+        style={{
+          right: '20px', // ラックの柱の内側に表示
+          width: '10px',
+          height: '100%',
+          opacity: 0.7,
+        }}
+        title={`Rail for ${rail.equipmentId || 'Unassigned'}`}
+      />
+    </div>
+  );
 };

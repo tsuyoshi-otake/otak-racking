@@ -30,21 +30,9 @@ export const MountingHoles: React.FC<MountingHolesProps> = ({
   };
 
   // このユニットに影響を与えているレール設備を検索する
-  let relevantRail: RailInstallation | undefined = undefined;
-  if (rack.railInstallations) {
-    // `find`が期待通りに動作しない可能性を考慮し、より堅牢なforループで検索
-    for (const key in rack.railInstallations) {
-      if (Object.prototype.hasOwnProperty.call(rack.railInstallations, key)) {
-        const rail = rack.railInstallations[key as any];
-        if (rail && typeof rail.unit === 'number' && typeof rail.size === 'number') {
-          if (unit >= rail.unit && unit < rail.unit + rail.size) {
-            relevantRail = rail;
-            break;
-          }
-        }
-      }
-    }
-  }
+  const relevantRail = Object.values(rack.railInstallations || {}).find(
+    (rail) => unit >= rail.startUnit && unit <= rail.endUnit
+  );
 
   const holeSize = Math.max(8, 16 * (zoomLevel / 100));
   const frameOffset = 20 * (zoomLevel / 100);
@@ -135,22 +123,24 @@ export const MountingHoles: React.FC<MountingHolesProps> = ({
           )}
         </div>
         {/* レールスロット */}
-        <div
-          className={`border-y ${
-            shouldHighlightSlot
-              ? darkMode
-                ? 'bg-blue-500 border-blue-400'
-                : 'bg-blue-400 border-blue-500'
-              : darkMode
-                ? 'bg-gray-700 border-gray-600'
-                : 'bg-gray-300 border-gray-400'
-          } ${position === 'left' ? 'border-r' : 'border-l'}`}
-          style={{
-            width: `${slotWidth}px`,
-            height: '100%',
-          }}
-          title={relevantRail ? `レール設置済み (U${relevantRail.unit}, ${relevantRail.size}U)` : `レールスロット (U${unit})`}
-        />
+        {relevantRail && (
+          <div
+            className={`border-y ${
+              shouldHighlightSlot
+                ? darkMode
+                  ? 'bg-blue-500 border-blue-400'
+                  : 'bg-blue-400 border-blue-500'
+                : darkMode
+                  ? 'bg-gray-700 border-gray-600'
+                  : 'bg-gray-300 border-gray-400'
+            } ${position === 'left' ? 'border-r' : 'border-l'}`}
+            style={{
+              width: `${slotWidth}px`,
+              height: '100%',
+            }}
+            title={`レール設置済み (U${relevantRail.startUnit}-${relevantRail.endUnit})`}
+          />
+        )}
       </div>
     );
   };

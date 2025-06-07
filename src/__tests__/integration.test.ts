@@ -186,14 +186,15 @@ describe('新しい機器設置システム統合テスト', () => {
       expect(testRack.equipment[2]).toBeDefined();
 
       // 削除
-      const removeResult = await manager.removeEquipment(testRack, 1);
+      let removeResult = await manager.removeEquipment(testRack, 1);
       expect(removeResult.success).toBe(true);
-      expect(testRack.equipment[1]).toBeUndefined();
-      expect(testRack.equipment[2]).toBeUndefined();
+      let updatedRack = removeResult.updatedRack!;
+      expect(updatedRack.equipment[1]).toBeUndefined();
+      expect(updatedRack.equipment[2]).toBeUndefined();
 
       // 削除後に同じ場所に新しい機器を設置できる
       const newServer = { ...create2UServer(), id: 'server-2u-new' };
-      const result = await manager.placeEquipment(testRack, 1, newServer, { autoInstallCageNuts: true });
+      const result = await manager.placeEquipment(updatedRack, 1, newServer, { autoInstallCageNuts: true });
       expect(result.success).toBe(true);
     });
 
@@ -208,20 +209,21 @@ describe('新しい機器設置システム統合テスト', () => {
       await manager.placeEquipment(testRack, 5, server3, { autoInstallCageNuts: true });
 
       // 中間の機器を削除
-      await manager.removeEquipment(testRack, 3);
+      const removeResult = await manager.removeEquipment(testRack, 3);
+      let updatedRack = removeResult.updatedRack!;
 
       // 削除されたユニットが空いていることを確認
-      expect(testRack.equipment[3]).toBeUndefined();
-      expect(testRack.equipment[4]).toBeUndefined();
+      expect(updatedRack.equipment[3]).toBeUndefined();
+      expect(updatedRack.equipment[4]).toBeUndefined();
 
       // 他の機器は残っていることを確認
-      expect(testRack.equipment[1]).toBeDefined();
-      expect(testRack.equipment[2]).toBeDefined();
-      expect(testRack.equipment[5]).toBeDefined();
+      expect(updatedRack.equipment[1]).toBeDefined();
+      expect(updatedRack.equipment[2]).toBeDefined();
+      expect(updatedRack.equipment[5]).toBeDefined();
 
       // 削除された場所に新しい機器を設置できる
       const newServer = { ...create1UServer(), id: 'server-1u-replacement' };
-      const result = await manager.placeEquipment(testRack, 3, newServer, { autoInstallCageNuts: true });
+      const result = await manager.placeEquipment(updatedRack, 3, newServer, { autoInstallCageNuts: true });
       expect(result.success).toBe(true);
     });
   });

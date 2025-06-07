@@ -188,15 +188,18 @@ describe('設置ロジック修正確認テスト', () => {
       expect(testRack.equipment[34]).toBeDefined();
 
       // 削除
-      const removeResult = await manager.removeEquipment(testRack, 33);
+      let removeResult = await manager.removeEquipment(testRack, 33);
       expect(removeResult.success).toBe(true);
+      
+      // 更新されたラックでアサーションを行う
+      const updatedRack = removeResult.updatedRack!;
 
       // 確認：両方のユニットがクリアされている
-      expect(testRack.equipment[33]).toBeUndefined();
-      expect(testRack.equipment[34]).toBeUndefined();
+      expect(updatedRack.equipment[33]).toBeUndefined();
+      expect(updatedRack.equipment[34]).toBeUndefined();
 
       // 35Uは影響されない（元々空き）
-      expect(testRack.equipment[35]).toBeUndefined();
+      expect(updatedRack.equipment[35]).toBeUndefined();
     });
   });
 });

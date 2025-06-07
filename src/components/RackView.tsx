@@ -87,9 +87,9 @@ export const RackView: React.FC<RackViewProps> = ({
           <RackPDU rack={rack} zoomLevel={zoomLevel} unitHeight={unitHeight} />
           
           {/* レールを描画 */}
-          {rack.railInstallations && Object.values(rack.railInstallations).map(rail => (
+          {Object.values(rack.railInstallations).map(rail => (
             <Rail
-              key={`rail-${rail.unit}`}
+              key={rail.id}
               rack={rack}
               rail={rail}
               unitHeight={unitHeight}

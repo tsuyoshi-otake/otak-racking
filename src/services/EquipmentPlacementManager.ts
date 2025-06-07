@@ -14,7 +14,7 @@ import {
   RackOccupancy,
   PlacementState,
   RailInstallation
-} from '../types/equipment';
+} from '../types';
 import { rackTypes } from '../constants';
 
 /**
@@ -42,16 +42,13 @@ export class EquipmentPlacementManager {
     equipment: Equipment,
     options: PlacementOptions = {}
   ): Promise<PlacementResult> {
-    // 不変性を保つためにラックのディープコピーを作成
-    const rackCopy = JSON.parse(JSON.stringify(rack));
-
     const position: PlacementPosition = {
       startUnit,
       endUnit: startUnit + equipment.height - 1
     };
 
     const context: PlacementContext = {
-      rack: rackCopy,
+      rack: rack,
       position,
       equipment,
       options
@@ -65,7 +62,7 @@ export class EquipmentPlacementManager {
         position,
         validation,
         appliedChanges: [],
-        updatedRack: rack
+        updatedRack: undefined
       };
     }
 
@@ -77,7 +74,7 @@ export class EquipmentPlacementManager {
         success: false,
         validation,
         appliedChanges: [],
-        updatedRack: rack
+        updatedRack: undefined
       };
     }
 
@@ -92,7 +89,7 @@ export class EquipmentPlacementManager {
         success: false,
         validation,
         appliedChanges: [],
-        updatedRack: rack
+        updatedRack: undefined
       };
     }
 
@@ -104,7 +101,7 @@ export class EquipmentPlacementManager {
       position,
       validation,
       appliedChanges: changes,
-      updatedRack: rackCopy
+      updatedRack: rack
     };
   }
 
@@ -245,19 +242,18 @@ export class EquipmentPlacementManager {
 
       const newRail: RailInstallation = {
         id: railId,
-        unit: position.startUnit,
+        startUnit: position.startUnit,
+        endUnit: position.endUnit,
         type: 'slide', // デフォルト
         depth: equipment.depth,
         equipmentId: equipmentId,
-        size: equipment.height,
         highlightPositions: highlightPositions,
       };
 
       if (!rack.railInstallations) {
         rack.railInstallations = {};
       }
-      // 機器が複数のUを占有する場合でも、レール情報は開始Uに紐付ける
-      rack.railInstallations[position.startUnit] = newRail;
+      rack.railInstallations[railId] = newRail;
 
       changes.push({
         type: 'rail',
@@ -337,13 +333,17 @@ export class EquipmentPlacementManager {
     delete rackCopy.labels[equipment.id];
 
     // 関連するレールを削除
-    if (equipment.needsRails && rackCopy.railInstallations?.[equipment.startUnit!]) {
-      const oldRail = rackCopy.railInstallations[equipment.startUnit!];
-      delete rackCopy.railInstallations[equipment.startUnit!];
+    const railIdToRemove = Object.keys(rackCopy.railInstallations || {}).find(
+      id => rackCopy.railInstallations![id].equipmentId === equipment.id
+    );
+
+    if (railIdToRemove) {
+      const oldRail = rackCopy.railInstallations![railIdToRemove];
+      delete rackCopy.railInstallations![railIdToRemove];
       changes.push({
         type: 'rail',
         action: 'remove',
-        target: equipment.startUnit!.toString(),
+        target: railIdToRemove,
         oldValue: oldRail,
       });
     }

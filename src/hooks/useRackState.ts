@@ -213,7 +213,8 @@ export const useRackState = () => {
     if (!currentRack) return;
 
     try {
-      const result = await placementManager.placeEquipment(currentRack, startUnit, equipment, {
+      const rackCopy = JSON.parse(JSON.stringify(currentRack));
+      const result = await placementManager.placeEquipment(rackCopy, startUnit, equipment, {
         autoInstallCageNuts: true
       });
 
@@ -282,14 +283,47 @@ export const useRackState = () => {
   // 取り付け設定更新
   const updateMountingOption = useCallback((rackId: string, equipmentId: string, field: string, value: any) => {
     setRacks(prev => {
-      const newRack = deepCopy(prev[rackId]);
-      newRack.mountingOptions[equipmentId] = {
-        ...newRack.mountingOptions[equipmentId],
-        [field]: value
-      };
-      return { ...prev, [rackId]: newRack };
+        const newRack = deepCopy(prev[rackId]);
+        const equipment = Object.values(newRack.equipment).find(e => e.id === equipmentId);
+
+        if (!equipment) return prev;
+
+        // Update mounting option
+        newRack.mountingOptions[equipmentId] = {
+            ...newRack.mountingOptions[equipmentId],
+            [field]: value
+        };
+
+        // if the type of mounting is being changed
+        if (field === 'type') {
+            const railType = value;
+            const existingRailId = Object.keys(newRack.railInstallations).find(
+                id => newRack.railInstallations[id].equipmentId === equipmentId
+            );
+
+            // Remove existing rail if it exists
+            if (existingRailId) {
+                delete newRack.railInstallations[existingRailId];
+            }
+
+            // Add new rail if a rail type is selected
+            if (railType.includes('rail')) {
+                const newRailId = `rail-${Date.now()}`;
+                newRack.railInstallations[newRailId] = {
+                    id: newRailId,
+                    startUnit: equipment.startUnit!,
+                    endUnit: equipment.endUnit!,
+                    type: railType,
+                    depth: equipment.depth,
+                    equipmentId: equipmentId,
+                    highlightPositions: ['top', 'bottom'],
+                };
+            }
+        }
+
+        return { ...prev, [rackId]: newRack };
     });
-  }, []);
+}, []);
 
   // ゲージナット設置
   const installCageNut = useCallback((rackId: string, unit: number, side: string, position: string, nutType: string = 'm6') => {
@@ -328,36 +362,36 @@ export const useRackState = () => {
     });
   }, []);
 
-  // const installRail = useCallback((rackId: string, unit: number, type: 'slide' | 'fixed' | 'toolless', depth: number) => {
-  //     setRacks(prev => {
-  //       const newRacks = deepCopy(prev);
-  //       const rack = newRacks[rackId];
-  //       if (rack) {
-  //         if (!rack.railInstallations) {
-  //           rack.railInstallations = {};
-  //         }
-  //         // @ts-ignore 古い型のためエラー
-  //         rack.railInstallations[unit] = {
-  //           unit,
-  //           type,
-  //           depth,
-  //           installed: true
-  //         };
-  //       }
-  //       return newRacks;
-  //     });
-  //   }, []);
+  const installRail = useCallback((rackId: string, equipmentId: string, startUnit: number, endUnit: number, type: 'slide' | 'fixed' | 'toolless', depth: number) => {
+      setRacks(prev => {
+        const newRacks = deepCopy(prev);
+        const rack = newRacks[rackId];
+        if (rack) {
+          const newRailId = `rail-${Date.now()}`;
+          rack.railInstallations[newRailId] = {
+            id: newRailId,
+            startUnit,
+            endUnit,
+            type,
+            depth,
+            equipmentId,
+            highlightPositions: ['top', 'bottom'],
+          };
+        }
+        return newRacks;
+      });
+    }, []);
 
-  // const removeRail = useCallback((rackId: string, unit: number) => {
-  //   setRacks(prev => {
-  //     const newRacks = deepCopy(prev);
-  //     const rack = newRacks[rackId];
-  //     if (rack && rack.railInstallations) {
-  //       delete rack.railInstallations[unit];
-  //     }
-  //     return newRacks;
-  //   });
-  // }, []);
+  const removeRail = useCallback((rackId: string, railId: string) => {
+    setRacks(prev => {
+      const newRacks = deepCopy(prev);
+      const rack = newRacks[rackId];
+      if (rack && rack.railInstallations[railId]) {
+        delete rack.railInstallations[railId];
+      }
+      return newRacks;
+    });
+  }, []);
 
   // 環境設定更新
   const updateEnvironment = useCallback((rackId: string, field: string, value: number) => {
@@ -390,8 +424,8 @@ export const useRackState = () => {
     removeCageNut,
     autoInstallCageNutsForUnit,
     updateEnvironment,
-    // installRail, // 削除。レール設置は EquipmentPlacementManager が担当
-    // removeRail,  // 削除。レール削除は EquipmentPlacementManager が担当
+    installRail,
+    removeRail,
     
     // Computed
     currentRack: racks[selectedRack] || racks[Object.keys(racks)[0]]

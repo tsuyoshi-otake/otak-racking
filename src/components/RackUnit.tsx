@@ -135,7 +135,7 @@ export const RackUnit: React.FC<RackUnitProps> = ({
       }}
     >
       <div className="flex items-center gap-1">
-        <span className={`font-mono ${unitNumClass}`}>{unit}</span>
+        <span className={`font-mono ${unitNumClass} ml-2`}>{unit}</span>
         {activeViewMode === 'showCageNutView' && (
           <div className="flex gap-0.5">
             <div className="flex flex-col gap-0.5" title={`ゲージナット: ${cageNutStatus.installed}/8`}>
