@@ -92,7 +92,7 @@ export const RackView: React.FC<RackViewProps> = ({
             <RackPDU rack={rack} zoomLevel={zoomLevel} unitHeight={unitHeight} />
           )}
           
-          {draggedItem && hoveredUnit && draggedItem.requiresRails && (
+          {draggedItem && hoveredUnit && draggedItem.height > 0 && (
             <div
               className="absolute bg-blue-500 bg-opacity-30 border-2 border-dashed border-blue-400 pointer-events-none"
               style={{

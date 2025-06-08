@@ -34,7 +34,10 @@ export interface Equipment {
   washerType?: string;
   requiresShelf?: boolean;
   system?: string;
+  role?: EquipmentRole;
 }
+
+export type EquipmentRole = 'compute' | 'network' | 'storage' | 'power-source' | 'power-distribution' | 'cooling' | 'security' | 'monitoring' | 'accessory' | 'other';
 
 export interface RackType {
   name: string;

@@ -161,17 +161,21 @@ export const getCageNutStatus = (unit: number, rack: Rack): CageNutStatus => {
  * 電源系統検索
  */
 export const getPowerSources = (rack: Rack): PowerSources => {
-  const pdus = Object.values(rack.equipment).filter(item => item.type === 'pdu' && item.isMainUnit);
-  const upses = Object.values(rack.equipment).filter(item => item.type === 'ups' && item.isMainUnit);
-  const cvcfs = Object.values(rack.equipment).filter(item => (item.id.includes('cvcf') || item.name.includes('CVCF')) && item.isMainUnit);
-  const distributionPanels = Object.values(rack.equipment).filter(item => item.id.includes('distribution-panel') && item.isMainUnit);
-  
+  const powerSources = Object.values(rack.equipment).filter(item =>
+    (item.role === 'power-source' || item.role === 'power-distribution') && item.isMainUnit
+  );
+
+  const pdus = powerSources.filter(item => item.type === 'pdu');
+  const upses = powerSources.filter(item => item.type === 'ups');
+  const cvcfs = powerSources.filter(item => item.id.includes('cvcf') || item.name.includes('CVCF'));
+  const distributionPanels = powerSources.filter(item => item.id.includes('distribution-panel'));
+
   return {
     pdus,
     upses,
     cvcfs,
     distributionPanels,
-    all: [...pdus, ...upses, ...cvcfs, ...distributionPanels]
+    all: powerSources
   };
 };
 
