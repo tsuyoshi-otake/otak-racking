@@ -22,7 +22,7 @@ interface RackUnitProps {
   activeViewMode: string | null;
   selectedRack: string;
   coolingStats: CoolingStats;
-  onDragOver?: (e: React.DragEvent) => void;
+  onDragOver?: (e: React.DragEvent, unit: number) => void;
   onDrop?: (e: React.DragEvent, unit: number) => void;
   onEquipmentClick?: (equipment: Equipment) => void;
   onEquipmentRemove?: (unit: number) => void;
@@ -137,7 +137,7 @@ export const RackUnit: React.FC<RackUnitProps> = ({
         item && !isMainUnit ? `border-t-0 ${emptyUnitClass}` : ''
       }`}
       style={{ height: unitHeight }}
-      onDragOver={(isEmpty || (item && !isMainUnit)) && selectedRack !== 'all' ? onDragOver : undefined}
+      onDragOver={(isEmpty || (item && !isMainUnit)) && selectedRack !== 'all' ? (e) => onDragOver?.(e, unit) : undefined}
       onDrop={(isEmpty || (item && !isMainUnit)) && selectedRack !== 'all' ? (e) => onDrop?.(e, unit) : undefined}
       onClick={() => {
         if (item && isMainUnit && selectedRack !== 'all') {

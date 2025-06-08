@@ -14,6 +14,7 @@ export const useDragAndDrop = (
   showConfirmModal: (title: string, message: string, onConfirm: () => void) => void
 ) => {
   const [draggedItem, setDraggedItem] = useState<Equipment | null>(null);
+  const [hoveredUnit, setHoveredUnit] = useState<number | null>(null);
 
   // ドラッグ開始
   const handleDragStart = useCallback((e: React.DragEvent, item: Equipment) => {
@@ -22,24 +23,29 @@ export const useDragAndDrop = (
   }, []);
 
   // ドラッグオーバー
-  const handleDragOver = useCallback((e: React.DragEvent) => {
+  const handleDragOver = useCallback((e: React.DragEvent, unit: number) => {
     e.preventDefault();
     e.dataTransfer.dropEffect = 'copy';
-  }, []);
+    if (draggedItem) {
+      setHoveredUnit(unit);
+    }
+  }, [draggedItem]);
 
   // ドロップ処理
   const handleDrop = useCallback(async (e: React.DragEvent, startUnit: number) => {
     e.preventDefault();
+    setHoveredUnit(null);
     if (!draggedItem || !currentRack) return;
 
     // 最終的にドラッグ状態をリセット
     const cleanup = () => setDraggedItem(null);
 
     try {
+      const correctedStartUnit = startUnit;
       // ゲージナットの場合は該当ユニットに自動設置
       if (draggedItem.nutType) {
-        autoInstallCageNutsForUnit(selectedRack, startUnit, draggedItem.nutType);
-        showInfoModal('ゲージナット設置完了', `${startUnit}Uに${draggedItem.name}を8個設置しました。\n（前面4穴・背面4穴）`);
+        autoInstallCageNutsForUnit(selectedRack, correctedStartUnit, draggedItem.nutType);
+        showInfoModal('ゲージナット設置完了', `${correctedStartUnit}Uに${draggedItem.name}を8個設置しました。\n（前面4穴・背面4穴）`);
         return;
       }
 
@@ -50,7 +56,7 @@ export const useDragAndDrop = (
       }
 
       // 機器を配置
-      const result = await addEquipment(selectedRack, startUnit, draggedItem);
+      const result = await addEquipment(selectedRack, correctedStartUnit, draggedItem);
 
       // 結果をハンドリング
       if (!result.success) {
@@ -72,10 +78,12 @@ export const useDragAndDrop = (
   // ドラッグキャンセル
   const handleDragEnd = useCallback(() => {
     setDraggedItem(null);
+    setHoveredUnit(null);
   }, []);
 
   return {
     draggedItem,
+    hoveredUnit,
     handleDragStart,
     handleDragOver,
     handleDrop,

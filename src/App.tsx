@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { Maximize, Minimize } from 'lucide-react';
 import { Equipment, PhysicalStructure } from './types';
 import { useRackState } from './hooks/useRackState';
 import { useDragAndDrop, DraggedItem } from './hooks/useDragAndDrop';
@@ -106,11 +107,12 @@ function App() {
 
   // ドラッグ&ドロップ
   const {
+    draggedItem,
+    hoveredUnit,
     handleDragStart,
     handleDragOver,
     handleDrop,
     handleDragEnd,
-    draggedItem
   } = useDragAndDrop(
     currentRack,
     addEquipment,
@@ -194,9 +196,48 @@ function App() {
   const rackIds = selectedRack === 'all' ? Object.keys(racks) : [selectedRack];
   const layoutDimensions = calculateLayoutDimensions(rackIds.length);
 
+  const [isFullscreen, setIsFullscreen] = useState(false);
+
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement);
+    };
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    
+    // クリーンアップ関数でスタイルをリセット
+    return () => {
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+      const html = document.documentElement;
+      html.style.transform = '';
+      html.style.transformOrigin = '';
+      html.style.width = '';
+      html.style.height = '';
+      html.style.overflow = '';
+    };
+  }, []);
+
+  const toggleFullscreen = () => {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen();
+    } else {
+      if (document.exitFullscreen) {
+        document.exitFullscreen();
+      }
+    }
+  };
+
   return (
     <div className="min-h-screen dark">
       <div className="min-h-screen bg-gray-800 text-gray-100">
+        <div className="fixed top-4 right-4 z-50 flex items-center gap-2">
+          <button
+            onClick={toggleFullscreen}
+            className="p-2 rounded-full bg-gray-700 text-gray-300 hover:bg-gray-600 focus:outline-none"
+            title={isFullscreen ? 'フルスクリーン解除' : 'フルスクリーン'}
+          >
+            {isFullscreen ? <Minimize size={20} /> : <Maximize size={20} />}
+          </button>
+        </div>
         {/* ヘッダー */}
         <header className="border-b p-4 border-custom-gray bg-gray-700">
           <div className="flex items-center justify-between">
@@ -209,9 +250,6 @@ function App() {
             
             <div className="flex items-center gap-4">
               {/* ズーム表示 */}
-              <span className="text-sm text-gray-300">
-                {zoomLevel}%
-              </span>
             </div>
           </div>
         </header>
@@ -288,6 +326,7 @@ function App() {
                       autoInstallCageNutsForUnit(selectedRack, unit, nutType)
                     }
                     draggedItem={draggedItem as DraggedItem | null}
+                    hoveredUnit={hoveredUnit}
                     perspective={rackViewPerspective}
                     showConfirmModal={showConfirmModal}
                     onUpdatePhysicalStructure={handleUpdatePhysicalStructure}

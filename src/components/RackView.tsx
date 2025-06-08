@@ -16,7 +16,7 @@ interface RackViewProps {
   selectedRack: string;
   activeViewMode: string | null;
   draggedItem?: Equipment | null;
-  onDragOver?: (e: React.DragEvent) => void;
+  onDragOver?: (e: React.DragEvent, unit: number) => void;
   onDrop?: (e: React.DragEvent, unit: number) => void;
   onEquipmentClick?: (equipment: Equipment) => void;
   onEquipmentRemove?: (unit: number) => void;
@@ -28,6 +28,7 @@ interface RackViewProps {
   onUpdatePhysicalStructure?: (updates: Partial<PhysicalStructure>) => void;
   onRailInstall?: (unit: number, side: 'left' | 'right', railType: string) => void;
   onRailRemove?: (unit: number, side: 'left' | 'right') => void;
+  hoveredUnit?: number | null;
 }
 
 export const RackView: React.FC<RackViewProps> = ({
@@ -47,7 +48,8 @@ export const RackView: React.FC<RackViewProps> = ({
   showConfirmModal,
   onUpdatePhysicalStructure,
   onRailInstall,
-  onRailRemove
+  onRailRemove,
+  hoveredUnit
 }) => {
   const unitHeight = getZoomedUnitHeight(zoomLevel);
   const fontSize = getZoomedFontSize(zoomLevel);
@@ -90,6 +92,17 @@ export const RackView: React.FC<RackViewProps> = ({
             <RackPDU rack={rack} zoomLevel={zoomLevel} unitHeight={unitHeight} />
           )}
           
+          {draggedItem && hoveredUnit && draggedItem.requiresRails && (
+            <div
+              className="absolute bg-blue-500 bg-opacity-30 border-2 border-dashed border-blue-400 pointer-events-none"
+              style={{
+                height: `${draggedItem.height * unitHeight}px`,
+                width: '100%',
+                top: `${(rack.units - hoveredUnit) * unitHeight}px`,
+                zIndex: 20,
+              }}
+            />
+          )}
 
           {Array.from({ length: rack.units }, (_, i) => rack.units - i).map(unit => (
             <RackUnit
