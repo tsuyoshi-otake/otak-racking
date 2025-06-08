@@ -43,6 +43,7 @@ interface ModalsAndDialogsProps {
   onUpdatePowerConnection: (equipmentId: string, field: string, value: any) => void;
   onUpdateMountingOption: (equipmentId: string, field: string, value: any) => void;
   onUpdateEquipmentColor: (equipmentId: string, color: string) => void;
+  onUpdateEquipmentOpacity: (equipmentId: string, opacity: number) => void;
   
   // 新しいモーダル用props
   racks?: Record<string, Rack>;
@@ -77,6 +78,7 @@ export const ModalsAndDialogs: React.FC<ModalsAndDialogsProps> = ({
   onUpdatePowerConnection,
   onUpdateMountingOption,
   onUpdateEquipmentColor,
+  onUpdateEquipmentOpacity,
   
   // 新しいモーダル用props
   racks,
@@ -348,21 +350,23 @@ export const ModalsAndDialogs: React.FC<ModalsAndDialogsProps> = ({
                 
                 <div className="space-y-3">
                   <div>
-                    <label className="block text-sm font-medium mb-1">背景色</label>
+                    <label className="block text-sm font-medium mb-1">背景色と透過度</label>
                     <div className="flex items-center gap-2">
                       <input
                         type="color"
                         value={selectedEquipment.color}
                         onChange={(e) => onUpdateEquipmentColor(selectedEquipment.id, e.target.value)}
-                        className="w-8 h-8 p-0 border-none rounded"
+                        className="w-8 h-8 p-0 border-none rounded bg-transparent"
                       />
                       <input
-                        type="text"
-                        value={selectedEquipment.color}
-                        onChange={(e) => onUpdateEquipmentColor(selectedEquipment.id, e.target.value)}
-                        className={`flex-1 p-2 border rounded text-sm ${inputBg}`}
-                        placeholder="#374151"
+                        type="range"
+                        min="0"
+                        max="100"
+                        value={selectedEquipment.opacity ?? 100}
+                        onChange={(e) => onUpdateEquipmentOpacity(selectedEquipment.id, parseInt(e.target.value))}
+                        className="flex-1"
                       />
+                      <span className="text-xs w-10 text-center">{selectedEquipment.opacity ?? 100}%</span>
                     </div>
                   </div>
                   <div>

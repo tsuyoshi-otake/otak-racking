@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Maximize, Minimize } from 'lucide-react';
 import { Equipment, PhysicalStructure } from './types';
 import { useRackState } from './hooks/useRackState';
-import { useDragAndDrop, DraggedItem } from './hooks/useDragAndDrop';
+import { useDragAndDrop, DraggedItem, HoveredInfo } from './hooks/useDragAndDrop';
 import { LeftSidebar } from './components/LeftSidebar'; // Sidebar を LeftSidebar に変更
 import { RightSidebar } from './components/RightSidebar'; // RightSidebar を追加
 import { RackView } from './components/RackView';
@@ -58,6 +58,7 @@ function App() {
     updatePowerConnection,
     updateMountingOption,
     updateEquipmentColor,
+    updateEquipmentOpacity,
     autoInstallCageNutsForUnit,
     installCageNut,
     removeCageNut,
@@ -106,19 +107,30 @@ function App() {
     saveAppState(appState);
   }, [zoomLevel, selectedRack, activeViewMode, rackViewPerspective, racks, floorSettings, isProMode]);
 
+  // 選択中の機器情報が更新されたら、モーダルに表示されている情報も更新する
+  useEffect(() => {
+    if (selectedEquipment && currentRack) {
+      const updatedEquipment = Object.values(currentRack.equipment).find(
+        (e) => e.id === selectedEquipment.id
+      );
+      if (updatedEquipment) {
+        setSelectedEquipment(updatedEquipment);
+      }
+    }
+  }, [racks, selectedEquipment, currentRack]);
+
   // ドラッグ&ドロップ
   const {
     draggedItem,
-    hoveredUnit,
+    hoveredInfo,
     handleDragStart,
     handleDragOver,
     handleDrop,
     handleDragEnd,
   } = useDragAndDrop(
-    currentRack,
+    racks,
     addEquipment,
     autoInstallCageNutsForUnit,
-    selectedRack,
     showInfoModal,
     showConfirmModal
   );
@@ -298,6 +310,10 @@ function App() {
                       onEquipmentClick={handleEquipmentClick}
                       perspective={rackViewPerspective}
                       showConfirmModal={showConfirmModal}
+                      onDragOver={(e, unit) => handleDragOver(e, unit, rack.id)}
+                      onDrop={(e, unit) => handleDrop(e, unit, rack.id)}
+                      draggedItem={draggedItem as DraggedItem | null}
+                      hoveredUnit={hoveredInfo.rackId === rack.id ? hoveredInfo.unit : null}
                     />
                   </div>
                 ))}
@@ -313,8 +329,8 @@ function App() {
                     zoomLevel={zoomLevel}
                     selectedRack={selectedRack}
                     activeViewMode={activeViewMode}
-                    onDragOver={handleDragOver}
-                    onDrop={handleDrop}
+                    onDragOver={(e, unit) => handleDragOver(e, unit, selectedRack)}
+                    onDrop={(e, unit) => handleDrop(e, unit, selectedRack)}
                     onEquipmentClick={handleEquipmentClick}
                     onEquipmentRemove={handleEquipmentRemove}
                     onCageNutInstall={(unit, side, position, nutType) => 
@@ -327,7 +343,7 @@ function App() {
                       autoInstallCageNutsForUnit(selectedRack, unit, nutType)
                     }
                     draggedItem={draggedItem as DraggedItem | null}
-                    hoveredUnit={hoveredUnit}
+                    hoveredUnit={hoveredInfo.rackId === selectedRack ? hoveredInfo.unit : null}
                     perspective={rackViewPerspective}
                     showConfirmModal={showConfirmModal}
                     onUpdatePhysicalStructure={handleUpdatePhysicalStructure}
@@ -382,6 +398,9 @@ function App() {
         }
         onUpdateEquipmentColor={(equipmentId, color) =>
           updateEquipmentColor(selectedRack, equipmentId, color)
+        }
+        onUpdateEquipmentOpacity={(equipmentId, opacity) =>
+          updateEquipmentOpacity(selectedRack, equipmentId, opacity)
         }
         
         // 新しいモーダル用props

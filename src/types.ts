@@ -9,6 +9,7 @@ export interface Equipment {
   weight: number;
   type: string;
   color: string;
+  opacity?: number; // 0-100
   dualPower: boolean;
   airflow: string;
   cfm: number;

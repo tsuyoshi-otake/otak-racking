@@ -304,7 +304,7 @@ export const RackUnit: React.FC<RackUnitProps> = ({
             ['showPowerView', 'showMountingView', 'showLabelView', 'showCablingView', 'showCageNutView', 'showRailView'].includes(activeViewMode ?? '') ? 'border-2 border-dashed border-gray-400' : ''
           }`}
           style={{
-            backgroundColor: `${item.color}B3`, // 70% opacity
+            backgroundColor: `${item.color}${Math.round((item.opacity ?? 100) / 100 * 255).toString(16).padStart(2, '0')}`,
             height: `${item.height * unitHeight}px`,
             zIndex: 10
           }}

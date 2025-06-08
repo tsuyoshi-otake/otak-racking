@@ -52,7 +52,8 @@ const createInitialRack = (id: string, name: string, rackCount: number): Rack =>
         weight: 5,
         type: 'pdu',
         role: 'power-distribution',
-        color: '#DC2626',
+        color: '#374151',
+        opacity: 100,
         dualPower: false,
         airflow: 'natural',
         cfm: 0,
@@ -75,7 +76,8 @@ const createInitialRack = (id: string, name: string, rackCount: number): Rack =>
         weight: 7,
         type: 'pdu',
         role: 'power-distribution',
-        color: '#B91C1C',
+        color: '#374151',
+        opacity: 100,
         dualPower: false,
         airflow: 'natural',
         cfm: 0,
@@ -335,6 +337,18 @@ export const useRackState = () => {
       const equipment = Object.values(newRack.equipment).find(e => e.id === equipmentId);
       if (equipment) {
         equipment.color = color;
+      }
+      return { ...prev, [rackId]: newRack };
+    });
+  }, []);
+
+  // 機器の透過度を更新
+  const updateEquipmentOpacity = useCallback((rackId: string, equipmentId: string, opacity: number) => {
+    setRacks(prev => {
+      const newRack = deepCopy(prev[rackId]);
+      const equipment = Object.values(newRack.equipment).find(e => e.id === equipmentId);
+      if (equipment) {
+        equipment.opacity = opacity;
       }
       return { ...prev, [rackId]: newRack };
     });
@@ -609,6 +623,7 @@ export const useRackState = () => {
     clearAllEquipment,
     updateLabel,
     updateEquipmentColor,
+    updateEquipmentOpacity,
     updatePowerConnection,
     updateMountingOption,
     installCageNut,
