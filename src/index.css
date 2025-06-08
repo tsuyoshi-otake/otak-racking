@@ -123,3 +123,16 @@ html {
 .toggle-checkbox:checked + .toggle-label {
   background-color: #10b981;
 }
+
+/* 数値入力フィールドのスピナー（上下ボタン）を非表示 */
+/* Chrome, Safari, Edge, Opera */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Firefox */
+input[type="number"] {
+  -moz-appearance: textfield;
+}

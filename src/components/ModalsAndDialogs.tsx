@@ -12,7 +12,8 @@ import {
   Trash2,
   Copy,
   Snowflake,
-  Building
+  Building,
+  Edit2
 } from 'lucide-react';
 import { Equipment, Rack, FloorSettings } from '../types';
 import { getPowerSources } from '../utils';
@@ -44,6 +45,7 @@ interface ModalsAndDialogsProps {
   onUpdateMountingOption: (equipmentId: string, field: string, value: any) => void;
   onUpdateEquipmentColor: (equipmentId: string, color: string) => void;
   onUpdateEquipmentOpacity: (equipmentId: string, opacity: number) => void;
+  onUpdateEquipmentSpecs?: (equipmentId: string, field: 'power' | 'cfm' | 'weight', value: number) => void;
   
   // 新しいモーダル用props
   racks?: Record<string, Rack>;
@@ -52,6 +54,7 @@ interface ModalsAndDialogsProps {
   onAddRack?: () => void;
   onRemoveRack?: (rackId: string) => void;
   onDuplicateRack?: (rackId: string) => void;
+  onUpdateRackName?: (rackId: string, name: string) => void;
   
   floorSettings?: FloorSettings;
   showFloorSettings?: boolean;
@@ -67,6 +70,12 @@ interface ModalsAndDialogsProps {
   // +++ InfoModal と ConfirmModal 用の Props を ModalsAndDialogsProps に追加 +++
   infoModal?: InfoModalProps | null;
   confirmModal?: ConfirmModalProps | null;
+  
+  // ラック詳細モーダル用props
+  showRackDetailsModal?: boolean;
+  onCloseRackDetailsModal?: () => void;
+  selectedRackForDetails?: string;
+  onUpdateRackDetails?: (rackId: string, updates: Partial<Rack>) => void;
 }
 
 export const ModalsAndDialogs: React.FC<ModalsAndDialogsProps> = ({
@@ -79,6 +88,7 @@ export const ModalsAndDialogs: React.FC<ModalsAndDialogsProps> = ({
   onUpdateMountingOption,
   onUpdateEquipmentColor,
   onUpdateEquipmentOpacity,
+  onUpdateEquipmentSpecs,
   
   // 新しいモーダル用props
   racks,
@@ -87,6 +97,7 @@ export const ModalsAndDialogs: React.FC<ModalsAndDialogsProps> = ({
   onAddRack,
   onRemoveRack,
   onDuplicateRack,
+  onUpdateRackName,
   
   floorSettings,
   showFloorSettings,
@@ -101,10 +112,21 @@ export const ModalsAndDialogs: React.FC<ModalsAndDialogsProps> = ({
 
   // +++ props を展開 +++
   infoModal,
-  confirmModal
+  confirmModal,
+  
+  // ラック詳細モーダル用props
+  showRackDetailsModal,
+  onCloseRackDetailsModal,
+  selectedRackForDetails,
+  onUpdateRackDetails
 }) => {
   const [activeTab, setActiveTab] = useState<'info' | 'power' | 'mounting' | 'label'>('info');
   const [tempFloorSettings, setTempFloorSettings] = useState<FloorSettings | null>(null);
+  const [editingRackId, setEditingRackId] = useState<string | null>(null);
+  const [editingRackName, setEditingRackName] = useState<string>('');
+  
+  // ラック詳細モーダル用の一時的な状態
+  const [tempRackDetails, setTempRackDetails] = useState<Partial<Rack> | null>(null);
 
   // 機器設定モーダル
   const renderEquipmentModal = () => {
@@ -185,13 +207,57 @@ export const ModalsAndDialogs: React.FC<ModalsAndDialogsProps> = ({
                 <div className="text-sm space-y-1">
                   <div><strong>高さ:</strong> {selectedEquipment.height}U</div>
                   <div><strong>奥行:</strong> {selectedEquipment.depth}mm</div>
-                  <div><strong>消費電力:</strong> {selectedEquipment.power}W</div>
-                  <div><strong>発熱量:</strong> {selectedEquipment.heat}BTU/h</div>
-                  <div><strong>重量:</strong> {selectedEquipment.weight}kg</div>
                   <div><strong>エアフロー:</strong> {selectedEquipment.airflow}</div>
-                  {selectedEquipment.cfm > 0 && (
-                    <div><strong>冷却風量:</strong> {selectedEquipment.cfm}CFM</div>
-                  )}
+                </div>
+              </div>
+
+              {/* 編集可能な仕様 */}
+              <div>
+                <h4 className="font-medium mb-2">編集可能な仕様</h4>
+                <div className="space-y-3">
+                  <div>
+                    <label className="block text-sm font-medium mb-1">消費電力 (W)</label>
+                    <input
+                      type="number"
+                      value={selectedEquipment.power}
+                      onChange={(e) => onUpdateEquipmentSpecs?.(selectedEquipment.id, 'power', parseFloat(e.target.value) || 0)}
+                      className={`w-full p-2 border rounded text-sm ${inputBg}`}
+                      min="0"
+                      step="0.1"
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium mb-1">冷却風量 (CFM)</label>
+                    <input
+                      type="number"
+                      value={selectedEquipment.cfm}
+                      onChange={(e) => onUpdateEquipmentSpecs?.(selectedEquipment.id, 'cfm', parseFloat(e.target.value) || 0)}
+                      className={`w-full p-2 border rounded text-sm ${inputBg}`}
+                      min="0"
+                      step="0.1"
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium mb-1">重量 (kg)</label>
+                    <input
+                      type="number"
+                      value={selectedEquipment.weight}
+                      onChange={(e) => onUpdateEquipmentSpecs?.(selectedEquipment.id, 'weight', parseFloat(e.target.value) || 0)}
+                      className={`w-full p-2 border rounded text-sm ${inputBg}`}
+                      min="0"
+                      step="0.1"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* 計算値 */}
+              <div>
+                <h4 className="font-medium mb-2">計算値</h4>
+                <div className="text-sm space-y-1">
+                  <div><strong>発熱量:</strong> {selectedEquipment.heat}BTU/h</div>
                 </div>
               </div>
               
@@ -492,11 +558,49 @@ export const ModalsAndDialogs: React.FC<ModalsAndDialogsProps> = ({
               <div className="space-y-2">
                 {Object.values(racks).map((rack) => (
                   <div key={rack.id} className="p-3 border rounded flex items-center justify-between border-custom-gray bg-gray-700">
-                    <div>
-                      <div className="font-medium">{rack.name}</div>
-                      <div className="text-sm text-custom-gray">
-                        {rack.units}U - {Object.keys(rack.equipment).length}台の機器
-                      </div>
+                    <div className="flex-1">
+                      {editingRackId === rack.id ? (
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="text"
+                            value={editingRackName}
+                            onChange={(e) => setEditingRackName(e.target.value)}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter') {
+                                onUpdateRackName?.(rack.id, editingRackName);
+                                setEditingRackId(null);
+                              } else if (e.key === 'Escape') {
+                                setEditingRackId(null);
+                              }
+                            }}
+                            onBlur={() => {
+                              onUpdateRackName?.(rack.id, editingRackName);
+                              setEditingRackId(null);
+                            }}
+                            className="px-2 py-1 text-sm bg-gray-600 border border-gray-500 rounded text-white"
+                            autoFocus
+                          />
+                        </div>
+                      ) : (
+                        <div>
+                          <div className="font-medium flex items-center gap-2">
+                            {rack.name}
+                            <button
+                              onClick={() => {
+                                setEditingRackId(rack.id);
+                                setEditingRackName(rack.name);
+                              }}
+                              className="p-1 rounded hover:bg-gray-600"
+                              title="名前を編集"
+                            >
+                              <Edit2 size={12} />
+                            </button>
+                          </div>
+                          <div className="text-sm text-custom-gray">
+                            {rack.units}U - {Object.keys(rack.equipment).length}台の機器
+                          </div>
+                        </div>
+                      )}
                     </div>
                     <div className="flex gap-1">
                       <button
@@ -862,6 +966,151 @@ export const ModalsAndDialogs: React.FC<ModalsAndDialogsProps> = ({
     );
   };
 
+  // ラック詳細モーダル
+  const renderRackDetailsModal = () => {
+    if (!showRackDetailsModal || !selectedRackForDetails || !racks) return null;
+    
+    const currentRack = racks[selectedRackForDetails];
+    if (!currentRack) return null;
+    
+    const modalBg = 'bg-gray-800 text-white';
+    const inputBg = 'bg-gray-700 border-gray-600 text-white';
+    
+    const details = tempRackDetails || {
+      name: currentRack.name,
+      type: currentRack.type,
+      units: currentRack.units,
+      width: currentRack.width,
+      depth: currentRack.depth,
+    };
+    
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className={`${modalBg} rounded-lg shadow-xl w-96 max-w-full max-h-[90vh] overflow-hidden`}>
+          <div className="p-4 border-b flex items-center justify-between border-custom-gray">
+            <h3 className="text-lg font-bold flex items-center gap-2">
+              <Settings size={20} />
+              ラック詳細設定
+            </h3>
+            <button
+              onClick={() => {
+                setTempRackDetails(null);
+                onCloseRackDetailsModal?.();
+              }}
+              className="p-1 rounded hover:bg-opacity-10 hover:bg-custom-gray"
+            >
+              <X size={20} />
+            </button>
+          </div>
+          
+          <div className="p-4 space-y-4">
+            <div>
+              <label className="block text-sm font-medium mb-1">ラック名</label>
+              <input
+                type="text"
+                value={details.name || ''}
+                onChange={(e) => setTempRackDetails({
+                  ...details,
+                  name: e.target.value
+                })}
+                className={`w-full p-2 border rounded ${inputBg}`}
+                placeholder="ラック名を入力"
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium mb-1">ラックタイプ</label>
+              <select
+                value={details.type || '42U'}
+                onChange={(e) => {
+                  const type = e.target.value;
+                  const units = parseInt(type);
+                  setTempRackDetails({
+                    ...details,
+                    type,
+                    units
+                  });
+                }}
+                className={`w-full p-2 border rounded ${inputBg}`}
+              >
+                <option value="42U">42U (標準)</option>
+                <option value="47U">47U (高密度)</option>
+                <option value="36U">36U (コンパクト)</option>
+                <option value="24U">24U (小型)</option>
+              </select>
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium mb-1">幅 (mm)</label>
+              <select
+                value={details.width || 600}
+                onChange={(e) => setTempRackDetails({
+                  ...details,
+                  width: parseInt(e.target.value)
+                })}
+                className={`w-full p-2 border rounded ${inputBg}`}
+              >
+                <option value={600}>600mm (標準)</option>
+                <option value={700}>700mm (ケーブル余裕)</option>
+                <option value={800}>800mm (高密度配線)</option>
+              </select>
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium mb-1">奥行き (mm)</label>
+              <select
+                value={details.depth || 1000}
+                onChange={(e) => setTempRackDetails({
+                  ...details,
+                  depth: parseInt(e.target.value)
+                })}
+                className={`w-full p-2 border rounded ${inputBg}`}
+              >
+                <option value={800}>800mm (浅型)</option>
+                <option value={1000}>1000mm (標準)</option>
+                <option value={1200}>1200mm (深型)</option>
+                <option value={1400}>1400mm (超深型)</option>
+              </select>
+            </div>
+            
+            <div className="p-3 bg-gray-700 rounded">
+              <h4 className="font-medium mb-2">現在の設定</h4>
+              <div className="text-sm space-y-1 text-gray-300">
+                <div>機器数: {Object.keys(currentRack.equipment).length}台</div>
+                <div>使用済みU数: {Object.values(currentRack.equipment).reduce((sum, eq) => sum + eq.height, 0)}U</div>
+                <div>空きU数: {currentRack.units - Object.values(currentRack.equipment).reduce((sum, eq) => sum + eq.height, 0)}U</div>
+              </div>
+            </div>
+            
+            <div className="flex gap-2 pt-4">
+              <button
+                onClick={() => {
+                  if (tempRackDetails) {
+                    onUpdateRackDetails?.(selectedRackForDetails, tempRackDetails);
+                  }
+                  setTempRackDetails(null);
+                  onCloseRackDetailsModal?.();
+                }}
+                className="flex-1 p-2 rounded text-sm font-medium bg-gray-600 hover:bg-custom-gray text-white"
+              >
+                保存
+              </button>
+              <button
+                onClick={() => {
+                  setTempRackDetails(null);
+                  onCloseRackDetailsModal?.();
+                }}
+                className="flex-1 p-2 rounded text-sm bg-gray-600 hover:bg-gray-700 text-white"
+              >
+                キャンセル
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   // すべてのモーダルをレンダリング
   return (
     <>
@@ -872,6 +1121,7 @@ export const ModalsAndDialogs: React.FC<ModalsAndDialogsProps> = ({
       {renderPowerConfigModal()}
       {renderInfoModal()}
       {renderConfirmModal()}
+      {renderRackDetailsModal()}
     </>
   );
 };

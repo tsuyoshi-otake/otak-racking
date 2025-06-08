@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Trash2, CheckCircle, AlertCircle, XCircle, Thermometer, Move } from 'lucide-react';
 import { Rack, Equipment, CoolingStats, RackViewPerspective } from '../types';
 import {
@@ -12,6 +12,9 @@ import {
 } from '../utils';
 import { getEquipmentIcon, getAirflowIcon, getMountingIcon } from './RackIcons';
 import { MountingHoles } from './MountingHoles';
+
+// メモ化されたコンポーネント
+const MemoizedMountingHoles = React.memo(MountingHoles);
 
 interface RackUnitProps {
   rack: Rack;
@@ -35,7 +38,7 @@ interface RackUnitProps {
   onRailRemove?: (unit: number, side: 'left' | 'right') => void;
 }
 
-const ServerFrontView: React.FC = () => (
+const ServerFrontView: React.FC = React.memo(() => (
   <div className="w-full h-full flex items-center justify-center bg-gray-700 border border-gray-600 rounded-sm overflow-hidden">
     <div className="w-full h-full flex items-center justify-between px-1">
       {/* Left Ear */}
@@ -63,9 +66,10 @@ const ServerFrontView: React.FC = () => (
       </div>
     </div>
   </div>
-);
+));
+ServerFrontView.displayName = 'ServerFrontView';
 
-const ServerRearView: React.FC<{ dualPower: boolean }> = ({ dualPower }) => (
+const ServerRearView: React.FC<{ dualPower: boolean }> = React.memo(({ dualPower }) => (
   <div className="w-full h-full flex items-center justify-between bg-gray-800 border border-gray-700 rounded-sm overflow-hidden p-1">
     {/* Left side: Ports */}
     <div className="h-full w-2/5 flex flex-wrap gap-1 p-1 bg-gray-900 rounded-sm content-start">
@@ -91,9 +95,10 @@ const ServerRearView: React.FC<{ dualPower: boolean }> = ({ dualPower }) => (
       {!dualPower && <div className="flex-1 h-full" />}
     </div>
   </div>
-);
+));
+ServerRearView.displayName = 'ServerRearView';
 
-const SwitchFrontView: React.FC = () => (
+const SwitchFrontView: React.FC = React.memo(() => (
   <div className="w-full h-full flex items-center justify-between bg-gray-300 border border-gray-400 rounded-sm overflow-hidden p-1">
     {/* Left side: Console/Management */}
     <div className="h-full w-1/5 flex flex-col justify-around bg-gray-200 p-1 rounded-l-sm">
@@ -111,9 +116,10 @@ const SwitchFrontView: React.FC = () => (
       ))}
     </div>
   </div>
-);
+));
+SwitchFrontView.displayName = 'SwitchFrontView';
 
-const SwitchRearView: React.FC = () => (
+const SwitchRearView: React.FC = React.memo(() => (
   <div className="w-full h-full flex items-center justify-between bg-gray-300 border border-gray-400 rounded-sm overflow-hidden p-1">
     {/* Fans */}
     <div className="h-full w-1/4 bg-gray-200 rounded-sm flex items-center justify-center">
@@ -135,9 +141,10 @@ const SwitchRearView: React.FC = () => (
       </div>
     </div>
   </div>
-);
+));
+SwitchRearView.displayName = 'SwitchRearView';
 
-export const RackUnit: React.FC<RackUnitProps> = ({
+export const RackUnit: React.FC<RackUnitProps> = React.memo(({
   rack,
   unit,
   zoomLevel,
@@ -161,76 +168,85 @@ export const RackUnit: React.FC<RackUnitProps> = ({
   const item = rack.equipment[unit];
   const isEmpty = !item;
   const isMainUnit = item?.isMainUnit;
-  const cageNutStatus = getCageNutStatus(unit, rack);
-  const railStatus = rack.rails && rack.rails[unit];
-
-  let powerStatus = null;
-  let mountingStatus = null;
-  let airflowStatus = null;
-  let temperatureStatus = null;
-  let cageNutDisplay = null;
-  let railDisplay = null;
-  let displayName = '';
   
-  if (item && isMainUnit) {
-    displayName = getEquipmentDisplayName(item, rack.labels);
+  // メモ化された計算値
+  const cageNutStatus = useMemo(() => getCageNutStatus(unit, rack), [unit, rack]);
+  const railStatus = useMemo(() => rack.rails && rack.rails[unit], [rack.rails, unit]);
+  const marginLeft = useMemo(() => getZoomedMarginLeft(zoomLevel), [zoomLevel]);
+
+  // メモ化された表示要素
+  const { displayName, powerStatus, mountingStatus, airflowStatus, temperatureStatus, cageNutDisplay, railDisplay } = useMemo(() => {
+    let powerStatus = null;
+    let mountingStatus = null;
+    let airflowStatus = null;
+    let temperatureStatus = null;
+    let cageNutDisplay = null;
+    let railDisplay = null;
+    let displayName = '';
     
-    if (activeViewMode === 'showLabelView') {
-      const labels = rack.labels?.[item.id] || {};
-      if (labels.ipAddress) {
-        displayName += ` (${labels.ipAddress})`;
-      } else if (labels.serialNumber) {
-        displayName += ` (SN:${labels.serialNumber})`;
+    if (item && isMainUnit) {
+      displayName = getEquipmentDisplayName(item, rack.labels);
+      
+      if (activeViewMode === 'showLabelView') {
+        const labels = rack.labels?.[item.id] || {};
+        if (labels.ipAddress) {
+          displayName += ` (${labels.ipAddress})`;
+        } else if (labels.serialNumber) {
+          displayName += ` (SN:${labels.serialNumber})`;
+        }
+      }
+      
+      if (activeViewMode === 'showPowerView') {
+        const status = getPowerStatus(item, rack.powerConnections);
+        powerStatus = React.createElement(
+          status.icon === 'CircleCheck' ? CheckCircle :
+          status.icon === 'AlertCircle' ? AlertCircle : XCircle,
+          { size: 12, className: status.color }
+        );
+      }
+      
+      if (activeViewMode === 'showMountingView') {
+        const mounting = rack.mountingOptions[item.id] || {};
+        mountingStatus = getMountingIcon(mounting.type, false, 12);
+      }
+      
+      if (activeViewMode === 'showAirflowView') {
+        airflowStatus = getAirflowIcon(item.airflow, 12);
+      }
+      
+      if (activeViewMode === 'showTemperatureView') {
+        const unitTemp = coolingStats.temperatureMap[unit] || rack.environment.ambientTemp;
+        const tempColor = unitTemp > 30 ? 'text-red-500' : unitTemp > 25 ? 'text-yellow-500' : 'text-gray-300';
+        temperatureStatus = <Thermometer size={12} className={tempColor} />;
       }
     }
-    
-    if (activeViewMode === 'showPowerView') {
-      const status = getPowerStatus(item, rack.powerConnections);
-      powerStatus = React.createElement(
-        status.icon === 'CircleCheck' ? CheckCircle :
-        status.icon === 'AlertCircle' ? AlertCircle : XCircle,
-        { size: 12, className: status.color }
-      );
-    }
-    
-    if (activeViewMode === 'showMountingView') {
-      const mounting = rack.mountingOptions[item.id] || {};
-      mountingStatus = getMountingIcon(mounting.type, false, 12);
-    }
-    
-    if (activeViewMode === 'showAirflowView') {
-      airflowStatus = getAirflowIcon(item.airflow, 12);
-    }
-    
-    if (activeViewMode === 'showTemperatureView') {
-      const unitTemp = coolingStats.temperatureMap[unit] || rack.environment.ambientTemp;
-      const tempColor = unitTemp > 30 ? 'text-red-500' : unitTemp > 25 ? 'text-yellow-500' : 'text-gray-300';
-      temperatureStatus = <Thermometer size={12} className={tempColor} />;
-    }
-  }
 
-  if (activeViewMode === 'showCageNutView') {
-    if (cageNutStatus.isComplete) {
-      cageNutDisplay = <CheckCircle size={12} className="text-green-400" />;
-    } else if (cageNutStatus.installed > 0) {
-      cageNutDisplay = <AlertCircle size={12} className="text-yellow-400" />;
-    } else {
-      cageNutDisplay = <XCircle size={12} className="text-gray-400" />;
+    if (activeViewMode === 'showCageNutView') {
+      if (cageNutStatus.isComplete) {
+        cageNutDisplay = <CheckCircle size={12} className="text-green-400" />;
+      } else if (cageNutStatus.installed > 0) {
+        cageNutDisplay = <AlertCircle size={12} className="text-yellow-400" />;
+      } else {
+        cageNutDisplay = <XCircle size={12} className="text-gray-400" />;
+      }
     }
-  }
 
-  // レール表示処理
-  if (activeViewMode === 'showRailView') {
-    if (railStatus && (railStatus.frontLeft?.installed || railStatus.frontRight?.installed)) {
-      railDisplay = <Move size={12} className="text-blue-400" />;
-    } else {
-      railDisplay = <XCircle size={12} className="text-gray-400" />;
+    // レール表示処理
+    if (activeViewMode === 'showRailView') {
+      if (railStatus && (railStatus.frontLeft?.installed || railStatus.frontRight?.installed)) {
+        railDisplay = <Move size={12} className="text-blue-400" />;
+      } else {
+        railDisplay = <XCircle size={12} className="text-gray-400" />;
+      }
     }
-  }
 
-  const unitBorderClass = getUnitBorderClass();
-  const emptyUnitClass = getEmptyUnitClass();
-  const unitNumClass = getUnitNumClass();
+    return { displayName, powerStatus, mountingStatus, airflowStatus, temperatureStatus, cageNutDisplay, railDisplay };
+  }, [item, isMainUnit, activeViewMode, rack.labels, rack.powerConnections, rack.mountingOptions, coolingStats.temperatureMap, unit, rack.environment.ambientTemp, cageNutStatus, railStatus]);
+
+  // スタイルクラスをメモ化
+  const unitBorderClass = useMemo(() => getUnitBorderClass(), []);
+  const emptyUnitClass = useMemo(() => getEmptyUnitClass(), []);
+  const unitNumClass = useMemo(() => getUnitNumClass(), []);
 
   return (
     <div
@@ -252,7 +268,7 @@ export const RackUnit: React.FC<RackUnitProps> = ({
       <div className="flex items-center gap-1">
         <span
           className={`font-mono ${unitNumClass}`}
-          style={{ fontSize: fontSize, marginLeft: getZoomedMarginLeft(zoomLevel) }}
+          style={{ fontSize: fontSize, marginLeft: marginLeft }}
         >
           {unit}
         </span>
@@ -285,7 +301,7 @@ export const RackUnit: React.FC<RackUnitProps> = ({
       </div>
 
       {(activeViewMode === 'showCageNutView' || isEmpty || (item && !isMainUnit)) && (perspective === 'front' || perspective === 'rear') && (
-        <MountingHoles
+        <MemoizedMountingHoles
           rack={rack}
           unit={unit}
           zoomLevel={zoomLevel}
@@ -340,4 +356,7 @@ export const RackUnit: React.FC<RackUnitProps> = ({
       )}
     </div>
   );
-};
+});
+
+// 表示名を設定
+RackUnit.displayName = 'RackUnit';

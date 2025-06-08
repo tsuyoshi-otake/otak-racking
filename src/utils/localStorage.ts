@@ -92,43 +92,90 @@ export const loadAppState = (): Partial<AppState> => {
   }
 };
 
-// LocalStorageに状態を保存
+// 保存処理のデバウンス用タイマー
+let saveTimer: NodeJS.Timeout | null = null;
+let lastSavedData: string | null = null;
+
+// LocalStorageに状態を保存（デバウンス対応）
 export const saveAppState = (state: Partial<AppState>): void => {
+  // 既存のタイマーをクリア
+  if (saveTimer) {
+    clearTimeout(saveTimer);
+  }
+
+  // 500ms後に保存を実行
+  saveTimer = setTimeout(() => {
+    try {
+      const dataToSave = {
+        version: STORAGE_VERSION,
+        timestamp: new Date().toISOString(),
+        data: state
+      };
+
+      const dataString = JSON.stringify(dataToSave);
+      
+      // 前回と同じデータの場合はスキップ
+      if (dataString === lastSavedData) {
+        return;
+      }
+
+      localStorage.setItem(STORAGE_KEY, dataString);
+      lastSavedData = dataString;
+      console.log('アプリ状態を正常に保存しました。');
+    } catch (error) {
+      console.error('アプリ状態の保存中にエラーが発生しました:', error);
+      
+      // localStorage容量不足の場合
+      if (error instanceof DOMException && error.code === 22) {
+        console.warn('LocalStorageの容量が不足しています。古いデータを削除して再試行します。');
+        try {
+          // 古いデータを削除して再試行
+          localStorage.removeItem(STORAGE_KEY);
+          const minimalData = {
+            version: STORAGE_VERSION,
+            timestamp: new Date().toISOString(),
+            data: state
+          };
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(minimalData));
+          lastSavedData = JSON.stringify(minimalData);
+          console.log('容量不足後の再保存が成功しました。');
+        } catch (retryError) {
+          console.error('再保存も失敗しました:', retryError);
+        }
+      }
+    }
+  }, 500);
+};
+
+// 即座に保存（アプリ終了時など）
+export const saveAppStateImmediate = (state: Partial<AppState>): void => {
+  if (saveTimer) {
+    clearTimeout(saveTimer);
+    saveTimer = null;
+  }
+  
   try {
     const dataToSave = {
       version: STORAGE_VERSION,
       timestamp: new Date().toISOString(),
       data: state
     };
-
     localStorage.setItem(STORAGE_KEY, JSON.stringify(dataToSave));
-    console.log('アプリ状態を正常に保存しました。');
+    lastSavedData = JSON.stringify(dataToSave);
   } catch (error) {
-    console.error('アプリ状態の保存中にエラーが発生しました:', error);
-    
-    // localStorage容量不足の場合
-    if (error instanceof DOMException && error.code === 22) {
-      console.warn('LocalStorageの容量が不足しています。古いデータを削除して再試行します。');
-      try {
-        // 古いデータを削除して再試行
-        localStorage.removeItem(STORAGE_KEY);
-        localStorage.setItem(STORAGE_KEY, JSON.stringify({
-          version: STORAGE_VERSION,
-          timestamp: new Date().toISOString(),
-          data: state
-        }));
-        console.log('容量不足後の再保存が成功しました。');
-      } catch (retryError) {
-        console.error('再保存も失敗しました:', retryError);
-      }
-    }
+    console.error('アプリ状態の即時保存中にエラーが発生しました:', error);
   }
 };
 
 // LocalStorageをクリア
 export const clearAppState = (): void => {
   try {
+    if (saveTimer) {
+      clearTimeout(saveTimer);
+      saveTimer = null;
+    }
     localStorage.removeItem(STORAGE_KEY);
+    lastSavedData = null;
     console.log('アプリ状態を削除しました。');
   } catch (error) {
     console.error('アプリ状態の削除中にエラーが発生しました:', error);

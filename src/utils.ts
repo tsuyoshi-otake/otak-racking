@@ -3,9 +3,20 @@ import { rackTypes, BASE_UNIT_HEIGHT, BASE_FONT_SIZE, BASE_MARGIN_LEFT, BASE_CAG
 import { placementManager } from './services/EquipmentPlacementManager';
 
 /**
- * 個別ラック統計計算
+ * 個別ラック統計計算（メモ化対応）
  */
+const rackStatsCache = new WeakMap<Rack, { stats: RackStats; version: number }>();
+let rackVersion = 0;
+
 export const calculateRackStats = (rack: Rack): RackStats => {
+  // キャッシュチェック
+  const cached = rackStatsCache.get(rack);
+  const currentVersion = Object.keys(rack.equipment).length;
+  
+  if (cached && cached.version === currentVersion) {
+    return cached.stats;
+  }
+
   const equipmentArray = Object.values(rack.equipment).filter(item => item.isMainUnit || !item.startUnit);
   const totalPower = equipmentArray.reduce((sum, item) => sum + (item.power || 0), 0);
   const totalHeat = equipmentArray.reduce((sum, item) => sum + (item.heat || 0), 0);
@@ -13,13 +24,18 @@ export const calculateRackStats = (rack: Rack): RackStats => {
   const usedUnits = equipmentArray.reduce((sum, item) => sum + (item.height || 0), 0);
   const availableUnits = rack.units - usedUnits;
   
-  return { 
-    totalPower, 
-    totalHeat, 
-    totalWeight, 
-    usedUnits, 
+  const stats = {
+    totalPower,
+    totalHeat,
+    totalWeight,
+    usedUnits,
     availableUnits
   };
+
+  // キャッシュに保存
+  rackStatsCache.set(rack, { stats, version: currentVersion });
+  
+  return stats;
 };
 
 /**
@@ -57,9 +73,19 @@ export const calculateTotalStats = (racks: Record<string, Rack>): TotalStats => 
 };
 
 /**
- * 冷却・エアフロー計算
+ * 冷却・エアフロー計算（メモ化対応）
  */
+const coolingStatsCache = new WeakMap<Rack, { stats: CoolingStats; version: string }>();
+
 export const calculateCoolingStats = (rack: Rack): CoolingStats => {
+  // キャッシュチェック
+  const cacheKey = `${Object.keys(rack.equipment).length}-${rack.environment.ambientTemp}`;
+  const cached = coolingStatsCache.get(rack);
+  
+  if (cached && cached.version === cacheKey) {
+    return cached.stats;
+  }
+
   let totalHeatGeneration = 0;
   let totalCFM = 0;
   let totalCoolingCapacity = 0;
@@ -113,14 +139,15 @@ export const calculateCoolingStats = (rack: Rack): CoolingStats => {
     }
   }
   
-  const coolingEfficiency = totalCoolingCapacity > 0 ? 
+  const coolingEfficiency = totalCoolingCapacity > 0 ?
     Math.min((totalCoolingCapacity / totalHeatGeneration) * 100, 100) : 0;
   
-  const maxTemp = Math.max(...Object.values(temperatureMap));
-  const minTemp = Math.min(...Object.values(temperatureMap));
-  const avgTemp = Object.values(temperatureMap).reduce((a, b) => a + b, 0) / Object.values(temperatureMap).length;
+  const tempValues = Object.values(temperatureMap);
+  const maxTemp = Math.max(...tempValues);
+  const minTemp = Math.min(...tempValues);
+  const avgTemp = tempValues.reduce((a, b) => a + b, 0) / tempValues.length;
   
-  return {
+  const stats = {
     totalHeatGeneration,
     totalCFM,
     totalCoolingCapacity,
@@ -133,6 +160,11 @@ export const calculateCoolingStats = (rack: Rack): CoolingStats => {
     pressureDrop: Math.round(totalCFM * 0.001 * 100) / 100,
     thermalDesignPoint: totalHeatGeneration / (rack.units * 100)
   };
+
+  // キャッシュに保存
+  coolingStatsCache.set(rack, { stats, version: cacheKey });
+  
+  return stats;
 };
 
 /**
@@ -304,37 +336,23 @@ export const autoInstallCageNuts = (unit: number, nutType: string = 'm6') => {
 };
 
 /**
- * スタイルヘルパー関数
+ * スタイルヘルパー関数（定数化）
  */
-export const getContainerStyle = (): string => {
-  return 'bg-gray-800 text-gray-100';
-};
+export const getContainerStyle = (): string => 'bg-gray-800 text-gray-100';
 
-export const getSidebarStyle = (): string => {
-  return 'bg-gray-700 border-custom-gray text-gray-100';
-};
+export const getSidebarStyle = (): string => 'bg-gray-700 border-custom-gray text-gray-100';
 
-export const getButtonStyle = (isActive: boolean = false): string => {
-  if (isActive) {
-    return 'bg-custom-gray text-white';
-  }
-  return 'bg-gray-600 text-gray-200 hover:bg-custom-gray';
-};
+export const getButtonStyle = (isActive: boolean = false): string =>
+  isActive ? 'bg-custom-gray text-white' : 'bg-gray-600 text-gray-200 hover:bg-custom-gray';
 
 /**
- * ユニット表示ヘルパー
+ * ユニット表示ヘルパー（定数化）
  */
-export const getUnitBorderClass = (): string => {
-  return 'border-custom-gray';
-};
+export const getUnitBorderClass = (): string => 'border-custom-gray';
 
-export const getEmptyUnitClass = (): string => {
-  return 'bg-gray-700 hover:bg-gray-600';
-};
+export const getEmptyUnitClass = (): string => 'bg-gray-700 hover:bg-gray-600';
 
-export const getUnitNumClass = (): string => {
-  return 'text-gray-300';
-};
+export const getUnitNumClass = (): string => 'text-gray-300';
 
 /**
  * 電源状態チェック

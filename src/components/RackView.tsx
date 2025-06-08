@@ -1,14 +1,19 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Rack, Equipment, PhysicalStructure } from '../types';
 import { RackViewPerspective } from '../App';
 import {
   calculateCoolingStats,
-  getZoomedUnitHeight, 
+  getZoomedUnitHeight,
   getZoomedFontSize,
 } from '../utils';
 import { RackStructure } from './RackStructure';
 import { RackPDU } from './RackPDU';
 import { RackUnit } from './RackUnit';
+
+// メモ化されたコンポーネント
+const MemoizedRackStructure = React.memo(RackStructure);
+const MemoizedRackPDU = React.memo(RackPDU);
+const MemoizedRackUnit = React.memo(RackUnit);
 
 interface RackViewProps {
   rack: Rack;
@@ -20,6 +25,7 @@ interface RackViewProps {
   onDrop?: (e: React.DragEvent, unit: number) => void;
   onEquipmentClick?: (equipment: Equipment) => void;
   onEquipmentRemove?: (unit: number) => void;
+  onRackHeaderClick?: () => void;
   onCageNutInstall?: (unit: number, side: string, position: string, nutType: string) => void;
   onCageNutRemove?: (unit: number, side: string, position: string) => void;
   onAutoInstallCageNuts?: (unit: number, nutType: string) => void;
@@ -31,7 +37,7 @@ interface RackViewProps {
   hoveredUnit?: number | null;
 }
 
-export const RackView: React.FC<RackViewProps> = ({
+export const RackView: React.FC<RackViewProps> = React.memo(({
   rack,
   zoomLevel,
   selectedRack,
@@ -40,6 +46,7 @@ export const RackView: React.FC<RackViewProps> = ({
   onDrop,
   onEquipmentClick,
   onEquipmentRemove,
+  onRackHeaderClick,
   onCageNutInstall,
   onCageNutRemove,
   onAutoInstallCageNuts,
@@ -51,26 +58,38 @@ export const RackView: React.FC<RackViewProps> = ({
   onRailRemove,
   hoveredUnit
 }) => {
-  const unitHeight = getZoomedUnitHeight(zoomLevel);
-  const fontSize = getZoomedFontSize(zoomLevel);
-  const coolingStats = calculateCoolingStats(rack);
+  // メモ化された計算値
+  const unitHeight = useMemo(() => getZoomedUnitHeight(zoomLevel), [zoomLevel]);
+  const fontSize = useMemo(() => getZoomedFontSize(zoomLevel), [zoomLevel]);
+  const coolingStats = useMemo(() => calculateCoolingStats(rack), [rack]);
+  const rackWidth = useMemo(() => 600 * (zoomLevel / 100), [zoomLevel]);
 
-  const renderRackHeader = (view: '前面' | '背面' | '左側面' | '右側面') => (
-    <div
-      className="mb-2 p-2 border rounded-t-lg bg-gray-800 border-custom-gray"
-      style={{
-        width: `${600 * (zoomLevel / 100)}px`
-      }}
-    >
-      <h3 className="font-bold text-center text-gray-100" style={{ fontSize: `${fontSize * 1.2}px` }}>{rack.name} ({view})</h3>
-      <div className="text-center text-gray-300" style={{ fontSize: `${fontSize * 0.8}px` }}>
-        {rack.units}U / {rack.width}mm幅 × {rack.depth}mm奥行
+  // メモ化されたヘッダーレンダリング関数
+  const renderRackHeader = useMemo(() => {
+    return (view: '前面' | '背面' | '左側面' | '右側面') => (
+      <div
+        className="mb-2 p-2 border rounded-t-lg bg-gray-800 border-custom-gray cursor-pointer hover:bg-gray-700 transition-colors"
+        style={{
+          width: `${rackWidth}px`
+        }}
+        onClick={onRackHeaderClick}
+        title="クリックしてラック詳細を編集"
+      >
+        <h3 className="font-bold text-center text-gray-100" style={{ fontSize: `${fontSize * 1.2}px` }}>{rack.name} ({view})</h3>
+        <div className="text-center text-gray-300" style={{ fontSize: `${fontSize * 0.8}px` }}>
+          {rack.units}U / {rack.width}mm幅 × {rack.depth}mm奥行
+        </div>
       </div>
-    </div>
+    );
+  }, [rackWidth, fontSize, rack.name, rack.units, rack.width, rack.depth, onRackHeaderClick]);
+
+  // ユニット配列をメモ化
+  const unitArray = useMemo(() =>
+    Array.from({ length: rack.units }, (_, i) => rack.units - i),
+    [rack.units]
   );
 
   if (perspective === 'front' || perspective === 'rear') {
-    const rackWidth = 600 * (zoomLevel / 100);
     return (
       <div className="flex flex-col relative items-center">
         {renderRackHeader(perspective === 'front' ? '前面' : '背面')}
@@ -80,7 +99,7 @@ export const RackView: React.FC<RackViewProps> = ({
             width: `${rackWidth}px`
           }}
         >
-          <RackStructure
+          <MemoizedRackStructure
             rack={rack}
             zoomLevel={zoomLevel}
             unitHeight={unitHeight}
@@ -89,7 +108,7 @@ export const RackView: React.FC<RackViewProps> = ({
           />
           {/* PDUは背面のみ表示 */}
           {perspective === 'rear' && (
-            <RackPDU rack={rack} zoomLevel={zoomLevel} unitHeight={unitHeight} />
+            <MemoizedRackPDU rack={rack} zoomLevel={zoomLevel} unitHeight={unitHeight} />
           )}
           
           {draggedItem && hoveredUnit && draggedItem.height > 0 && (
@@ -104,8 +123,8 @@ export const RackView: React.FC<RackViewProps> = ({
             />
           )}
 
-          {Array.from({ length: rack.units }, (_, i) => rack.units - i).map(unit => (
-            <RackUnit
+          {unitArray.map(unit => (
+            <MemoizedRackUnit
               key={`unit-${unit}`}
               rack={rack}
               unit={unit}
@@ -168,4 +187,7 @@ export const RackView: React.FC<RackViewProps> = ({
   }
 
   return null;
-};
+});
+
+// 表示名を設定
+RackView.displayName = 'RackView';

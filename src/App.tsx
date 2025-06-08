@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Maximize, Minimize } from 'lucide-react';
-import { Equipment, PhysicalStructure } from './types';
+import { Equipment, PhysicalStructure, Rack } from './types';
 import { useRackState } from './hooks/useRackState';
 import { useDragAndDrop, DraggedItem, HoveredInfo } from './hooks/useDragAndDrop';
 import { LeftSidebar } from './components/LeftSidebar'; // Sidebar を LeftSidebar に変更
@@ -11,6 +11,13 @@ import { calculateLayoutDimensions } from './utils';
 import { loadAppState, saveAppState } from './utils/localStorage';
 
 export type RackViewPerspective = 'front' | 'rear' | 'left' | 'right';
+
+// メモ化されたコンポーネント
+const MemoizedLeftSidebar = React.memo(LeftSidebar);
+const MemoizedRightSidebar = React.memo(RightSidebar);
+const MemoizedRackView = React.memo(RackView);
+const MemoizedModalsAndDialogs = React.memo(ModalsAndDialogs);
+
 function App() {
   // LocalStorageから初期状態を読み込み
   const loadedState = loadAppState();
@@ -19,6 +26,7 @@ function App() {
   const [zoomLevel, setZoomLevel] = useState(() => loadedState.zoomLevel ?? 100);
   const [selectedEquipment, setSelectedEquipment] = useState<Equipment | null>(null);
   const [showEquipmentModal, setShowEquipmentModal] = useState(false);
+  const [showRackDetailsModal, setShowRackDetailsModal] = useState(false);
   
   const [rackViewPerspective, setRackViewPerspective] = useState<RackViewPerspective>(() =>
     loadedState.rackViewPerspective ?? 'front'
@@ -59,6 +67,7 @@ function App() {
     updateMountingOption,
     updateEquipmentColor,
     updateEquipmentOpacity,
+    updateEquipmentSpecs,
     autoInstallCageNutsForUnit,
     installCageNut,
     removeCageNut,
@@ -67,12 +76,12 @@ function App() {
     isProMode,
     toggleProMode,
   } = useRackState();
-// モーダル表示関数
-  const showInfoModal = (title: string, message: string) => {
+  // モーダル表示関数（メモ化）
+  const showInfoModal = useCallback((title: string, message: string) => {
     setInfoModal({ isOpen: true, title, message, onClose: () => setInfoModal(null) });
-  };
+  }, []);
 
-  const showConfirmModal = (
+  const showConfirmModal = useCallback((
     title: string,
     message: string,
     onConfirmAction: () => void,
@@ -91,7 +100,7 @@ function App() {
       confirmText,
       cancelText
     });
-  };
+  }, []);
 
   // LocalStorageに状態保存
   useEffect(() => {
@@ -135,10 +144,10 @@ function App() {
     showConfirmModal
   );
 
-  // アクティブなビューモード変更
-  const handleActiveViewModeChange = (mode: string | null) => {
+  // アクティブなビューモード変更（メモ化）
+  const handleActiveViewModeChange = useCallback((mode: string | null) => {
     setActiveViewMode(mode);
-  };
+  }, []);
 
   // 物理構造更新関数
   const handleUpdatePhysicalStructure = useCallback((updates: Partial<PhysicalStructure>) => {
@@ -152,14 +161,14 @@ function App() {
     }
   }, [selectedRack, racks, updateRack]);
 
-  // 機器クリック処理
-  const handleEquipmentClick = (equipment: Equipment) => {
+  // 機器クリック処理（メモ化）
+  const handleEquipmentClick = useCallback((equipment: Equipment) => {
     setSelectedEquipment(equipment);
     setShowEquipmentModal(true);
-  };
+  }, []);
 
-  // 機器削除処理
-  const handleEquipmentRemove = (unit: number, rackId: string) => {
+  // 機器削除処理（メモ化）
+  const handleEquipmentRemove = useCallback((unit: number, rackId: string) => {
     showConfirmModal(
       '機器の削除',
       'この機器を削除しますか？\n関連する設定もすべて削除されます。',
@@ -169,10 +178,10 @@ function App() {
       '削除する',
       'キャンセル'
     );
-  };
+  }, [showConfirmModal, removeEquipment]);
 
-  // ラック機器全クリア処理
-  const handleClearAllEquipment = () => {
+  // ラック機器全クリア処理（メモ化）
+  const handleClearAllEquipment = useCallback(() => {
     if (selectedRack === 'all') return;
     
     const rack = racks[selectedRack];
@@ -203,11 +212,17 @@ function App() {
       'すべて削除する',
       'キャンセル'
     );
-  };
+  }, [selectedRack, racks, showInfoModal, showConfirmModal, clearAllEquipment]);
 
-  // レイアウト計算
-  const rackIds = selectedRack === 'all' ? Object.keys(racks) : [selectedRack];
-  const layoutDimensions = calculateLayoutDimensions(rackIds.length);
+  // レイアウト計算（メモ化）
+  const rackIds = useMemo(() =>
+    selectedRack === 'all' ? Object.keys(racks) : [selectedRack],
+    [selectedRack, racks]
+  );
+  const layoutDimensions = useMemo(() =>
+    calculateLayoutDimensions(rackIds.length),
+    [rackIds]
+  );
 
   const [isFullscreen, setIsFullscreen] = useState(false);
 
@@ -229,7 +244,7 @@ function App() {
     };
   }, []);
 
-  const toggleFullscreen = () => {
+  const toggleFullscreen = useCallback(() => {
     if (!document.fullscreenElement) {
       document.documentElement.requestFullscreen();
     } else {
@@ -237,7 +252,24 @@ function App() {
         document.exitFullscreen();
       }
     }
-  };
+  }, []);
+
+  // モーダル関連のコールバック（メモ化）
+  const handleCloseEquipmentModal = useCallback(() => {
+    setShowEquipmentModal(false);
+    setSelectedEquipment(null);
+  }, []);
+
+  const handleShowRackManager = useCallback(() => setShowRackManager(true), []);
+  const handleShowFloorSettings = useCallback(() => setShowFloorSettings(true), []);
+  const handleShowCoolingConfig = useCallback(() => setShowCoolingConfig(true), []);
+  const handleShowPowerConfig = useCallback(() => setShowPowerConfig(true), []);
+
+  // ラック詳細モーダルを開く処理
+  const handleRackHeaderClick = useCallback((rackId: string) => {
+    setSelectedRack(rackId);
+    setShowRackDetailsModal(true);
+  }, [setSelectedRack]);
 
   return (
     <div className="min-h-screen dark">
@@ -270,7 +302,7 @@ function App() {
       {/* メインコンテンツ */}
       <div className="flex h-[calc(100vh-80px)]">
         {/* 左サイドバー */}
-        <LeftSidebar
+        <MemoizedLeftSidebar
           zoomLevel={zoomLevel}
           activeViewMode={activeViewMode}
           onZoomChange={setZoomLevel}
@@ -302,7 +334,7 @@ function App() {
               >
                 {Object.values(racks).map(rack => (
                   <div key={rack.id} className="flex-shrink-0">
-                    <RackView
+                    <MemoizedRackView
                       rack={rack}
                       zoomLevel={zoomLevel}
                       selectedRack={rack.id} // 個別のラックIDを渡す
@@ -311,6 +343,7 @@ function App() {
                       onDrop={(e, unit) => handleDrop(e, unit, rack.id)}
                       onEquipmentClick={handleEquipmentClick}
                       onEquipmentRemove={(unit) => handleEquipmentRemove(unit, rack.id)}
+                      onRackHeaderClick={() => handleRackHeaderClick(rack.id)}
                       onCageNutInstall={(unit, side, position, nutType) =>
                         installCageNut(rack.id, unit, side, position, nutType)
                       }
@@ -348,7 +381,7 @@ function App() {
             currentRack && (
               <div className="flex justify-center">
                 <div className="w-full max-w-md">
-                  <RackView
+                  <MemoizedRackView
                     rack={currentRack}
                     zoomLevel={zoomLevel}
                     selectedRack={selectedRack}
@@ -357,10 +390,11 @@ function App() {
                     onDrop={(e, unit) => handleDrop(e, unit, selectedRack)}
                     onEquipmentClick={handleEquipmentClick}
                     onEquipmentRemove={(unit) => handleEquipmentRemove(unit, selectedRack)}
-                    onCageNutInstall={(unit, side, position, nutType) => 
+                    onRackHeaderClick={() => handleRackHeaderClick(selectedRack)}
+                    onCageNutInstall={(unit, side, position, nutType) =>
                       installCageNut(selectedRack, unit, side, position, nutType)
                     }
-                    onCageNutRemove={(unit, side, position) => 
+                    onCageNutRemove={(unit, side, position) =>
                       removeCageNut(selectedRack, unit, side, position)
                     }
                     onAutoInstallCageNuts={(unit, nutType) =>
@@ -385,7 +419,7 @@ function App() {
         </main>
 
         {/* 右サイドバー */}
-        <RightSidebar
+        <MemoizedRightSidebar
           racks={racks}
           selectedRack={selectedRack}
           floorSettings={floorSettings}
@@ -395,22 +429,19 @@ function App() {
           onRemoveRack={removeRack}
           onDuplicateRack={duplicateRack}
           onClearAllEquipment={handleClearAllEquipment}
-          onShowRackManager={() => setShowRackManager(true)}
-          onShowFloorSettings={() => setShowFloorSettings(true)}
-          onShowCoolingConfig={() => setShowCoolingConfig(true)}
-          onShowPowerConfig={() => setShowPowerConfig(true)}
+          onShowRackManager={handleShowRackManager}
+          onShowFloorSettings={handleShowFloorSettings}
+          onShowCoolingConfig={handleShowCoolingConfig}
+          onShowPowerConfig={handleShowPowerConfig}
         />
       </div>
 
       {/* モーダル・ダイアログ */}
-      <ModalsAndDialogs
+      <MemoizedModalsAndDialogs
         currentRack={currentRack}
         selectedEquipment={selectedEquipment}
         showEquipmentModal={showEquipmentModal}
-        onCloseEquipmentModal={() => {
-          setShowEquipmentModal(false);
-          setSelectedEquipment(null);
-        }}
+        onCloseEquipmentModal={handleCloseEquipmentModal}
         onUpdateLabel={(equipmentId, field, value) =>
           updateLabel(selectedRack, equipmentId, field, value)
         }
@@ -426,6 +457,9 @@ function App() {
         onUpdateEquipmentOpacity={(equipmentId, opacity) =>
           updateEquipmentOpacity(selectedRack, equipmentId, opacity)
         }
+        onUpdateEquipmentSpecs={(equipmentId, field, value) =>
+          updateEquipmentSpecs(selectedRack, equipmentId, field, value)
+        }
         
         // 新しいモーダル用props
         racks={racks}
@@ -434,6 +468,7 @@ function App() {
         onAddRack={addRack}
         onRemoveRack={removeRack}
         onDuplicateRack={duplicateRack}
+        onUpdateRackName={(rackId, name) => updateRack(rackId, { name })}
         
         floorSettings={floorSettings}
         showFloorSettings={showFloorSettings}
@@ -448,6 +483,12 @@ function App() {
 
         infoModal={infoModal}
         confirmModal={confirmModal}
+        
+        // ラック詳細モーダル用props
+        showRackDetailsModal={showRackDetailsModal}
+        onCloseRackDetailsModal={() => setShowRackDetailsModal(false)}
+        selectedRackForDetails={selectedRack}
+        onUpdateRackDetails={(rackId: string, updates: Partial<Rack>) => updateRack(rackId, updates)}
       />
 
         {/* ドラッグ終了処理 */}

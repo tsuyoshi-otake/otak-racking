@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useMemo } from 'react';
 import { Rack, Equipment, FloorSettings, createDefaultPhysicalStructure, RailType } from '../types';
 import { deepCopy, autoInstallCageNuts } from '../utils';
 import { rackTypes } from '../constants';
@@ -199,10 +199,25 @@ export const useRackState = () => {
     setSelectedRack(newRackId);
   }, [racks]);
 
-  // ラック設定更新
+  // ラック設定更新（最適化版）
   const updateRack = useCallback((rackId: string, updates: Partial<Rack>) => {
     setRacks(prev => {
-      const updatedRack = { ...prev[rackId], ...updates };
+      // 変更がない場合は早期リターン
+      const currentRack = prev[rackId];
+      if (!currentRack) return prev;
+      
+      // 浅い比較で変更チェック
+      let hasChanges = false;
+      for (const key in updates) {
+        if (updates[key as keyof Rack] !== currentRack[key as keyof Rack]) {
+          hasChanges = true;
+          break;
+        }
+      }
+      
+      if (!hasChanges) return prev;
+      
+      const updatedRack = { ...currentRack, ...updates };
       
       // ラック種類が変更された場合の追加処理
       if (updates.type) {
@@ -317,40 +332,151 @@ export const useRackState = () => {
     }
   }, [racks]);
 
-  // ラベル更新
+  // ラベル更新（最適化版）
   const updateLabel = useCallback((rackId: string, equipmentId: string, field: string, value: string) => {
     setRacks(prev => {
-      const newRack = deepCopy(prev[rackId]);
-      newRack.labels = newRack.labels || {};
-      newRack.labels[equipmentId] = {
-        ...newRack.labels[equipmentId],
-        [field]: value
+      const currentRack = prev[rackId];
+      if (!currentRack) return prev;
+      
+      // 値が変わらない場合は早期リターン
+      const currentLabel = currentRack.labels?.[equipmentId];
+      if (currentLabel && (currentLabel as any)[field] === value) return prev;
+      
+      return {
+        ...prev,
+        [rackId]: {
+          ...currentRack,
+          labels: {
+            ...currentRack.labels,
+            [equipmentId]: {
+              ...currentRack.labels?.[equipmentId],
+              [field]: value
+            }
+          }
+        }
       };
-      return { ...prev, [rackId]: newRack };
     });
   }, []);
 
-  // 機器の色を更新
+  // 機器の色を更新（最適化版）
   const updateEquipmentColor = useCallback((rackId: string, equipmentId: string, color: string) => {
     setRacks(prev => {
-      const newRack = deepCopy(prev[rackId]);
-      const equipment = Object.values(newRack.equipment).find(e => e.id === equipmentId);
-      if (equipment) {
-        equipment.color = color;
+      const currentRack = prev[rackId];
+      if (!currentRack) return prev;
+      
+      // 該当機器を探す
+      let targetUnit: number | null = null;
+      let targetEquipment: Equipment | null = null;
+      
+      for (const [unit, equipment] of Object.entries(currentRack.equipment)) {
+        if (equipment.id === equipmentId) {
+          targetUnit = parseInt(unit);
+          targetEquipment = equipment;
+          break;
+        }
       }
-      return { ...prev, [rackId]: newRack };
+      
+      if (!targetUnit || !targetEquipment || targetEquipment.color === color) {
+        return prev;
+      }
+      
+      return {
+        ...prev,
+        [rackId]: {
+          ...currentRack,
+          equipment: {
+            ...currentRack.equipment,
+            [targetUnit]: {
+              ...targetEquipment,
+              color
+            }
+          }
+        }
+      };
     });
   }, []);
 
-  // 機器の透過度を更新
+  // 機器の透過度を更新（最適化版）
   const updateEquipmentOpacity = useCallback((rackId: string, equipmentId: string, opacity: number) => {
     setRacks(prev => {
-      const newRack = deepCopy(prev[rackId]);
-      const equipment = Object.values(newRack.equipment).find(e => e.id === equipmentId);
-      if (equipment) {
-        equipment.opacity = opacity;
+      const currentRack = prev[rackId];
+      if (!currentRack) return prev;
+      
+      // 該当機器を探す
+      let targetUnit: number | null = null;
+      let targetEquipment: Equipment | null = null;
+      
+      for (const [unit, equipment] of Object.entries(currentRack.equipment)) {
+        if (equipment.id === equipmentId) {
+          targetUnit = parseInt(unit);
+          targetEquipment = equipment;
+          break;
+        }
       }
-      return { ...prev, [rackId]: newRack };
+      
+      if (!targetUnit || !targetEquipment || targetEquipment.opacity === opacity) {
+        return prev;
+      }
+      
+      return {
+        ...prev,
+        [rackId]: {
+          ...currentRack,
+          equipment: {
+            ...currentRack.equipment,
+            [targetUnit]: {
+              ...targetEquipment,
+              opacity
+            }
+          }
+        }
+      };
+    });
+  }, []);
+
+  // 機器の仕様（power, cfm, weight）を更新
+  const updateEquipmentSpecs = useCallback((rackId: string, equipmentId: string, field: 'power' | 'cfm' | 'weight', value: number) => {
+    setRacks(prev => {
+      const currentRack = prev[rackId];
+      if (!currentRack) return prev;
+      
+      // 該当機器を探す
+      let targetUnit: number | null = null;
+      let targetEquipment: Equipment | null = null;
+      
+      for (const [unit, equipment] of Object.entries(currentRack.equipment)) {
+        if (equipment.id === equipmentId) {
+          targetUnit = parseInt(unit);
+          targetEquipment = equipment;
+          break;
+        }
+      }
+      
+      if (!targetUnit || !targetEquipment || targetEquipment[field] === value) {
+        return prev;
+      }
+      
+      // powerが変更された場合、heatも自動計算
+      let updatedEquipment = {
+        ...targetEquipment,
+        [field]: value
+      };
+      
+      if (field === 'power') {
+        // 消費電力からBTU/hへの変換（1W = 3.412 BTU/h）
+        updatedEquipment.heat = Math.round(value * 3.412);
+      }
+      
+      return {
+        ...prev,
+        [rackId]: {
+          ...currentRack,
+          equipment: {
+            ...currentRack.equipment,
+            [targetUnit]: updatedEquipment
+          }
+        }
+      };
     });
   }, []);
 
@@ -604,6 +730,12 @@ export const useRackState = () => {
     []
   );
 
+  // 計算値をメモ化
+  const currentRack = useMemo(() =>
+    racks[selectedRack] || racks[Object.keys(racks)[0]],
+    [racks, selectedRack]
+  );
+
   return {
     // State
     racks,
@@ -624,6 +756,7 @@ export const useRackState = () => {
     updateLabel,
     updateEquipmentColor,
     updateEquipmentOpacity,
+    updateEquipmentSpecs,
     updatePowerConnection,
     updateMountingOption,
     installCageNut,
@@ -635,6 +768,6 @@ export const useRackState = () => {
     toggleProMode,
     
     // Computed
-    currentRack: racks[selectedRack] || racks[Object.keys(racks)[0]]
+    currentRack
   };
 };
