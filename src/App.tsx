@@ -159,12 +159,12 @@ function App() {
   };
 
   // 機器削除処理
-  const handleEquipmentRemove = (unit: number) => {
+  const handleEquipmentRemove = (unit: number, rackId: string) => {
     showConfirmModal(
       '機器の削除',
       'この機器を削除しますか？\n関連する設定もすべて削除されます。',
       () => {
-        removeEquipment(selectedRack, unit);
+        removeEquipment(rackId, unit);
       },
       '削除する',
       'キャンセル'
@@ -295,7 +295,7 @@ function App() {
               </div>
               
               <div
-                className={`flex gap-8 ${
+                className={`flex gap-16 ${
                   layoutDimensions.needsScroll ? 'overflow-x-auto pb-4 custom-scrollbar' : 'justify-center'
                 }`}
                 style={{ minWidth: layoutDimensions.needsScroll ? `${layoutDimensions.totalContentWidth}px` : 'auto' }}
@@ -305,15 +305,39 @@ function App() {
                     <RackView
                       rack={rack}
                       zoomLevel={zoomLevel}
-                      selectedRack={selectedRack}
+                      selectedRack={rack.id} // 個別のラックIDを渡す
                       activeViewMode={activeViewMode}
-                      onEquipmentClick={handleEquipmentClick}
-                      perspective={rackViewPerspective}
-                      showConfirmModal={showConfirmModal}
                       onDragOver={(e, unit) => handleDragOver(e, unit, rack.id)}
                       onDrop={(e, unit) => handleDrop(e, unit, rack.id)}
+                      onEquipmentClick={handleEquipmentClick}
+                      onEquipmentRemove={(unit) => handleEquipmentRemove(unit, rack.id)}
+                      onCageNutInstall={(unit, side, position, nutType) =>
+                        installCageNut(rack.id, unit, side, position, nutType)
+                      }
+                      onCageNutRemove={(unit, side, position) =>
+                        removeCageNut(rack.id, unit, side, position)
+                      }
+                      onAutoInstallCageNuts={(unit, nutType) =>
+                        autoInstallCageNutsForUnit(rack.id, unit, nutType)
+                      }
                       draggedItem={draggedItem as DraggedItem | null}
                       hoveredUnit={hoveredInfo.rackId === rack.id ? hoveredInfo.unit : null}
+                      perspective={rackViewPerspective}
+                      showConfirmModal={showConfirmModal}
+                      onUpdatePhysicalStructure={(updates) => {
+                        updateRack(rack.id, {
+                          physicalStructure: {
+                            ...rack.physicalStructure,
+                            ...updates
+                          }
+                        });
+                      }}
+                      onRailInstall={(unit, side, railType) =>
+                        installRail(rack.id, unit, side, railType as any)
+                      }
+                      onRailRemove={(unit, side) =>
+                        removeRail(rack.id, unit, side)
+                      }
                     />
                   </div>
                 ))}
@@ -332,7 +356,7 @@ function App() {
                     onDragOver={(e, unit) => handleDragOver(e, unit, selectedRack)}
                     onDrop={(e, unit) => handleDrop(e, unit, selectedRack)}
                     onEquipmentClick={handleEquipmentClick}
-                    onEquipmentRemove={handleEquipmentRemove}
+                    onEquipmentRemove={(unit) => handleEquipmentRemove(unit, selectedRack)}
                     onCageNutInstall={(unit, side, position, nutType) => 
                       installCageNut(selectedRack, unit, side, position, nutType)
                     }
