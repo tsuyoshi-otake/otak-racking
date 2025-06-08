@@ -515,3 +515,4 @@ export interface PlacementState {
   occupancy: RackOccupancy;
   lastModified: Date;
 }
+export type RackViewPerspective = 'front' | 'rear' | 'left' | 'right';

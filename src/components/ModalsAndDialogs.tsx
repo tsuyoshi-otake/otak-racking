@@ -42,6 +42,7 @@ interface ModalsAndDialogsProps {
   onUpdateLabel: (equipmentId: string, field: string, value: string) => void;
   onUpdatePowerConnection: (equipmentId: string, field: string, value: any) => void;
   onUpdateMountingOption: (equipmentId: string, field: string, value: any) => void;
+  onUpdateEquipmentColor: (equipmentId: string, color: string) => void;
   
   // 新しいモーダル用props
   racks?: Record<string, Rack>;
@@ -75,6 +76,7 @@ export const ModalsAndDialogs: React.FC<ModalsAndDialogsProps> = ({
   onUpdateLabel,
   onUpdatePowerConnection,
   onUpdateMountingOption,
+  onUpdateEquipmentColor,
   
   // 新しいモーダル用props
   racks,
@@ -345,6 +347,24 @@ export const ModalsAndDialogs: React.FC<ModalsAndDialogsProps> = ({
                 <h4 className="font-medium mb-2">ラベル情報</h4>
                 
                 <div className="space-y-3">
+                  <div>
+                    <label className="block text-sm font-medium mb-1">背景色</label>
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="color"
+                        value={selectedEquipment.color}
+                        onChange={(e) => onUpdateEquipmentColor(selectedEquipment.id, e.target.value)}
+                        className="w-8 h-8 p-0 border-none rounded"
+                      />
+                      <input
+                        type="text"
+                        value={selectedEquipment.color}
+                        onChange={(e) => onUpdateEquipmentColor(selectedEquipment.id, e.target.value)}
+                        className={`flex-1 p-2 border rounded text-sm ${inputBg}`}
+                        placeholder="#374151"
+                      />
+                    </div>
+                  </div>
                   <div>
                     <label className="block text-sm font-medium mb-1">カスタム名</label>
                     <input

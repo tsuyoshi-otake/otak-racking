@@ -328,6 +328,18 @@ export const useRackState = () => {
     });
   }, []);
 
+  // 機器の色を更新
+  const updateEquipmentColor = useCallback((rackId: string, equipmentId: string, color: string) => {
+    setRacks(prev => {
+      const newRack = deepCopy(prev[rackId]);
+      const equipment = Object.values(newRack.equipment).find(e => e.id === equipmentId);
+      if (equipment) {
+        equipment.color = color;
+      }
+      return { ...prev, [rackId]: newRack };
+    });
+  }, []);
+
   // 電源接続更新
   const updatePowerConnection = useCallback((rackId: string, equipmentId: string, field: string, value: any) => {
     setRacks(prev => {
@@ -596,6 +608,7 @@ export const useRackState = () => {
     removeEquipment,
     clearAllEquipment,
     updateLabel,
+    updateEquipmentColor,
     updatePowerConnection,
     updateMountingOption,
     installCageNut,

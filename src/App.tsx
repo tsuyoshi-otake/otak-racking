@@ -57,6 +57,7 @@ function App() {
     updateLabel,
     updatePowerConnection,
     updateMountingOption,
+    updateEquipmentColor,
     autoInstallCageNutsForUnit,
     installCageNut,
     removeCageNut,
@@ -378,6 +379,9 @@ function App() {
         }
         onUpdateMountingOption={(equipmentId, field, value) =>
           updateMountingOption(selectedRack, equipmentId, field, value)
+        }
+        onUpdateEquipmentColor={(equipmentId, color) =>
+          updateEquipmentColor(selectedRack, equipmentId, color)
         }
         
         // 新しいモーダル用props

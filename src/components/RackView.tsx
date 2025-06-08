@@ -125,6 +125,7 @@ export const RackView: React.FC<RackViewProps> = ({
               showConfirmModal={showConfirmModal}
               onRailInstall={onRailInstall}
               onRailRemove={onRailRemove}
+              perspective={perspective}
             />
           ))}
         </div>

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Trash2, CheckCircle, AlertCircle, XCircle, Thermometer, Move } from 'lucide-react';
-import { Rack, Equipment, CoolingStats } from '../types';
+import { Rack, Equipment, CoolingStats, RackViewPerspective } from '../types';
 import {
   getCageNutStatus,
   getUnitBorderClass,
@@ -22,6 +22,7 @@ interface RackUnitProps {
   activeViewMode: string | null;
   selectedRack: string;
   coolingStats: CoolingStats;
+  perspective: RackViewPerspective;
   onDragOver?: (e: React.DragEvent, unit: number) => void;
   onDrop?: (e: React.DragEvent, unit: number) => void;
   onEquipmentClick?: (equipment: Equipment) => void;
@@ -34,6 +35,108 @@ interface RackUnitProps {
   onRailRemove?: (unit: number, side: 'left' | 'right') => void;
 }
 
+const ServerFrontView: React.FC = () => (
+  <div className="w-full h-full flex items-center justify-center bg-gray-700 border border-gray-600 rounded-sm overflow-hidden">
+    <div className="w-full h-full flex items-center justify-between px-1">
+      {/* Left Ear */}
+      <div className="h-5/6 w-5 bg-gray-800 flex items-center justify-center rounded-l-sm">
+        <div className="w-1 h-4 bg-gray-600 rounded-full" />
+      </div>
+      
+      {/* Center Grill */}
+      <div className="flex-1 h-full flex items-center justify-center bg-black bg-opacity-20 p-1 relative">
+        <div className="w-full h-3/4 grid grid-cols-10 gap-px">
+          {Array.from({ length: 40 }).map((_, i) => (
+            <div key={i} className="bg-gray-500 opacity-50 rounded-sm" />
+          ))}
+        </div>
+        <div className="absolute w-12 h-3 bg-green-500 bg-opacity-70 rounded-sm flex items-center justify-center text-white text-xs font-bold" style={{fontSize: '0.5rem'}}>
+          HPE
+        </div>
+      </div>
+
+      {/* Right Ear */}
+      <div className="h-5/6 w-7 bg-gray-800 flex flex-col items-center justify-around p-1 rounded-r-sm">
+        <div className="w-full h-1 bg-green-400 rounded-full" />
+        <div className="w-full h-1 bg-blue-400 rounded-full" />
+        <div className="w-full h-1 bg-gray-500 rounded-full" />
+      </div>
+    </div>
+  </div>
+);
+
+const ServerRearView: React.FC<{ dualPower: boolean }> = ({ dualPower }) => (
+  <div className="w-full h-full flex items-center justify-between bg-gray-800 border border-gray-700 rounded-sm overflow-hidden p-1">
+    {/* Left side: Ports */}
+    <div className="h-full w-2/5 flex flex-wrap gap-1 p-1 bg-gray-900 rounded-sm content-start">
+      <div className="w-5 h-3 bg-gray-600 rounded-sm" title="USB" />
+      <div className="w-5 h-3 bg-gray-600 rounded-sm" title="USB" />
+      <div className="w-5 h-3 bg-gray-700 rounded-sm" title="VGA" />
+      <div className="w-5 h-3 bg-gray-700 rounded-sm" title="Serial" />
+      <div className="w-full h-4 bg-black rounded-sm grid grid-cols-2 gap-px p-px" title="Network">
+        <div className="bg-gray-600 rounded-sm" />
+        <div className="bg-gray-600 rounded-sm" />
+      </div>
+    </div>
+    {/* Right side: PSUs */}
+    <div className="h-full w-3/5 flex gap-1 p-1">
+      {Array.from({ length: dualPower ? 2 : 1 }).map((_, i) => (
+        <div key={i} className={`flex-1 h-full bg-gray-900 rounded-sm flex flex-col items-center justify-between p-1 ${!dualPower && i > 0 ? 'opacity-0' : ''}`}>
+          <div className="w-full h-2/3 bg-black rounded-sm grid grid-cols-3 gap-px p-px">
+            {Array.from({ length: 9 }).map((_, j) => <div key={j} className="bg-gray-700 rounded-full" />)}
+          </div>
+          <div className="w-4 h-2 bg-gray-600 rounded-full" />
+        </div>
+      ))}
+      {!dualPower && <div className="flex-1 h-full" />}
+    </div>
+  </div>
+);
+
+const SwitchFrontView: React.FC = () => (
+  <div className="w-full h-full flex items-center justify-between bg-gray-300 border border-gray-400 rounded-sm overflow-hidden p-1">
+    {/* Left side: Console/Management */}
+    <div className="h-full w-1/5 flex flex-col justify-around bg-gray-200 p-1 rounded-l-sm">
+      <div className="w-full h-2 bg-blue-400 rounded-sm" title="Console" />
+      <div className="w-full h-2 bg-yellow-400 rounded-sm" title="Management" />
+      <div className="flex gap-1 mt-1">
+        <div className="w-1 h-1 bg-green-500 rounded-full" />
+        <div className="w-1 h-1 bg-gray-500 rounded-full" />
+      </div>
+    </div>
+    {/* Right side: Ports */}
+    <div className="h-full w-4/5 flex flex-wrap gap-px p-1 bg-gray-800 rounded-r-sm content-center justify-center">
+      {Array.from({ length: 48 }).map((_, i) => (
+        <div key={i} className="w-3 h-2 bg-gray-600 border border-gray-500 rounded-sm" />
+      ))}
+    </div>
+  </div>
+);
+
+const SwitchRearView: React.FC = () => (
+  <div className="w-full h-full flex items-center justify-between bg-gray-300 border border-gray-400 rounded-sm overflow-hidden p-1">
+    {/* Fans */}
+    <div className="h-full w-1/4 bg-gray-200 rounded-sm flex items-center justify-center">
+      <div className="w-8 h-8 rounded-full bg-blue-900 flex items-center justify-center">
+        <div className="w-2 h-2 bg-blue-400 rounded-full" />
+      </div>
+    </div>
+    {/* PSU */}
+    <div className="h-full flex-1 bg-gray-800 mx-1 rounded-sm flex items-center justify-center">
+      <div className="w-1/2 h-4/5 bg-gray-600 rounded-sm" />
+    </div>
+    <div className="h-full flex-1 bg-gray-800 mx-1 rounded-sm flex items-center justify-center">
+      <div className="w-1/2 h-4/5 bg-gray-600 rounded-sm" />
+    </div>
+    {/* Fans */}
+    <div className="h-full w-1/4 bg-gray-200 rounded-sm flex items-center justify-center">
+      <div className="w-8 h-8 rounded-full bg-blue-900 flex items-center justify-center">
+        <div className="w-2 h-2 bg-blue-400 rounded-full" />
+      </div>
+    </div>
+  </div>
+);
+
 export const RackUnit: React.FC<RackUnitProps> = ({
   rack,
   unit,
@@ -43,6 +146,7 @@ export const RackUnit: React.FC<RackUnitProps> = ({
   activeViewMode,
   selectedRack,
   coolingStats,
+  perspective,
   onDragOver,
   onDrop,
   onEquipmentClick,
@@ -180,13 +284,13 @@ export const RackUnit: React.FC<RackUnitProps> = ({
         )}
       </div>
 
-      {(activeViewMode === 'showCageNutView' || isEmpty || (item && !isMainUnit)) && (
+      {(activeViewMode === 'showCageNutView' || isEmpty || (item && !isMainUnit)) && (perspective === 'front' || perspective === 'rear') && (
         <MountingHoles
           rack={rack}
           unit={unit}
           zoomLevel={zoomLevel}
           unitHeight={unitHeight}
-          perspective="front"
+          perspective={perspective}
           onCageNutInstall={onCageNutInstall}
           onCageNutRemove={onCageNutRemove}
           onRailInstall={onRailInstall}
@@ -200,12 +304,21 @@ export const RackUnit: React.FC<RackUnitProps> = ({
             ['showPowerView', 'showMountingView', 'showLabelView', 'showCablingView', 'showCageNutView', 'showRailView'].includes(activeViewMode ?? '') ? 'border-2 border-dashed border-gray-400' : ''
           }`}
           style={{
-            backgroundColor: item.color, 
+            backgroundColor: `${item.color}B3`, // 70% opacity
             height: `${item.height * unitHeight}px`,
             zIndex: 10
           }}
         >
-          <div className="text-white font-medium truncate flex-1 text-center flex items-center justify-center gap-1">
+          <div className="absolute inset-0 flex items-center justify-center opacity-25 pointer-events-none">
+            {item.type === 'server' && (
+              perspective === 'front' ? <ServerFrontView /> : <ServerRearView dualPower={item.dualPower} />
+            )}
+            {item.type === 'network' && (
+              perspective === 'front' ? <SwitchFrontView /> : <SwitchRearView />
+            )}
+            {/* 他の機器タイプのビューもここに追加 */}
+          </div>
+          <div className="relative z-10 text-white font-normal text-xs truncate flex-1 text-center flex items-center justify-center gap-1 [text-shadow:0_1px_2px_rgba(0,0,0,0.5)]">
             <span>{displayName}</span>
             {powerStatus && <span className="ml-1">{powerStatus}</span>}
             {mountingStatus && <span className="ml-1">{mountingStatus}</span>}
@@ -214,18 +327,15 @@ export const RackUnit: React.FC<RackUnitProps> = ({
             {cageNutDisplay && <span className="ml-1">{cageNutDisplay}</span>}
             {railDisplay && <span className="ml-1">{railDisplay}</span>}
           </div>
-          <div className="flex gap-1 items-center">
-            {getEquipmentIcon(item.type, Math.max(10, fontSize))}
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                onEquipmentRemove?.(unit);
-              }}
-              className="text-white hover:text-gray-300 ml-1"
-            >
-              <Trash2 size={Math.max(8, fontSize - 2)} />
-            </button>
-          </div>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onEquipmentRemove?.(unit);
+            }}
+            className="relative z-10 text-white hover:text-gray-300 ml-1 [text-shadow:0_1px_2px_rgba(0,0,0,0.5)]"
+          >
+            <Trash2 size={Math.max(8, fontSize - 2)} />
+          </button>
         </div>
       )}
     </div>
