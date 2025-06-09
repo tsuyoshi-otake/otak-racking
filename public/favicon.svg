@@ -1,1 +1,16 @@
-<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"><defs><style>.favicon-text { font-family: Arial, sans-serif; font-weight: bold; font-size: 80px; fill: currentColor; }</style></defs><text x="100" y="130" text-anchor="middle" class="favicon-text">R</text></svg>
+<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <style>
+      .favicon-text { 
+        font-family: Arial, sans-serif; 
+        font-weight: bold; 
+        font-size: 180px; 
+        fill: white; 
+        text-anchor: middle;
+        dominant-baseline: central;
+      }
+    </style>
+  </defs>
+  <rect width="200" height="200" fill="transparent"/>
+  <text x="100" y="100" class="favicon-text">R</text>
+</svg>
