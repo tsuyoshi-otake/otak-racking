@@ -534,48 +534,96 @@ export const useRackState = () => {
     });
   }, []);
 
-  // 機器のサイズを更新
-  const updateEquipmentSize = useCallback((rackId: string, equipmentId: string, newHeight: number) => {
-    setRacks(prev => {
-      const currentRack = prev[rackId];
-      if (!currentRack) return prev;
+  // 機器のサイズを更新（上方向のみに拡大）
+  const updateEquipmentSize = useCallback(async (rackId: string, equipmentId: string, newHeight: number) => {
+    const currentRack = racks[rackId];
+    if (!currentRack) return;
 
-      let targetUnit: number | null = null;
-      let targetEquipment: Equipment | null = null;
+    // 対象機器を見つける
+    let targetUnit: number | null = null;
+    let targetEquipment: Equipment | null = null;
 
-      for (const [unit, equipment] of Object.entries(currentRack.equipment)) {
-        if (equipment.id === equipmentId) {
-          targetUnit = parseInt(unit);
-          targetEquipment = equipment;
-          break;
-        }
+    for (const [unit, equipment] of Object.entries(currentRack.equipment)) {
+      if (equipment.id === equipmentId && equipment.isMainUnit) {
+        targetUnit = parseInt(unit);
+        targetEquipment = equipment;
+        break;
+      }
+    }
+
+    if (!targetUnit || !targetEquipment || !targetEquipment.availableSizes) {
+      console.warn('対象機器が見つからないか、サイズ変更に対応していません');
+      return;
+    }
+
+    const newSize = targetEquipment.availableSizes.find(s => s.height === newHeight);
+    if (!newSize) {
+      console.warn('指定されたサイズが見つかりません');
+      return;
+    }
+
+    if (newSize.height === targetEquipment.height) {
+      // サイズが変わらない場合は何もしない
+      return;
+    }
+
+    try {
+      // 既存機器を一時的に削除
+      const removeResult = await placementManager.removeEquipment(currentRack, targetUnit);
+      if (!removeResult.success || !removeResult.updatedRack) {
+        console.error('機器の削除に失敗しました:', removeResult.validation.errors);
+        return;
       }
 
-      if (!targetUnit || !targetEquipment || !targetEquipment.availableSizes) {
-        return prev;
-      }
-
-      const newSize = targetEquipment.availableSizes.find(s => s.height === newHeight);
-      if (!newSize) return prev;
-
-      const updatedEquipment = {
+      // 新しいサイズの機器データを作成
+      const updatedEquipment: Equipment = {
         ...targetEquipment,
         ...newSize,
         selectedSize: newHeight,
+        id: targetEquipment.id // IDは保持
       };
 
-      return {
-        ...prev,
-        [rackId]: {
-          ...currentRack,
-          equipment: {
-            ...currentRack.equipment,
-            [targetUnit]: updatedEquipment,
-          },
+      // 新しいサイズで再配置（上方向のみ拡大するため、startUnitは同じ位置）
+      const placeResult = await placementManager.placeEquipment(
+        removeResult.updatedRack,
+        targetUnit, // 同じ位置に配置（上方向に拡大）
+        updatedEquipment,
+        {
+          autoInstallCageNuts: !isProMode
         },
-      };
-    });
-  }, []);
+        isProMode
+      );
+
+      if (placeResult.success && placeResult.updatedRack) {
+        setRacks(prev => ({
+          ...prev,
+          [rackId]: placeResult.updatedRack!
+        }));
+        console.log(`機器サイズを${targetEquipment.height}Uから${newHeight}Uに変更しました`);
+      } else {
+        // 配置に失敗した場合、元の機器を復元
+        console.error('新しいサイズでの配置に失敗しました:', placeResult.validation.errors);
+        const restoreResult = await placementManager.placeEquipment(
+          removeResult.updatedRack,
+          targetUnit,
+          targetEquipment,
+          {
+            autoInstallCageNuts: !isProMode
+          },
+          isProMode
+        );
+        
+        if (restoreResult.success && restoreResult.updatedRack) {
+          setRacks(prev => ({
+            ...prev,
+            [rackId]: restoreResult.updatedRack!
+          }));
+        }
+      }
+    } catch (error) {
+      console.error('機器サイズ変更中にエラーが発生しました:', error);
+    }
+  }, [racks, isProMode]);
 
   // 電源接続更新
   const updatePowerConnection = useCallback((rackId: string, equipmentId: string, field: string, value: any) => {

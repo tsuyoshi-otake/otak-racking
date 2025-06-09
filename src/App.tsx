@@ -477,9 +477,14 @@ function App() {
         onUpdateEquipmentSpecs={(equipmentId, field, value) =>
           updateEquipmentSpecs(selectedRack, equipmentId, field, value)
         }
-        onUpdateEquipmentSize={(equipmentId, newHeight) =>
-          updateEquipmentSize(selectedRack, equipmentId, newHeight)
-        }
+        onUpdateEquipmentSize={async (equipmentId, newHeight) => {
+          try {
+            await updateEquipmentSize(selectedRack, equipmentId, newHeight);
+          } catch (error) {
+            console.error('機器サイズ変更に失敗しました:', error);
+            showInfoModal('エラー', '機器サイズの変更に失敗しました。');
+          }
+        }}
         
         // 新しいモーダル用props
         racks={racks}

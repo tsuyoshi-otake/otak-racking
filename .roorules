@@ -1,3 +1,4 @@
+# Rules from .roorules:
 # OTAK Racking Tool - アーキテクチャ設計書
 
 ## プロジェクト概要
@@ -10,27 +11,24 @@
 classDiagram
     %% メインアプリケーション
     class App {
-        -darkMode: boolean
         -zoomLevel: number
-        -selectedRack: string
+        -selectedEquipment: Equipment | null
         -activeViewMode: string | null
-        -currentPerspective: RackViewPerspective
+        -rackViewPerspective: RackViewPerspective
+        -isProMode: boolean
         -racks: Record~string, Rack~
         -floorSettings: FloorSettings
-        -selectedEquipment: Equipment | null
-        -showEquipmentModal: boolean
-        -showRackManager: boolean
-        -showFloorSettings: boolean
-        -showCoolingConfig: boolean
-        -showPowerConfig: boolean
         -infoModal: InfoModalProps | null
         -confirmModal: ConfirmModalProps | null
         +render(): JSX.Element
         +handleDragStart(e: DragEvent, item: Equipment): void
-        +handleDragOver(e: DragEvent): void
-        +handleDrop(e: DragEvent, unit: number): void
+        +handleEquipmentDragStart(e: DragEvent, equipment: Equipment, rackId: string, unit: number): void
+        +handleDragOver(e: DragEvent, unit: number, rackId: string): void
+        +handleDrop(e: DragEvent, unit: number, rackId: string): void
+        +handleDragEnd(): void
         +showInfoModal(title: string, message: string): void
         +showConfirmModal(title: string, message: string, onConfirm: Function): void
+        +toggleProMode(): void
     }
 
     %% 型定義
@@ -44,6 +42,7 @@ classDiagram
         +weight: number
         +type: EquipmentType
         +color: string
+        +opacity?: number
         +dualPower: boolean
         +airflow: string
         +cfm: number
@@ -54,12 +53,18 @@ classDiagram
         +startUnit?: number
         +endUnit?: number
         +isMainUnit?: boolean
+        +mountingMethod?: 'rails' | 'cage-nuts' | 'shelf' | 'direct'
+        +requiresRails?: boolean
+        +requiresCageNuts?: boolean
         +pduType?: string
         +nutType?: string
         +screwType?: string
         +washerType?: string
         +requiresShelf?: boolean
         +system?: string
+        +role?: EquipmentRole
+        +availableSizes?: EquipmentSize[]
+        +selectedSize?: number
     }
 
     class Rack {
@@ -74,6 +79,7 @@ classDiagram
         +mountingOptions: Record~string, MountingOption~
         +labels: Record~string, Label~
         +cageNuts: Record~number, CageNutConfig~
+        +rails: Record~number, RailConfiguration~
         +partInventory: Record~string, Equipment~
         +fans: FanConfig
         +position: Position
@@ -107,24 +113,32 @@ classDiagram
         +cableRouting: any
     }
 
+    class RailConfiguration {
+      +frontLeft: RailPosition
+      +frontRight: RailPosition
+      +rearLeft: RailPosition
+      +rearRight: RailPosition
+    }
+
     %% コンポーネント階層
     class LeftSidebar {
-        +darkMode: boolean
         +zoomLevel: number
         +activeViewMode: string | null
         +currentPerspective: RackViewPerspective
+        +isProMode: boolean
         +onZoomChange(zoom: number): void
         +onActiveViewModeChange(mode: string | null): void
         +onDragStart(e: DragEvent, item: any): void
         +onPerspectiveChange(perspective: RackViewPerspective): void
+        +onToggleProMode(): void
         +render(): JSX.Element
     }
 
     class RightSidebar {
         +racks: Record~string, Rack~
         +selectedRack: string
-        +darkMode: boolean
         +floorSettings: FloorSettings
+        +isProMode: boolean
         +onRackSelect(rackId: string): void
         +onAddRack(): void
         +onRemoveRack(rackId: string): void
@@ -139,33 +153,38 @@ classDiagram
 
     class RackView {
         +rack: Rack
-        +darkMode: boolean
         +zoomLevel: number
         +selectedRack: string
         +activeViewMode: string | null
         +perspective: RackViewPerspective
         +draggedItem?: Equipment | null
-        +onDragOver?(e: DragEvent): void
+        +hoveredUnit?: number | null
+        +onDragOver?(e: DragEvent, unit: number): void
         +onDrop?(e: DragEvent, unit: number): void
         +onEquipmentClick?(equipment: Equipment): void
         +onEquipmentRemove?(unit: number): void
+        +onEquipmentDragStart?(equipment: Equipment, unit: number, e: DragEvent): void
         +onCageNutInstall?(unit: number, side: string, position: string, nutType: string): void
         +onCageNutRemove?(unit: number, side: string, position: string): void
         +onAutoInstallCageNuts?(unit: number, nutType: string): void
         +onUpdatePhysicalStructure?(updates: Partial~PhysicalStructure~): void
+        +onRailInstall?(unit: number, side: 'left' | 'right', railType: string): void
+        +onRailRemove?(unit: number, side: 'left' | 'right'): void
+        +onPduInstall?(side: 'left' | 'right', top: number): void
+        +onPduRemove?(pduId: string): void
         +render(): JSX.Element
     }
 
     class RackUnit {
         +rack: Rack
         +unit: number
-        +darkMode: boolean
         +zoomLevel: number
         +unitHeight: number
         +fontSize: number
         +activeViewMode: string | null
         +selectedRack: string
         +coolingStats: CoolingStats
+        +perspective: RackViewPerspective
         +render(): JSX.Element
     }
 
@@ -182,6 +201,9 @@ classDiagram
         +rack: Rack
         +zoomLevel: number
         +unitHeight: number
+        +perspective: RackViewPerspective
+        +onPduInstall?(side: 'left' | 'right', top: number): void
+        +onPduRemove?(pduId: string): void
         +render(): JSX.Element
     }
 
@@ -190,21 +212,28 @@ classDiagram
         +unit: number
         +zoomLevel: number
         +unitHeight: number
-        +darkMode: boolean
         +perspective: 'front' | 'rear'
         +onCageNutInstall?(unit: number, side: string, position: string, nutType: string): void
         +onCageNutRemove?(unit: number, side: string, position: string): void
+        +onRailInstall?(unit: number, side: 'left' | 'right', railType: string): void
+        +onRailRemove?(unit: number, side: 'left' | 'right'): void
+        +render(): JSX.Element
+    }
+
+    class RailManager {
+        +rack: Rack
+        +unit: number
+        +onInstallRail(unit: number, side: 'left' | 'right', railType: RailType): void
+        +onRemoveRail(unit: number, side: 'left' | 'right'): void
         +render(): JSX.Element
     }
 
     class EquipmentLibrary {
-        +darkMode: boolean
         +onDragStart(e: DragEvent, item: Equipment): void
         +render(): JSX.Element
     }
 
     class ModalsAndDialogs {
-        +darkMode: boolean
         +currentRack: Rack | null
         +selectedEquipment: Equipment | null
         +showEquipmentModal: boolean
@@ -212,14 +241,10 @@ classDiagram
         +showRackManager?: boolean
         +floorSettings?: FloorSettings
         +showFloorSettings?: boolean
-        +showCoolingConfig?: boolean
-        +showPowerConfig?: boolean
         +infoModal?: InfoModalProps | null
         +confirmModal?: ConfirmModalProps | null
         +onCloseEquipmentModal(): void
-        +onUpdateLabel(equipmentId: string, field: string, value: string): void
-        +onUpdatePowerConnection(equipmentId: string, field: string, value: any): void
-        +onUpdateMountingOption(equipmentId: string, field: string, value: any): void
+        +onUpdateEquipmentSize(equipmentId: string, newHeight: number): void
         +render(): JSX.Element
     }
 
@@ -228,6 +253,7 @@ classDiagram
         +racks: Record~string, Rack~
         +selectedRack: string
         +floorSettings: FloorSettings
+        +isProMode: boolean
         +currentRack: Rack
         +setSelectedRack(rackId: string): void
         +setFloorSettings(settings: FloorSettings): void
@@ -235,32 +261,38 @@ classDiagram
         +removeRack(rackId: string): void
         +duplicateRack(rackId: string): void
         +updateRack(rackId: string, updates: Partial~Rack~): void
-        +addEquipment(rackId: string, startUnit: number, equipment: Equipment): void
-        +removeEquipment(rackId: string, unit: number): void
+        +addEquipment(rackId: string, startUnit: number, equipment: Equipment): Promise~PlacementResult~
+        +removeEquipment(rackId: string, unit: number): Promise~PlacementResult~
+        +moveEquipment(rackId: string, fromUnit: number, toUnit: number): Promise~PlacementResult~
         +clearAllEquipment(rackId: string): void
-        +updateLabel(rackId: string, equipmentId: string, field: string, value: string): void
-        +updatePowerConnection(rackId: string, equipmentId: string, field: string, value: any): void
-        +updateMountingOption(rackId: string, equipmentId: string, field: string, value: any): void
+        +updateEquipmentSize(rackId: string, equipmentId: string, newHeight: number): Promise~void~
         +installCageNut(rackId: string, unit: number, side: string, position: string, nutType: string): void
         +removeCageNut(rackId: string, unit: number, side: string, position: string): void
         +autoInstallCageNutsForUnit(rackId: string, unit: number, nutType: string): void
-        +updateEnvironment(rackId: string, field: string, value: number): void
+        +installRail(rackId: string, unit: number, side: 'left' | 'right', railType: RailType): void
+        +removeRail(rackId: string, unit: number, side: 'left' | 'right'): void
+        +addPduToSlot(rackId: string, side: 'left' | 'right', top: number): void
+        +removePdu(rackId: string, pduId: string): void
+        +toggleProMode(): void
     }
 
     class useDragAndDrop {
         +draggedItem: Equipment | null
+        +draggedEquipmentInfo: DraggedEquipmentInfo | null
+        +hoveredInfo: HoveredInfo
         +handleDragStart(e: DragEvent, item: Equipment): void
-        +handleDragOver(e: DragEvent): void
-        +handleDrop(e: DragEvent, startUnit: number): void
+        +handleEquipmentDragStart(e: DragEvent, equipment: Equipment, rackId: string, unit: number): void
+        +handleDragOver(e: DragEvent, unit: number, rackId: string): void
+        +handleDrop(e: DragEvent, startUnit: number, rackId: string): void
         +handleDragEnd(): void
-        +setDraggedItem(item: Equipment | null): void
     }
 
     %% サービス層
     class EquipmentPlacementManager {
         -constraints: PlacementConstraint[]
-        +placeEquipment(rack: Rack, startUnit: number, equipment: Equipment, options?: PlacementOptions): Promise~PlacementResult~
+        +placeEquipment(rack: Rack, startUnit: number, equipment: Equipment, options?: PlacementOptions, isProMode: boolean): Promise~PlacementResult~
         +removeEquipment(rack: Rack, unit: number): Promise~PlacementResult~
+        +moveEquipment(rack: Rack, fromUnit: number, toUnit: number, options?: PlacementOptions, isProMode: boolean): Promise~PlacementResult~
         +clearAllEquipment(rack: Rack): Promise~PlacementResult~
         +validatePlacement(context: PlacementContext): Promise~PlacementValidation~
         +getRackOccupancy(rack: Rack): RackOccupancy
@@ -270,18 +302,16 @@ classDiagram
         -createCapacityConstraint(): PlacementConstraint
         -createOccupancyConstraint(): PlacementConstraint
         -createShelfRequirementConstraint(): PlacementConstraint
-        -createCageNutConstraint(): PlacementConstraint
-        -calculateTotalWeight(rack: Rack): number
-        -getRackMaxWeight(rack: Rack): number
-        -hasCompleteCageNuts(rack: Rack, unit: number): boolean
-        -createCompleteCageNutConfig(nutType: string): any
+        -createProModeCageNutConstraint(): PlacementConstraint
+        -createProModeRailConstraint(): PlacementConstraint
+        -createRailConflictConstraint(): PlacementConstraint
     }
 
     class PlacementConstraint {
         +id: string
         +name: string
         +priority: number
-        +validate(rack: Rack, position: PlacementPosition, equipment: Equipment): PlacementValidation
+        +validate(context: PlacementContext): PlacementValidation
     }
 
     class PlacementResult {
@@ -290,12 +320,6 @@ classDiagram
         +validation: PlacementValidation
         +appliedChanges: PlacementChange[]
         +updatedRack?: Rack
-    }
-
-    class PlacementValidation {
-        +isValid: boolean
-        +errors: PlacementError[]
-        +warnings: PlacementWarning[]
     }
 
     %% ユーティリティ
@@ -317,7 +341,6 @@ classDiagram
         +getEquipmentDisplayName(equipment: Equipment, labels: any): string
         +deepCopy~T~(obj: T): T
         +autoInstallCageNuts(unit: number, nutType: string): any
-        +getPowerSources(rack: Rack): PowerSources
         +getZoomedUnitHeight(zoomLevel: number): number
         +getZoomedFontSize(zoomLevel: number): number
     }
@@ -342,6 +365,7 @@ classDiagram
     RackView *-- "1" RackPDU : contains
 
     RackUnit *-- "1" MountingHoles : contains
+    MountingHoles ..> RailManager : manages (conceptually)
     RackUnit ..> RackIcons : uses
 
     LeftSidebar *-- "1" EquipmentLibrary : contains
@@ -349,14 +373,15 @@ classDiagram
     useRackState ..> EquipmentPlacementManager : uses
     useRackState ..> LocalStorageUtils : uses
 
+    useDragAndDrop ..> EquipmentPlacementManager : uses (via moveEquipment)
     useDragAndDrop ..> UtilityFunctions : uses
 
     EquipmentPlacementManager *-- "0..*" PlacementConstraint : contains
     EquipmentPlacementManager ..> PlacementResult : creates
-    EquipmentPlacementManager ..> PlacementValidation : creates
 
     Rack *-- "0..*" Equipment : contains
     Rack *-- "1" PhysicalStructure : contains
+    Rack *-- "1" RailConfiguration : contains
     Rack ..> FloorSettings : references
 
     %% 重要な依存関係
@@ -365,9 +390,9 @@ classDiagram
     App ..> FloorSettings : configures
 
     note for App "メインアプリケーション\n状態管理とイベントハンドリング"
-    note for EquipmentPlacementManager "機器配置の制約チェックと実行\n複雑なビジネスロジックを担当"
-    note for useRackState "ラック状態管理\nLocalStorage連携"
-    note for Rack "ラックの完全な状態表現\n物理構造から論理設定まで"
+    note for EquipmentPlacementManager "機器配置の制約チェックと実行\n移動・サイズ変更など複雑なロジックを担当"
+    note for useRackState "ラック状態管理\nレール・PDU操作を含む\nLocalStorage連携"
+    note for Rack "ラックの完全な状態表現\nレールやPDUの情報も含む"
 ```
 
 ## 主要設計パターン
@@ -399,6 +424,7 @@ classDiagram
 3. **新しい表示モード**: activeViewModeの追加
 4. **新しいラックタイプ**: rackTypesの拡張
 5. **新しい物理構造**: PhysicalStructureの拡張
+6. **新しいレールタイプ**: RailTypeの追加と関連ロジックの更新
 
 ## パフォーマンス考慮
 

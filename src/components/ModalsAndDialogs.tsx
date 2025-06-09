@@ -47,7 +47,7 @@ interface ModalsAndDialogsProps {
   onUpdateEquipmentColor: (equipmentId: string, color: string) => void;
   onUpdateEquipmentOpacity: (equipmentId: string, opacity: number) => void;
   onUpdateEquipmentSpecs?: (equipmentId: string, field: 'power' | 'cfm' | 'weight', value: number) => void;
-  onUpdateEquipmentSize?: (equipmentId: string, newHeight: number) => void;
+  onUpdateEquipmentSize?: (equipmentId: string, newHeight: number) => Promise<void>;
   
   // 新しいモーダル用props
   racks?: Record<string, Rack>;
@@ -216,7 +216,13 @@ export const ModalsAndDialogs: React.FC<ModalsAndDialogsProps> = ({
 
               <EquipmentSizeSelector
                 equipment={selectedEquipment}
-                onSizeChange={(newHeight) => onUpdateEquipmentSize?.(selectedEquipment.id, newHeight)}
+                onSizeChange={async (newHeight: number) => {
+                  try {
+                    await onUpdateEquipmentSize?.(selectedEquipment.id, newHeight);
+                  } catch (error) {
+                    console.error('機器サイズ変更に失敗しました:', error);
+                  }
+                }}
               />
               {/* 編集可能な仕様 */}
               <div>
