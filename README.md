@@ -1,12 +1,12 @@
 # OTAK Racking - データセンターラック設計ツール
 
-[![Deploy to GitHub Pages](https://github.com/tsuyoshi-otake-system-exe-jp/otak-racking/actions/workflows/deploy.yml/badge.svg)](https://github.com/tsuyoshi-otake-system-exe-jp/otak-racking/actions/workflows/deploy.yml)
+[![Deploy to GitHub Pages](https://github.com/tsuyoshi-otake/otak-racking/actions/workflows/deploy.yml/badge.svg)](https://github.com/tsuyoshi-otake/otak-racking/actions/workflows/deploy.yml)
 
 データセンター・サーバールーム向けのラック管理システム。機器の配置、電源管理、冷却計算、ケーブル管理などの包括的な機能を提供します。
 
 ## 🌐 ライブデモ
 
-**[https://tsuyoshi-otake-system-exe-jp.github.io/otak-racking](https://tsuyoshi-otake-system-exe-jp.github.io/otak-racking)**
+**[https://tsuyoshi-otake.github.io/otak-racking](https://tsuyoshi-otake.github.io/otak-racking)**
 
 GitHub Pages経由で自動デプロイされています。
 
@@ -52,7 +52,7 @@ GitHub Pages経由で自動デプロイされています。
 
 1. リポジトリのクローン:
 ```bash
-git clone https://github.com/tsuyoshi-otake-system-exe-jp/otak-racking.git
+git clone https://github.com/tsuyoshi-otake/otak-racking.git
 cd otak-racking
 ```
 
@@ -192,7 +192,7 @@ mainブランチへのプッシュ時に自動的にGitHub Pagesにデプロイ�
 1. コードをmainブランチにプッシュ
 2. GitHub Actionsが自動実行
 3. テスト → ビルド → デプロイの順で処理
-4. https://tsuyoshi-otake-system-exe-jp.github.io/otak-racking で公開
+4. https://tsuyoshi-otake.github.io/otak-racking で公開
 
 ### 手動デプロイ
 
@@ -236,10 +236,10 @@ npm run build
 
 ## 👨‍💻 作者
 
-**TSUYOSHI-OTAKE-SYSTEM-EXE-JP**
+**tsuyoshi-otake**
 
-- GitHub: [@tsuyoshi-otake-system-exe-jp](https://github.com/tsuyoshi-otake-system-exe-jp)
-- Project Link: [https://github.com/tsuyoshi-otake-system-exe-jp/otak-racking](https://github.com/tsuyoshi-otake-system-exe-jp/otak-racking)
+- GitHub: [@tsuyoshi-otake](https://github.com/tsuyoshi-otake)
+- Project Link: [https://github.com/tsuyoshi-otake/otak-racking](https://github.com/tsuyoshi-otake/otak-racking)
 
 ## 🙏 謝辞
 
