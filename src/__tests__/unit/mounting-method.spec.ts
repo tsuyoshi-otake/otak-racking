@@ -238,9 +238,13 @@ describe('機器取り付け方法テスト', () => {
         { autoInstallCageNuts: true }
       );
 
-      expect(result.success).toBe(false);
+      // 通常モードではレール警告を無視して設置成功するように修正
+      expect(result.success).toBe(true);
+      // レールが必要な機器なのでケージナットは自動設置されない
       expect(result.appliedChanges.some(change => change.type === 'cagenut')).toBe(false);
       expect(testRack.cageNuts[1]).toBeUndefined();
+      // レールが必要という警告は出る
+      expect(result.validation.warnings.some(w => w.code === 'RAILS_REQUIRED')).toBe(true);
     });
   });
 

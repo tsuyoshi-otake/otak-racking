@@ -460,15 +460,12 @@ describe('EquipmentPlacementManager', () => {
       const server = createCageNutServer();
       const result = await manager.placeEquipment(testRack, 1, server, {}, false); // isProMode = false
 
-      expect(result.success).toBe(false); // skipWarnings: false なので失敗する
+      // 修正: 通常モードではケージナット警告を無視して設置成功するように変更
+      expect(result.success).toBe(true); // 通常モードでは警告を無視して成功
       expect(result.validation.isValid).toBe(true); // エラーはない
       expect(result.validation.warnings).toHaveLength(1);
       expect(result.validation.warnings[0].code).toBe('CAGE_NUT_MISSING');
-      
-      // skipWarnings: true で再試行
-      const result2 = await manager.placeEquipment(testRack, 1, server, { skipWarnings: true }, false);
-      expect(result2.success).toBe(true);
-      expect(result2.updatedRack?.equipment[1]).toBeDefined();
+      expect(result.updatedRack?.equipment[1]).toBeDefined();
     });
   });
 
@@ -519,17 +516,13 @@ describe('EquipmentPlacementManager', () => {
     it('ProモードOFF: レールがなくても警告のみで設置は成功する', async () => {
       const server = create2UServer();
       
-      // isProMode = false, skipWarnings = false
-      const result1 = await manager.placeEquipment(testRack, 1, server, {}, false);
-      expect(result1.success).toBe(false); // 警告があるので失敗
-      expect(result1.validation.isValid).toBe(true);
-      expect(result1.validation.warnings).toHaveLength(1);
-      expect(result1.validation.warnings[0].code).toBe('RAILS_REQUIRED');
-
-      // isProMode = false, skipWarnings = true
-      const result2 = await manager.placeEquipment(testRack, 1, server, { skipWarnings: true }, false);
-      expect(result2.success).toBe(true);
-      expect(result2.updatedRack?.equipment[1]).toBeDefined();
+      // 修正: 通常モードではレール警告を無視して設置成功するように変更
+      const result = await manager.placeEquipment(testRack, 1, server, {}, false);
+      expect(result.success).toBe(true); // 通常モードでは警告を無視して成功
+      expect(result.validation.isValid).toBe(true);
+      expect(result.validation.warnings).toHaveLength(1);
+      expect(result.validation.warnings[0].code).toBe('RAILS_REQUIRED');
+      expect(result.updatedRack?.equipment[1]).toBeDefined();
     });
   });
 });
