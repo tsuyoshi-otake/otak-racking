@@ -585,7 +585,8 @@ export class EquipmentPlacementManager {
       this.createProModeCageNutConstraint(),
       this.createProModeRailConstraint(),
       this.createMountingMethodWarningConstraint(),
-      this.createRailConflictConstraint()
+      this.createRailConflictConstraint(),
+      this.createDirectMountEquipmentConstraint()
     ];
   }
 
@@ -886,6 +887,47 @@ export class EquipmentPlacementManager {
         }
 
         return { isValid: errors.length === 0, errors, warnings };
+      }
+    };
+  }
+
+  /**
+   * 直接マウント機器のレール競合制約
+   * レール不要機器（requiresRails: false）がレール設置済みユニットに配置されることを防ぐ
+   */
+  private createDirectMountEquipmentConstraint(): PlacementConstraint {
+    return {
+      id: 'direct-mount-equipment',
+      name: '直接マウント機器のレール競合チェック',
+      priority: 6, // ProModeRailConstraintの後、MountingMethodWarningConstraintの前
+      validate: (context: PlacementContext): PlacementValidation => {
+        const { rack, position, equipment } = context;
+        const errors: PlacementError[] = [];
+
+        // レール不要機器（requiresRails: false または mountingMethod: 'cage-nuts'/'direct'）の場合のみチェック
+        if (equipment.requiresRails === false ||
+            equipment.mountingMethod === 'cage-nuts' ||
+            equipment.mountingMethod === 'direct') {
+          
+          const conflictUnits: number[] = [];
+          
+          for (let unit = position.startUnit; unit <= position.endUnit; unit++) {
+            if (this.hasRailInstalled(rack, unit)) {
+              conflictUnits.push(unit);
+            }
+          }
+          
+          if (conflictUnits.length > 0) {
+            errors.push({
+              code: 'RAIL_EQUIPMENT_CONFLICT',
+              message: `${equipment.name}はレールを必要としません。レールが設置されているユニット ${conflictUnits.join(', ')} には配置できません。`,
+              affectedUnits: conflictUnits,
+              severity: 'error' as const
+            });
+          }
+        }
+
+        return { isValid: errors.length === 0, errors, warnings: [] };
       }
     };
   }
