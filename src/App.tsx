@@ -318,6 +318,7 @@ function App() {
               <h1 className="text-2xl font-bold text-gray-100">otak-racking</h1>
               <p className="text-sm text-gray-300">
                 データセンター・サーバールーム設計支援ツール
+                {process.env.REACT_APP_COMMIT_HASH && ` - ${process.env.REACT_APP_COMMIT_HASH.substring(0, 7)}`}
               </p>
             </div>
             
