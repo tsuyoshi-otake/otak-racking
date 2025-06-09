@@ -153,6 +153,16 @@ export const EquipmentLibrary: React.FC<EquipmentLibraryProps> = ({
         </div>
       </div>
 
+      {/* ストレージ */}
+      <div>
+        <h3 className="text-sm font-semibold mb-2 flex items-center gap-1 text-gray-300">
+          <HardDrive size={14} />
+          ストレージ
+        </h3>
+        <div className="space-y-2">
+          {storageEquipment.map(renderEquipmentCard)}
+        </div>
+      </div>
 
       {/* 電源・UPS・電力制御 */}
       <div>
