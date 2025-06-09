@@ -82,7 +82,9 @@ export class EquipmentPlacementManager {
                                  options.forceOverride ||
                                  (options.autoInstallCageNuts &&
                                   (equipment.requiresCageNuts || equipment.mountingMethod === 'cage-nuts') &&
-                                  validation.warnings.every(w => w.code === 'CAGE_NUT_MISSING'));
+                                  validation.warnings.every(w => w.code === 'CAGE_NUT_MISSING')) ||
+                                 (!isProMode && validation.warnings.every(w =>
+                                   w.code === 'CAGE_NUT_MISSING' || w.code === 'RAILS_REQUIRED'));
     
     if (validation.warnings.length > 0 && !shouldIgnoreWarnings) {
       return {
