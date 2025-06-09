@@ -280,10 +280,34 @@ export const RightSidebar: React.FC<RightSidebarProps> = ({ // コンポーネ�
               className={`w-full p-2 rounded text-sm flex items-center gap-2 ${getButton()}`}
             >
               <Zap size={14} />
-              電源設定
+              電源・PDU設定
             </button>
           </div>
         </div>
+
+        {/* PDU情報表示 */}
+        {selectedRack !== 'all' && currentRack && currentRack.pduPlacements && currentRack.pduPlacements.length > 0 && (
+          <div className="p-3 border rounded bg-gray-700 border-custom-gray">
+            <h4 className="text-sm font-medium mb-2 flex items-center gap-1 text-gray-100">
+              <Zap size={12} className="text-gray-300" />
+              PDU情報
+            </h4>
+            <div className="text-xs space-y-1">
+              {currentRack.pduPlacements.map((pdu, index) => (
+                <div key={pdu.id} className="flex justify-between">
+                  <span>{pdu.position === 'left' ? 'A系統' : 'B系統'}:</span>
+                  <span>{pdu.outletCount}口</span>
+                </div>
+              ))}
+              <div className="pt-1 border-t border-gray-600 mt-2">
+                <div className="flex justify-between font-medium">
+                  <span>総コンセント数:</span>
+                  <span>{currentRack.pduPlacements.reduce((sum, pdu) => sum + pdu.outletCount, 0)}口</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* フロア設定表示 */}
         {floorSettings.hasAccessFloor && (

@@ -5,6 +5,7 @@ import { rackTypes } from '../constants';
 import { placementManager } from '../services/EquipmentPlacementManager';
 import { loadAppState } from '../utils/localStorage';
 import { loadDataFromUrl } from '../utils/shareUtils';
+import { getDefaultPDUModel, createPDUEquipment } from '../constants/pduModels';
 
 const createPduOutlets = (count: number, type: string): PowerOutlet[] => {
   return Array.from({ length: count }, (_, i) => ({
@@ -69,11 +70,16 @@ const createInitialRack = (id: string, name: string, rackCount: number): Rack =>
         cfm: 0,
         heatGeneration: 0,
         description: 'ラックの左側に設置されたPDU A系統',
-        powerOutlets: createPduOutlets(24, 'IEC C13'),
+        powerOutlets: createPduOutlets(42, 'IEC C13'), // デフォルトで42口に変更
+        isPdu: true,
+        outletCount: 42,
+        pduModelId: 'high-density-42'
       },
       position: 'left',
       offset: 0, // renderPDUsで再計算するため、仮の値
-      orientation: 'vertical'
+      orientation: 'vertical',
+      modelId: 'high-density-42',
+      outletCount: 42
     },
     {
       id: `pdu-right-${id}`,
@@ -94,11 +100,16 @@ const createInitialRack = (id: string, name: string, rackCount: number): Rack =>
         cfm: 0,
         heatGeneration: 0,
         description: 'ラックの右側に設置されたPDU B系統',
-        powerOutlets: createPduOutlets(24, 'IEC C13'),
+        powerOutlets: createPduOutlets(42, 'IEC C13'), // デフォルトで42口に変更
+        isPdu: true,
+        outletCount: 42,
+        pduModelId: 'high-density-42'
       },
       position: 'right',
       offset: 0, // renderPDUsで再計算するため、仮の値
-      orientation: 'vertical'
+      orientation: 'vertical',
+      modelId: 'high-density-42',
+      outletCount: 42
     }
   ],
   physicalStructure: createDefaultPhysicalStructure()
@@ -127,12 +138,38 @@ export const useRackState = () => {
   const [racks, setRacks] = useState<Record<string, Rack>>(() => {
     if (loadedState.racks && Object.keys(loadedState.racks).length > 0) {
       // 既存のラックにphysicalStructureが存在しない場合は追加
+      // また、古いPDUデータを新しい形式に変換
       const updatedRacks: Record<string, Rack> = {};
       Object.entries(loadedState.racks).forEach(([id, rack]) => {
-        updatedRacks[id] = {
+        const updatedRack = {
           ...rack,
           physicalStructure: rack.physicalStructure || createDefaultPhysicalStructure()
         };
+
+        // PDUPlacementの互換性チェックと更新
+        if (updatedRack.pduPlacements) {
+          updatedRack.pduPlacements = updatedRack.pduPlacements.map((pdu: any) => {
+            // 古い形式のPDUPlacementを新しい形式に変換
+            if (!pdu.modelId || !pdu.outletCount) {
+              const defaultModel = getDefaultPDUModel();
+              return {
+                ...pdu,
+                modelId: defaultModel.id,
+                outletCount: defaultModel.outletCount,
+                equipment: {
+                  ...pdu.equipment,
+                  isPdu: true,
+                  outletCount: defaultModel.outletCount,
+                  pduModelId: defaultModel.id,
+                  powerOutlets: pdu.equipment.powerOutlets || createPduOutlets(defaultModel.outletCount, defaultModel.outletType)
+                }
+              };
+            }
+            return pdu;
+          });
+        }
+
+        updatedRacks[id] = updatedRack;
       });
       return updatedRacks;
     }
@@ -1000,7 +1037,7 @@ export const useRackState = () => {
   );
 
   // PDUをスロットに設置
-  const addPduToSlot = useCallback((rackId: string, side: 'left' | 'right', top: number) => {
+  const addPduToSlot = useCallback((rackId: string, side: 'left' | 'right', top: number, modelId?: string) => {
     setRacks(prev => {
       const rack = prev[rackId];
       if (!rack) return prev;
@@ -1008,25 +1045,16 @@ export const useRackState = () => {
       const newRack = deepCopy(rack);
       const newPduId = `pdu-${side}-${Date.now()}`;
       
-      const newPduEquipment: Equipment = {
-        id: `pdu-equipment-${Date.now()}`,
-        name: `PDU ${side === 'left' ? 'A' : 'B'}系統`,
-        height: 42, // 42U PDU
-        depth: 100,
-        power: 0,
-        heat: 0,
-        weight: 8,
-        type: 'pdu',
-        role: 'power-distribution',
-        color: '#374151',
-        opacity: 100,
-        dualPower: false,
-        airflow: 'natural',
-        cfm: 0,
-        heatGeneration: 0,
-        description: `ラックの${side === 'left' ? '左' : '右'}側に設置されたPDU ${side === 'left' ? 'A' : 'B'}系統`,
-        powerOutlets: createPduOutlets(24, 'IEC C13'),
-      };
+      // デフォルトで高密度PDUモデルを使用
+      const pduModel = getDefaultPDUModel();
+      const newPduEquipment = createPDUEquipment(
+        pduModel,
+        `PDU ${side === 'left' ? 'A' : 'B'}系統`,
+        side
+      );
+
+      // PowerOutletsを作成
+      newPduEquipment.powerOutlets = createPduOutlets(pduModel.outletCount, pduModel.outletType);
 
       if (!newRack.pduPlacements) {
         newRack.pduPlacements = [];
@@ -1037,7 +1065,9 @@ export const useRackState = () => {
         equipment: newPduEquipment,
         position: side,
         offset: top, // RackPDUから渡されたtop値をオフセットとして使用
-        orientation: 'vertical'
+        orientation: 'vertical',
+        modelId: pduModel.id,
+        outletCount: pduModel.outletCount
       });
 
       return { ...prev, [rackId]: newRack };

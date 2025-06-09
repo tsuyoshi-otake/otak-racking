@@ -42,6 +42,11 @@ export interface Equipment {
   availableSizes?: EquipmentSize[];
   selectedSize?: number; // 選択されたサイズ（height）
   powerOutlets?: PowerOutlet[];
+  
+  // PDU関連プロパティ
+  isPdu?: boolean;
+  outletCount?: number;
+  pduModelId?: string;
 }
 
 export interface PowerOutlet {
@@ -151,6 +156,8 @@ export interface PDUPlacement {
   position: 'left' | 'right' | 'rear';
   offset: number; // ラック上端からのオフセット（mm）
   orientation: 'vertical' | 'horizontal';
+  modelId: string; // 使用されているPDUモデルのID
+  outletCount: number; // 実際のコンセント数
 }
 
 
