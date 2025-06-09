@@ -366,8 +366,8 @@ export const getPowerStatus = (equipment: Equipment, powerConnections: any) => {
   const connections = powerConnections[equipment.id] || {};
   
   if (equipment.dualPower) {
-    const hasPrimary = connections.primarySource;
-    const hasSecondary = connections.secondarySource;
+    const hasPrimary = connections.primaryPduId && connections.primaryPduOutlet;
+    const hasSecondary = connections.secondaryPduId && connections.secondaryPduOutlet;
     
     if (hasPrimary && hasSecondary) {
       return { status: 'ok', icon: 'CircleCheck', color: 'text-green-400' };
@@ -377,7 +377,7 @@ export const getPowerStatus = (equipment: Equipment, powerConnections: any) => {
       return { status: 'error', icon: 'XCircle', color: 'text-red-500' };
     }
   } else {
-    const hasPrimary = connections.primarySource;
+    const hasPrimary = connections.primaryPduId && connections.primaryPduOutlet;
     if (hasPrimary) {
       return { status: 'ok', icon: 'CircleCheck', color: 'text-green-400' };
     } else {

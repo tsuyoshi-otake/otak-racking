@@ -386,17 +386,53 @@ export const ModalsAndDialogs: React.FC<ModalsAndDialogsProps> = ({
                   {/* 電源状態表示 */}
                   <div className="p-2 rounded bg-gray-700">
                     <div className="flex items-center gap-2 text-sm">
-                      {powerConnection.primarySource && (selectedEquipment.dualPower ? powerConnection.secondarySource : true) ? (
-                        <>
-                          <CheckCircle size={14} className="text-green-400" />
-                          <span className="text-gray-200">電源設定完了</span>
-                        </>
-                      ) : (
-                        <>
-                          <AlertTriangle size={14} className="text-yellow-400" />
-                          <span className="text-gray-300">電源設定が不完全です</span>
-                        </>
-                      )}
+                      {(() => {
+                        const hasPrimaryConnection = powerConnection.primaryPduId && powerConnection.primaryPduOutlet;
+                        const hasSecondaryConnection = powerConnection.secondaryPduId && powerConnection.secondaryPduOutlet;
+                        
+                        if (selectedEquipment.dualPower) {
+                          // 冗長電源機器の場合：両方の電源接続が必要
+                          if (hasPrimaryConnection && hasSecondaryConnection) {
+                            return (
+                              <>
+                                <CheckCircle size={14} className="text-green-400" />
+                                <span className="text-gray-200">電源設定完了（冗長構成）</span>
+                              </>
+                            );
+                          } else if (hasPrimaryConnection || hasSecondaryConnection) {
+                            return (
+                              <>
+                                <AlertTriangle size={14} className="text-yellow-400" />
+                                <span className="text-gray-300">冗長電源が未設定です</span>
+                              </>
+                            );
+                          } else {
+                            return (
+                              <>
+                                <AlertTriangle size={14} className="text-yellow-400" />
+                                <span className="text-gray-300">電源設定が不完全です</span>
+                              </>
+                            );
+                          }
+                        } else {
+                          // 単一電源機器の場合：プライマリ電源のみ必要
+                          if (hasPrimaryConnection) {
+                            return (
+                              <>
+                                <CheckCircle size={14} className="text-green-400" />
+                                <span className="text-gray-200">電源設定完了</span>
+                              </>
+                            );
+                          } else {
+                            return (
+                              <>
+                                <AlertTriangle size={14} className="text-yellow-400" />
+                                <span className="text-gray-300">電源設定が不完全です</span>
+                              </>
+                            );
+                          }
+                        }
+                      })()}
                     </div>
                   </div>
                 </div>
