@@ -55,6 +55,7 @@ export const useDragAndDrop = (
 
   const handleDrop = useCallback(async (e: React.DragEvent, startUnit: number, rackId: string) => {
     e.preventDefault();
+    e.stopPropagation();
     setHoveredInfo({ rackId: null, unit: null });
     if (!draggedItem || !racks[rackId]) return;
 

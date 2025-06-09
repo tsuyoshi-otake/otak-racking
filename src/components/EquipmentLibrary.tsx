@@ -41,7 +41,7 @@ export const EquipmentLibrary: React.FC<EquipmentLibraryProps> = ({
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           {getEquipmentIcon(item.type)}
-          <span className="font-medium text-xs">{item.name}</span>
+          <span className="font-medium text-xs">{item.name.replace(/\s*\(\d+U\)$/, '')}</span>
           <button
             onClick={(e) => {
               e.stopPropagation();

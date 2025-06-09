@@ -62,7 +62,6 @@ function App() {
     updateRack,
     addEquipment,
     removeEquipment,
-    clearAllEquipment,
     updateLabel,
     updatePowerConnection,
     updateMountingOption,
@@ -148,6 +147,7 @@ function App() {
   // ドラッグ&ドロップ
   const {
     draggedItem,
+    draggedEquipmentInfo,
     hoveredInfo,
     handleDragStart,
     handleEquipmentDragStart,
@@ -162,6 +162,19 @@ function App() {
     showInfoModal,
     showConfirmModal
   );
+
+  // ラックエリア外でのドロップ処理（機器削除）
+  const handleDropOutside = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    
+    // ラックからドラッグされた機器の場合のみ削除処理を実行
+    if (draggedEquipmentInfo) {
+      removeEquipment(draggedEquipmentInfo.sourceRackId, draggedEquipmentInfo.sourceUnit);
+    }
+    
+    // ドラッグ状態をリセット
+    handleDragEnd();
+  }, [draggedEquipmentInfo, removeEquipment, handleDragEnd]);
 
   // アクティブなビューモード変更（メモ化）
   const handleActiveViewModeChange = useCallback((mode: string | null) => {
@@ -198,40 +211,6 @@ function App() {
       'キャンセル'
     );
   }, [showConfirmModal, removeEquipment]);
-
-  // ラック機器全クリア処理（メモ化）
-  const handleClearAllEquipment = useCallback(() => {
-    if (selectedRack === 'all') return;
-    
-    const rack = racks[selectedRack];
-    const equipmentCount = Object.keys(rack?.equipment || {}).length;
-    const cageNutCount = Object.keys(rack?.cageNuts || {}).length;
-    const railCount = Object.keys(rack?.rails || {}).length;
-    
-    if (equipmentCount === 0 && cageNutCount === 0 && railCount === 0) {
-      showInfoModal(
-        'ラッククリア',
-        'このラックには機器・ケージナット・レールが設置されていません。'
-      );
-      return;
-    }
-
-    const items = [];
-    if (equipmentCount > 0) items.push(`機器${equipmentCount}台`);
-    if (cageNutCount > 0) items.push(`ケージナット${cageNutCount}箇所`);
-    if (railCount > 0) items.push(`レール${railCount}箇所`);
-    const itemsText = items.join('、');
-
-    showConfirmModal(
-      'ラック内容クリア',
-      `このラックの${itemsText}をすべて削除しますか？\n関連する設定もすべて削除されます。\n\n⚠️ この操作は元に戻せません。`,
-      () => {
-        clearAllEquipment(selectedRack);
-      },
-      'すべて削除する',
-      'キャンセル'
-    );
-  }, [selectedRack, racks, showInfoModal, showConfirmModal, clearAllEquipment]);
 
   // レイアウト計算（メモ化）
   const rackIds = useMemo(() =>
@@ -330,7 +309,11 @@ function App() {
         </header>
 
       {/* メインコンテンツ */}
-      <div className="flex h-[calc(100vh-80px)]">
+      <div
+        className="flex h-[calc(100vh-80px)]"
+        onDragOver={(e) => e.preventDefault()}
+        onDrop={handleDropOutside}
+      >
         {/* 左サイドバー */}
         <MemoizedLeftSidebar
           zoomLevel={zoomLevel}
@@ -468,7 +451,6 @@ function App() {
           onAddRack={addRack}
           onRemoveRack={removeRack}
           onDuplicateRack={duplicateRack}
-          onClearAllEquipment={handleClearAllEquipment}
           onShowRackManager={handleShowRackManager}
           onShowFloorSettings={handleShowFloorSettings}
           onShowCoolingConfig={handleShowCoolingConfig}

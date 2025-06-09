@@ -35,15 +35,15 @@ export const StatusLEDs: React.FC<StatusLEDsProps> = ({ powerStatus, healthStatu
   };
 
   return (
-    <div className="flex flex-col gap-0.5 ml-1">
+    <div className="flex flex-col gap-0.5">
       {/* 電源LED */}
-      <div 
-        className={`w-1.5 h-1.5 rounded-full ${getPowerLEDColor()}`}
+      <div
+        className={`w-1 h-1 rounded-full ${getPowerLEDColor()}`}
         title={`電源: ${powerStatus === 'ok' ? '正常' : powerStatus === 'warning' ? '警告' : 'エラー'}`}
       />
       {/* ヘルスLED */}
-      <div 
-        className={`w-1.5 h-1.5 rounded-full ${getHealthLEDColor()}`}
+      <div
+        className={`w-1 h-1 rounded-full ${getHealthLEDColor()}`}
         title={`ヘルス: ${healthStatus === 'normal' ? '正常' : 'エラー'}`}
       />
     </div>

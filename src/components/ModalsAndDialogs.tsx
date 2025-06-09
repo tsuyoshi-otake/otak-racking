@@ -9,7 +9,6 @@ import {
   AlertTriangle,
   CheckCircle,
   Plus,
-  Trash2,
   Copy,
   Snowflake,
   Building,
@@ -773,14 +772,6 @@ export const ModalsAndDialogs: React.FC<ModalsAndDialogsProps> = ({
                         title="複製"
                       >
                         <Copy size={14} />
-                      </button>
-                      <button
-                        onClick={() => onRemoveRack?.(rack.id)}
-                        className="p-1 rounded hover:bg-gray-600"
-                        title="削除"
-                        disabled={Object.keys(racks).length <= 1}
-                      >
-                        <Trash2 size={14} />
                       </button>
                     </div>
                   </div>

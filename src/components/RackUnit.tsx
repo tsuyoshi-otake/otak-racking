@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { Trash2, CheckCircle, AlertCircle, XCircle, Thermometer, Move } from 'lucide-react';
+import { CheckCircle, AlertCircle, XCircle, Thermometer, Move } from 'lucide-react';
 import { Rack, Equipment, CoolingStats, RackViewPerspective } from '../types';
 import {
   getCageNutStatus,
@@ -241,24 +241,17 @@ export const RackUnit: React.FC<RackUnitProps> = React.memo(({
             {railDisplay && <span className="ml-1">{railDisplay}</span>}
             {/* サーバー、スイッチ、ストレージ機器の場合にStatusLEDsを表示 */}
             {(item.type === 'server' || item.type === 'network' || item.type === 'storage') && (
-              <StatusLEDs
-                powerStatus={(() => {
-                  const status = getPowerStatus(item, rack.powerConnections);
-                  return status.status;
-                })()}
-                healthStatus={item.healthStatus || 'normal'}
-              />
+              <div className="absolute right-1 top-1/2 transform -translate-y-1/2">
+                <StatusLEDs
+                  powerStatus={(() => {
+                    const status = getPowerStatus(item, rack.powerConnections);
+                    return status.status;
+                  })()}
+                  healthStatus={item.healthStatus || 'normal'}
+                />
+              </div>
             )}
           </div>
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              onEquipmentRemove?.(unit);
-            }}
-            className="relative z-10 text-white hover:text-gray-300 ml-1 [text-shadow:0_1px_2px_rgba(0,0,0,0.5)]"
-          >
-            <Trash2 size={Math.max(8, fontSize - 2)} />
-          </button>
         </div>
       )}
     </div>

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Move, Plus, Trash2 } from 'lucide-react';
+import { Move, Plus } from 'lucide-react';
 import { Rack, RailType } from '../types';
 
 interface RailManagerProps {
@@ -70,18 +70,6 @@ export const RailManager: React.FC<RailManagerProps> = ({
             <span className="text-xs">
               {rails.frontLeft?.railType?.toUpperCase()}設置済み
             </span>
-            <button
-              onClick={() => handleRemoveRail('left')}
-              className={`px-2 py-1 text-xs rounded transition-colors ${
-                darkMode
-                  ? 'bg-gray-700 hover:bg-gray-800 text-white'
-                  : 'bg-gray-600 hover:bg-gray-700 text-white'
-              }`}
-              title="左レールを削除"
-            >
-              <Trash2 size={10} className="inline mr-1" />
-              削除
-            </button>
           </div>
         )}
       </div>
@@ -112,18 +100,6 @@ export const RailManager: React.FC<RailManagerProps> = ({
             <span className="text-xs">
               {rails.frontRight?.railType?.toUpperCase()}設置済み
             </span>
-            <button
-              onClick={() => handleRemoveRail('right')}
-              className={`px-2 py-1 text-xs rounded transition-colors ${
-                darkMode
-                  ? 'bg-gray-700 hover:bg-gray-800 text-white'
-                  : 'bg-gray-600 hover:bg-gray-700 text-white'
-              }`}
-              title="右レールを削除"
-            >
-              <Trash2 size={10} className="inline mr-1" />
-              削除
-            </button>
           </div>
         )}
       </div>
