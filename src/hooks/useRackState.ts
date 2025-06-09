@@ -659,6 +659,44 @@ export const useRackState = () => {
       const equipment = Object.values(newRack.equipment).find(e => e.id === equipmentId);
       if (!equipment) return prev;
 
+      // useSecondaryPowerフィールドの場合は機器のプロパティを直接更新
+      if (field === 'useSecondaryPower') {
+        // 該当機器を探して更新
+        for (const [unit, eq] of Object.entries(newRack.equipment)) {
+          if (eq.id === equipmentId) {
+            newRack.equipment[parseInt(unit)] = {
+              ...eq,
+              useSecondaryPower: value
+            };
+            
+            // セカンダリ電源を使用しない場合、既存のセカンダリ電源接続をクリア
+            if (!value && newRack.powerConnections[equipmentId]) {
+              const connection = newRack.powerConnections[equipmentId];
+              if (connection.secondaryPduId) {
+                // 古いPDUのアウトレットを解放
+                const oldPdu = newRack.pduPlacements.find(p => p.equipment.id === connection.secondaryPduId)?.equipment;
+                if (oldPdu && oldPdu.powerOutlets) {
+                  const oldOutletIndex = oldPdu.powerOutlets.findIndex(o => o.connectedEquipmentId === equipmentId);
+                  if (oldOutletIndex > -1) {
+                    oldPdu.powerOutlets[oldOutletIndex].inUse = false;
+                    oldPdu.powerOutlets[oldOutletIndex].connectedEquipmentId = null;
+                  }
+                }
+                
+                // セカンダリ電源接続をクリア
+                newRack.powerConnections[equipmentId] = {
+                  ...connection,
+                  secondaryPduId: null,
+                  secondaryPduOutlet: null
+                };
+              }
+            }
+            break;
+          }
+        }
+        return { ...prev, [rackId]: newRack };
+      }
+
       const connection = newRack.powerConnections[equipmentId] || {};
       const oldPduId = field === 'primarySource' ? connection.primaryPduId : connection.secondaryPduId;
       

@@ -380,27 +380,47 @@ export const getPowerStatus = (equipment: Equipment, powerConnections: any): Pow
     const hasPrimary = connections.primaryPduId && connections.primaryPduOutlet;
     const hasSecondary = connections.secondaryPduId && connections.secondaryPduOutlet;
     
-    if (hasPrimary && hasSecondary) {
-      return {
-        status: 'ok',
-        icon: 'CircleCheck',
-        color: 'text-green-400',
-        message: '電源設定完了（冗長構成）'
-      };
-    } else if (hasPrimary || hasSecondary) {
-      return {
-        status: 'warning',
-        icon: 'AlertCircle',
-        color: 'text-yellow-400',
-        message: '冗長電源が未設定です'
-      };
+    // セカンダリ電源を使用しない場合は単一電源として扱う
+    if (equipment.useSecondaryPower === false) {
+      if (hasPrimary) {
+        return {
+          status: 'ok',
+          icon: 'CircleCheck',
+          color: 'text-green-400',
+          message: '電源設定完了（単一電源モード）'
+        };
+      } else {
+        return {
+          status: 'error',
+          icon: 'XCircle',
+          color: 'text-red-500',
+          message: '電源が未接続です'
+        };
+      }
     } else {
-      return {
-        status: 'error',
-        icon: 'XCircle',
-        color: 'text-red-500',
-        message: '電源が未接続です'
-      };
+      // セカンダリ電源を使用する場合：両方の電源接続が必要
+      if (hasPrimary && hasSecondary) {
+        return {
+          status: 'ok',
+          icon: 'CircleCheck',
+          color: 'text-green-400',
+          message: '電源設定完了（冗長構成）'
+        };
+      } else if (hasPrimary || hasSecondary) {
+        return {
+          status: 'warning',
+          icon: 'AlertCircle',
+          color: 'text-yellow-400',
+          message: '冗長電源が未設定です'
+        };
+      } else {
+        return {
+          status: 'error',
+          icon: 'XCircle',
+          color: 'text-red-500',
+          message: '電源が未接続です'
+        };
+      }
     }
   } else {
     // 単一電源機器の場合

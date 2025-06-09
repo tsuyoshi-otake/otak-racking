@@ -368,32 +368,54 @@ export const ModalsAndDialogs: React.FC<ModalsAndDialogsProps> = ({
                     {/* セカンダリ電源（冗長電源機器のみ） */}
                     {selectedEquipment.dualPower && (
                       <div className="space-y-2 p-2 border rounded border-gray-600">
-                        <label className="block text-sm font-medium">セカンダリ電源</label>
-                        <select
-                          value={powerConnection.secondaryPduId || ''}
-                          onChange={(e) => onUpdatePowerConnection(selectedEquipment.id, 'secondaryPduId', e.target.value)}
-                          className={`w-full p-2 border rounded text-sm ${inputBg}`}
-                        >
-                          <option value="">PDU未接続</option>
-                          {powerSources.pdus.map(pdu => (
-                            <option key={pdu.id} value={pdu.id}>
-                              {pdu.name}
-                            </option>
-                          ))}
-                        </select>
-                        {powerConnection.secondaryPduId && (
-                          <select
-                            value={powerConnection.secondaryPduOutlet || ''}
-                            onChange={(e) => onUpdatePowerConnection(selectedEquipment.id, 'secondaryPduOutlet', parseInt(e.target.value))}
-                            className={`w-full p-2 border rounded text-sm ${inputBg}`}
-                          >
-                            <option value="">コンセント選択</option>
-                            {powerSources.pdus.find(p => p.id === powerConnection.secondaryPduId)?.powerOutlets?.map(outlet => (
-                              <option key={outlet.id} value={outlet.id} disabled={outlet.inUse && outlet.connectedEquipmentId !== selectedEquipment.id}>
-                                コンセント #{outlet.id} ({outlet.type}) {outlet.inUse ? `(使用中: ${outlet.connectedEquipmentId === selectedEquipment.id ? 'この機器' : '他機器'})` : ''}
-                              </option>
-                            ))}
-                          </select>
+                        <div className="flex items-center justify-between">
+                          <label className="block text-sm font-medium">セカンダリ電源</label>
+                          <label className="flex items-center gap-2">
+                            <input
+                              type="checkbox"
+                              checked={selectedEquipment.useSecondaryPower !== false}
+                              onChange={(e) => onUpdatePowerConnection(selectedEquipment.id, 'useSecondaryPower', e.target.checked)}
+                              className="rounded"
+                            />
+                            <span className="text-xs">セカンダリ電源を使用する</span>
+                          </label>
+                        </div>
+                        {selectedEquipment.useSecondaryPower !== false && (
+                          <>
+                            <select
+                              value={powerConnection.secondaryPduId || ''}
+                              onChange={(e) => onUpdatePowerConnection(selectedEquipment.id, 'secondaryPduId', e.target.value)}
+                              className={`w-full p-2 border rounded text-sm ${inputBg}`}
+                            >
+                              <option value="">PDU未接続</option>
+                              {powerSources.pdus.map(pdu => (
+                                <option key={pdu.id} value={pdu.id}>
+                                  {pdu.name}
+                                </option>
+                              ))}
+                            </select>
+                            {powerConnection.secondaryPduId && (
+                              <select
+                                value={powerConnection.secondaryPduOutlet || ''}
+                                onChange={(e) => onUpdatePowerConnection(selectedEquipment.id, 'secondaryPduOutlet', parseInt(e.target.value))}
+                                className={`w-full p-2 border rounded text-sm ${inputBg}`}
+                              >
+                                <option value="">コンセント選択</option>
+                                {powerSources.pdus.find(p => p.id === powerConnection.secondaryPduId)?.powerOutlets?.map(outlet => (
+                                  <option key={outlet.id} value={outlet.id} disabled={outlet.inUse && outlet.connectedEquipmentId !== selectedEquipment.id}>
+                                    コンセント #{outlet.id} ({outlet.type}) {outlet.inUse ? `(使用中: ${outlet.connectedEquipmentId === selectedEquipment.id ? 'この機器' : '他機器'})` : ''}
+                                  </option>
+                                ))}
+                              </select>
+                            )}
+                          </>
+                        )}
+                        {selectedEquipment.useSecondaryPower === false && (
+                          <div className="p-2 bg-blue-900 rounded">
+                            <p className="text-xs text-blue-200">
+                              セカンダリ電源は使用しません（単一電源として動作）
+                            </p>
+                          </div>
                         )}
                       </div>
                     )}
@@ -406,28 +428,47 @@ export const ModalsAndDialogs: React.FC<ModalsAndDialogsProps> = ({
                           const hasSecondaryConnection = powerConnection.secondaryPduId && powerConnection.secondaryPduOutlet;
                           
                           if (selectedEquipment.dualPower) {
-                            // 冗長電源機器の場合：両方の電源接続が必要
-                            if (hasPrimaryConnection && hasSecondaryConnection) {
-                              return (
-                                <>
-                                  <CheckCircle size={14} className="text-green-400" />
-                                  <span className="text-gray-200">電源設定完了（冗長構成）</span>
-                                </>
-                              );
-                            } else if (hasPrimaryConnection || hasSecondaryConnection) {
-                              return (
-                                <>
-                                  <AlertTriangle size={14} className="text-yellow-400" />
-                                  <span className="text-gray-300">冗長電源が未設定です</span>
-                                </>
-                              );
+                            // セカンダリ電源を使用しない場合は単一電源として扱う
+                            if (selectedEquipment.useSecondaryPower === false) {
+                              if (hasPrimaryConnection) {
+                                return (
+                                  <>
+                                    <CheckCircle size={14} className="text-green-400" />
+                                    <span className="text-gray-200">電源設定完了（単一電源モード）</span>
+                                  </>
+                                );
+                              } else {
+                                return (
+                                  <>
+                                    <AlertTriangle size={14} className="text-red-400" />
+                                    <span className="text-gray-300">電源が未接続です</span>
+                                  </>
+                                );
+                              }
                             } else {
-                              return (
-                                <>
-                                  <AlertTriangle size={14} className="text-red-400" />
-                                  <span className="text-gray-300">電源が未接続です</span>
-                                </>
-                              );
+                              // セカンダリ電源を使用する場合：両方の電源接続が必要
+                              if (hasPrimaryConnection && hasSecondaryConnection) {
+                                return (
+                                  <>
+                                    <CheckCircle size={14} className="text-green-400" />
+                                    <span className="text-gray-200">電源設定完了（冗長構成）</span>
+                                  </>
+                                );
+                              } else if (hasPrimaryConnection || hasSecondaryConnection) {
+                                return (
+                                  <>
+                                    <AlertTriangle size={14} className="text-yellow-400" />
+                                    <span className="text-gray-300">冗長電源が未設定です</span>
+                                  </>
+                                );
+                              } else {
+                                return (
+                                  <>
+                                    <AlertTriangle size={14} className="text-red-400" />
+                                    <span className="text-gray-300">電源が未接続です</span>
+                                  </>
+                                );
+                              }
                             }
                           } else {
                             // 単一電源機器の場合：プライマリ電源のみ必要

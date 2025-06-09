@@ -11,6 +11,7 @@ export interface Equipment {
   color: string;
   opacity?: number; // 0-100
   dualPower: boolean;
+  useSecondaryPower?: boolean; // セカンダリ電源の使用有無（dualPower: trueの場合のみ有効）
   airflow: string;
   cfm: number;
   heatGeneration: number;
