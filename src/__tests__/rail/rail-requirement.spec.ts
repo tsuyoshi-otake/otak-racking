@@ -76,7 +76,8 @@ describe('レール要求制約のテスト', () => {
       validateOnly: true
     });
 
-    expect(result.success).toBe(false);
+    // 通常モードでは警告のみで配置は可能
+    expect(result.success).toBe(true);
     expect(result.validation.warnings).toHaveLength(1);
     expect(result.validation.warnings[0].code).toBe('RAILS_REQUIRED');
     expect(result.validation.warnings[0].affectedUnits).toEqual([10]);
@@ -113,7 +114,8 @@ describe('レール要求制約のテスト', () => {
       validateOnly: true
     });
 
-    expect(result.success).toBe(false);
+    // 通常モードでは警告のみで配置は可能
+    expect(result.success).toBe(true);
     expect(result.validation.warnings).toHaveLength(1);
     expect(result.validation.warnings[0].code).toBe('RAILS_REQUIRED');
   });

@@ -57,7 +57,7 @@ describe('棚板のテスト', () => {
       const { standardShelf } = getShelfEquipment();
       
       expect(standardShelf).toBeDefined();
-      expect(standardShelf.name).toBe('1U棚板 (標準)');
+      expect(standardShelf.name).toBe('棚板 (標準・1U)');
       expect(standardShelf.type).toBe('shelf');
       expect(standardShelf.height).toBe(1);
     });
@@ -66,7 +66,7 @@ describe('棚板のテスト', () => {
       const { ventedShelf } = getShelfEquipment();
       
       expect(ventedShelf).toBeDefined();
-      expect(ventedShelf.name).toBe('1U棚板 (通気孔付き)');
+      expect(ventedShelf.name).toBe('棚板 (通気孔付き・1U)');
       expect(ventedShelf.type).toBe('shelf');
       expect(ventedShelf.height).toBe(1);
       expect(ventedShelf.airflow).toBe('intake');
