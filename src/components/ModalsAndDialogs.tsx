@@ -308,55 +308,38 @@ export const ModalsAndDialogs: React.FC<ModalsAndDialogsProps> = ({
 
           {activeTab === 'power' && (
             <div className="space-y-3">
-              <div>
-                <h4 className="font-medium mb-2 flex items-center gap-2">
-                  電源接続設定
-                  {selectedEquipment.dualPower && (
-                    <span className="text-xs bg-yellow-900 text-yellow-200 px-2 py-0.5 rounded">
-                      冗長電源
-                    </span>
-                  )}
-                </h4>
-                
-                <div className="space-y-3">
-                  {/* プライマリ電源 */}
-                  <div className="space-y-2 p-2 border rounded border-gray-600">
-                    <label className="block text-sm font-medium">プライマリ電源</label>
-                    <select
-                      value={powerConnection.primaryPduId || ''}
-                      onChange={(e) => onUpdatePowerConnection(selectedEquipment.id, 'primaryPduId', e.target.value)}
-                      className={`w-full p-2 border rounded text-sm ${inputBg}`}
-                    >
-                      <option value="">PDU未接続</option>
-                      {powerSources.pdus.map(pdu => (
-                        <option key={pdu.id} value={pdu.id}>
-                          {pdu.name}
-                        </option>
-                      ))}
-                    </select>
-                    {powerConnection.primaryPduId && (
-                      <select
-                        value={powerConnection.primaryPduOutlet || ''}
-                        onChange={(e) => onUpdatePowerConnection(selectedEquipment.id, 'primaryPduOutlet', parseInt(e.target.value))}
-                        className={`w-full p-2 border rounded text-sm ${inputBg}`}
-                      >
-                        <option value="">コンセント選択</option>
-                        {powerSources.pdus.find(p => p.id === powerConnection.primaryPduId)?.powerOutlets?.map(outlet => (
-                          <option key={outlet.id} value={outlet.id} disabled={outlet.inUse && outlet.connectedEquipmentId !== selectedEquipment.id}>
-                            コンセント #{outlet.id} ({outlet.type}) {outlet.inUse ? `(使用中: ${outlet.connectedEquipmentId === selectedEquipment.id ? 'この機器' : '他機器'})` : ''}
-                          </option>
-                        ))}
-                      </select>
-                    )}
+              {/* 電源不要機器の場合は電源設定セクションを非表示 */}
+              {(!selectedEquipment.power || selectedEquipment.power === 0) ? (
+                <div className="p-4 text-center text-gray-400">
+                  <div className="flex items-center justify-center gap-2 mb-2">
+                    <span className="text-2xl">⚡</span>
+                    <span className="font-medium">電源接続不要</span>
                   </div>
-
-                  {/* セカンダリ電源（冗長電源機器のみ） */}
-                  {selectedEquipment.dualPower && (
+                  <p className="text-sm">この機器は電源接続を必要としません</p>
+                </div>
+              ) : (
+                <div>
+                  <h4 className="font-medium mb-2 flex items-center gap-2">
+                    電源接続設定
+                    {selectedEquipment.dualPower && (
+                      <span className="text-xs bg-yellow-900 text-yellow-200 px-2 py-0.5 rounded">
+                        冗長電源
+                      </span>
+                    )}
+                    {(!selectedEquipment.dualPower && selectedEquipment.power > 0) && (
+                      <span className="text-xs bg-blue-900 text-blue-200 px-2 py-0.5 rounded">
+                        単一電源
+                      </span>
+                    )}
+                  </h4>
+                  
+                  <div className="space-y-3">
+                    {/* プライマリ電源 */}
                     <div className="space-y-2 p-2 border rounded border-gray-600">
-                      <label className="block text-sm font-medium">セカンダリ電源</label>
+                      <label className="block text-sm font-medium">プライマリ電源</label>
                       <select
-                        value={powerConnection.secondaryPduId || ''}
-                        onChange={(e) => onUpdatePowerConnection(selectedEquipment.id, 'secondaryPduId', e.target.value)}
+                        value={powerConnection.primaryPduId || ''}
+                        onChange={(e) => onUpdatePowerConnection(selectedEquipment.id, 'primaryPduId', e.target.value)}
                         className={`w-full p-2 border rounded text-sm ${inputBg}`}
                       >
                         <option value="">PDU未接続</option>
@@ -366,14 +349,14 @@ export const ModalsAndDialogs: React.FC<ModalsAndDialogsProps> = ({
                           </option>
                         ))}
                       </select>
-                      {powerConnection.secondaryPduId && (
+                      {powerConnection.primaryPduId && (
                         <select
-                          value={powerConnection.secondaryPduOutlet || ''}
-                          onChange={(e) => onUpdatePowerConnection(selectedEquipment.id, 'secondaryPduOutlet', parseInt(e.target.value))}
+                          value={powerConnection.primaryPduOutlet || ''}
+                          onChange={(e) => onUpdatePowerConnection(selectedEquipment.id, 'primaryPduOutlet', parseInt(e.target.value))}
                           className={`w-full p-2 border rounded text-sm ${inputBg}`}
                         >
                           <option value="">コンセント選択</option>
-                          {powerSources.pdus.find(p => p.id === powerConnection.secondaryPduId)?.powerOutlets?.map(outlet => (
+                          {powerSources.pdus.find(p => p.id === powerConnection.primaryPduId)?.powerOutlets?.map(outlet => (
                             <option key={outlet.id} value={outlet.id} disabled={outlet.inUse && outlet.connectedEquipmentId !== selectedEquipment.id}>
                               コンセント #{outlet.id} ({outlet.type}) {outlet.inUse ? `(使用中: ${outlet.connectedEquipmentId === selectedEquipment.id ? 'この機器' : '他機器'})` : ''}
                             </option>
@@ -381,62 +364,95 @@ export const ModalsAndDialogs: React.FC<ModalsAndDialogsProps> = ({
                         </select>
                       )}
                     </div>
-                  )}
 
-                  {/* 電源状態表示 */}
-                  <div className="p-2 rounded bg-gray-700">
-                    <div className="flex items-center gap-2 text-sm">
-                      {(() => {
-                        const hasPrimaryConnection = powerConnection.primaryPduId && powerConnection.primaryPduOutlet;
-                        const hasSecondaryConnection = powerConnection.secondaryPduId && powerConnection.secondaryPduOutlet;
-                        
-                        if (selectedEquipment.dualPower) {
-                          // 冗長電源機器の場合：両方の電源接続が必要
-                          if (hasPrimaryConnection && hasSecondaryConnection) {
-                            return (
-                              <>
-                                <CheckCircle size={14} className="text-green-400" />
-                                <span className="text-gray-200">電源設定完了（冗長構成）</span>
-                              </>
-                            );
-                          } else if (hasPrimaryConnection || hasSecondaryConnection) {
-                            return (
-                              <>
-                                <AlertTriangle size={14} className="text-yellow-400" />
-                                <span className="text-gray-300">冗長電源が未設定です</span>
-                              </>
-                            );
+                    {/* セカンダリ電源（冗長電源機器のみ） */}
+                    {selectedEquipment.dualPower && (
+                      <div className="space-y-2 p-2 border rounded border-gray-600">
+                        <label className="block text-sm font-medium">セカンダリ電源</label>
+                        <select
+                          value={powerConnection.secondaryPduId || ''}
+                          onChange={(e) => onUpdatePowerConnection(selectedEquipment.id, 'secondaryPduId', e.target.value)}
+                          className={`w-full p-2 border rounded text-sm ${inputBg}`}
+                        >
+                          <option value="">PDU未接続</option>
+                          {powerSources.pdus.map(pdu => (
+                            <option key={pdu.id} value={pdu.id}>
+                              {pdu.name}
+                            </option>
+                          ))}
+                        </select>
+                        {powerConnection.secondaryPduId && (
+                          <select
+                            value={powerConnection.secondaryPduOutlet || ''}
+                            onChange={(e) => onUpdatePowerConnection(selectedEquipment.id, 'secondaryPduOutlet', parseInt(e.target.value))}
+                            className={`w-full p-2 border rounded text-sm ${inputBg}`}
+                          >
+                            <option value="">コンセント選択</option>
+                            {powerSources.pdus.find(p => p.id === powerConnection.secondaryPduId)?.powerOutlets?.map(outlet => (
+                              <option key={outlet.id} value={outlet.id} disabled={outlet.inUse && outlet.connectedEquipmentId !== selectedEquipment.id}>
+                                コンセント #{outlet.id} ({outlet.type}) {outlet.inUse ? `(使用中: ${outlet.connectedEquipmentId === selectedEquipment.id ? 'この機器' : '他機器'})` : ''}
+                              </option>
+                            ))}
+                          </select>
+                        )}
+                      </div>
+                    )}
+
+                    {/* 電源状態表示 */}
+                    <div className="p-2 rounded bg-gray-700">
+                      <div className="flex items-center gap-2 text-sm">
+                        {(() => {
+                          const hasPrimaryConnection = powerConnection.primaryPduId && powerConnection.primaryPduOutlet;
+                          const hasSecondaryConnection = powerConnection.secondaryPduId && powerConnection.secondaryPduOutlet;
+                          
+                          if (selectedEquipment.dualPower) {
+                            // 冗長電源機器の場合：両方の電源接続が必要
+                            if (hasPrimaryConnection && hasSecondaryConnection) {
+                              return (
+                                <>
+                                  <CheckCircle size={14} className="text-green-400" />
+                                  <span className="text-gray-200">電源設定完了（冗長構成）</span>
+                                </>
+                              );
+                            } else if (hasPrimaryConnection || hasSecondaryConnection) {
+                              return (
+                                <>
+                                  <AlertTriangle size={14} className="text-yellow-400" />
+                                  <span className="text-gray-300">冗長電源が未設定です</span>
+                                </>
+                              );
+                            } else {
+                              return (
+                                <>
+                                  <AlertTriangle size={14} className="text-red-400" />
+                                  <span className="text-gray-300">電源が未接続です</span>
+                                </>
+                              );
+                            }
                           } else {
-                            return (
-                              <>
-                                <AlertTriangle size={14} className="text-yellow-400" />
-                                <span className="text-gray-300">電源設定が不完全です</span>
-                              </>
-                            );
+                            // 単一電源機器の場合：プライマリ電源のみ必要
+                            if (hasPrimaryConnection) {
+                              return (
+                                <>
+                                  <CheckCircle size={14} className="text-green-400" />
+                                  <span className="text-gray-200">電源設定完了</span>
+                                </>
+                              );
+                            } else {
+                              return (
+                                <>
+                                  <AlertTriangle size={14} className="text-red-400" />
+                                  <span className="text-gray-300">電源が未接続です</span>
+                                </>
+                              );
+                            }
                           }
-                        } else {
-                          // 単一電源機器の場合：プライマリ電源のみ必要
-                          if (hasPrimaryConnection) {
-                            return (
-                              <>
-                                <CheckCircle size={14} className="text-green-400" />
-                                <span className="text-gray-200">電源設定完了</span>
-                              </>
-                            );
-                          } else {
-                            return (
-                              <>
-                                <AlertTriangle size={14} className="text-yellow-400" />
-                                <span className="text-gray-300">電源設定が不完全です</span>
-                              </>
-                            );
-                          }
-                        }
-                      })()}
+                        })()}
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
+              )}
             </div>
           )}
 

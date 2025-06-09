@@ -237,6 +237,14 @@ export interface PowerSources {
   all: Equipment[];
 }
 
+// 電源状態の型定義
+export interface PowerStatus {
+  status: 'ok' | 'warning' | 'error' | 'not-required';
+  icon: string;
+  color: string;
+  message: string;
+}
+
 export interface LayoutDimensions {
   rackCount: number;
   rackWidth: number;

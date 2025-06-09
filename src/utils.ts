@@ -1,4 +1,4 @@
-import { Rack, Equipment, RackStats, TotalStats, CoolingStats, CageNutStatus, PowerSources } from './types';
+import { Rack, Equipment, RackStats, TotalStats, CoolingStats, CageNutStatus, PowerSources, PowerStatus } from './types';
 import { rackTypes, BASE_UNIT_HEIGHT, BASE_FONT_SIZE, BASE_MARGIN_LEFT, BASE_CAGE_NUT_SIZE } from './constants';
 import { placementManager } from './services/EquipmentPlacementManager';
 
@@ -362,26 +362,63 @@ export const getUnitNumClass = (): string => 'text-gray-300';
 /**
  * 電源状態チェック
  */
-export const getPowerStatus = (equipment: Equipment, powerConnections: any) => {
+export const getPowerStatus = (equipment: Equipment, powerConnections: any): PowerStatus => {
   const connections = powerConnections[equipment.id] || {};
   
+  // 電源不要機器の場合
+  if (!equipment.power || equipment.power === 0) {
+    return {
+      status: 'not-required',
+      icon: 'Minus',
+      color: 'text-gray-400',
+      message: '電源接続不要'
+    };
+  }
+  
+  // 冗長電源搭載機器の場合
   if (equipment.dualPower) {
     const hasPrimary = connections.primaryPduId && connections.primaryPduOutlet;
     const hasSecondary = connections.secondaryPduId && connections.secondaryPduOutlet;
     
     if (hasPrimary && hasSecondary) {
-      return { status: 'ok', icon: 'CircleCheck', color: 'text-green-400' };
+      return {
+        status: 'ok',
+        icon: 'CircleCheck',
+        color: 'text-green-400',
+        message: '電源設定完了（冗長構成）'
+      };
     } else if (hasPrimary || hasSecondary) {
-      return { status: 'warning', icon: 'AlertCircle', color: 'text-yellow-400' };
+      return {
+        status: 'warning',
+        icon: 'AlertCircle',
+        color: 'text-yellow-400',
+        message: '冗長電源が未設定です'
+      };
     } else {
-      return { status: 'error', icon: 'XCircle', color: 'text-red-500' };
+      return {
+        status: 'error',
+        icon: 'XCircle',
+        color: 'text-red-500',
+        message: '電源が未接続です'
+      };
     }
   } else {
+    // 単一電源機器の場合
     const hasPrimary = connections.primaryPduId && connections.primaryPduOutlet;
     if (hasPrimary) {
-      return { status: 'ok', icon: 'CircleCheck', color: 'text-green-400' };
+      return {
+        status: 'ok',
+        icon: 'CircleCheck',
+        color: 'text-green-400',
+        message: '電源設定完了'
+      };
     } else {
-      return { status: 'error', icon: 'XCircle', color: 'text-red-500' };
+      return {
+        status: 'error',
+        icon: 'XCircle',
+        color: 'text-red-500',
+        message: '電源が未接続です'
+      };
     }
   }
 };
