@@ -259,10 +259,10 @@ export const networkEquipment: Equipment[] = [
       power: 'PoE+対応',
       management: 'Web/CLI/SNMP'
     },
-    mountingNotes: 'スライドレール必須。前面アクセス要確保。',
-    mountingMethod: 'rails',
-    requiresRails: true,
-    requiresCageNuts: false
+    mountingNotes: 'ケージナット固定。前面アクセス要確保。',
+    mountingMethod: 'cage-nuts',
+    requiresRails: false,
+    requiresCageNuts: true
   },
   {
     id: 'switch-2u',
@@ -346,10 +346,10 @@ export const networkEquipment: Equipment[] = [
       vpn: 'SSL-VPN/IPsec対応',
       management: '統合管理コンソール'
     },
-    mountingNotes: 'スライドレール必須。セキュリティ機器につき物理アクセス制限要検討。',
-    mountingMethod: 'rails',
-    requiresRails: true,
-    requiresCageNuts: false
+    mountingNotes: 'ケージナット固定。セキュリティ機器につき物理アクセス制限要検討。',
+    mountingMethod: 'cage-nuts',
+    requiresRails: false,
+    requiresCageNuts: true
   },
   {
     id: 'firewall-2u',
@@ -407,10 +407,10 @@ export const networkEquipment: Equipment[] = [
       features: 'iRules/ASM/APM/GTM対応',
       platform: 'TMOS OS搭載'
     },
-    mountingNotes: 'スライドレール必須。冗長構成必須。管理・データネットワーク分離推奨。',
-    mountingMethod: 'rails',
-    requiresRails: true,
-    requiresCageNuts: false
+    mountingNotes: 'ケージナット固定。冗長構成必須。管理・データネットワーク分離推奨。',
+    mountingMethod: 'cage-nuts',
+    requiresRails: false,
+    requiresCageNuts: true
   },
   {
     id: 'load-balancer-2u',
@@ -595,10 +595,10 @@ export const storageEquipment: Equipment[] = [
       network: '10GbE×2',
       management: 'Web管理画面'
     },
-    mountingNotes: 'スライドレール必須。前面アクセス要確保。',
-    mountingMethod: 'rails',
-    requiresRails: true,
-    requiresCageNuts: false
+    mountingNotes: 'ケージナット固定。前面アクセス要確保。',
+    mountingMethod: 'cage-nuts',
+    requiresRails: false,
+    requiresCageNuts: true
   },
   {
     id: 'storage-2u',
@@ -829,7 +829,7 @@ export const powerEquipment: Equipment[] = [
       management: 'ネットワーク管理カード対応',
       protection: 'サージ保護、ノイズフィルタ'
     },
-    mountingNotes: 'スライドレール必須。バッテリー交換時の前面アクセス要確保。',
+    mountingNotes: 'スライドレール必須。重量のため2人作業推奨。バッテリー交換時の前面アクセス要確保。',
     mountingMethod: 'rails',
     requiresRails: true,
     requiresCageNuts: false
