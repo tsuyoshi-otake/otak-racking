@@ -27,6 +27,7 @@ export interface Equipment {
   mountingMethod?: 'rails' | 'cage-nuts' | 'direct';
   requiresRails?: boolean;
   requiresCageNuts?: boolean;
+  requiresShelf?: boolean;
   
   // 特殊プロパティ
   pduType?: string;
