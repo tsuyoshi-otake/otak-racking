@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Maximize, Minimize } from 'lucide-react';
 import { Equipment, PhysicalStructure, Rack } from './types';
 import { useRackState } from './hooks/useRackState';
-import { useDragAndDrop, DraggedItem, HoveredInfo } from './hooks/useDragAndDrop';
+import { useDragAndDrop, DraggedItem } from './hooks/useDragAndDrop';
 import { LeftSidebar } from './components/LeftSidebar'; // Sidebar を LeftSidebar に変更
 import { RightSidebar } from './components/RightSidebar'; // RightSidebar を追加
 import { RackView } from './components/RackView';
@@ -10,7 +10,6 @@ import { ModalsAndDialogs, InfoModalProps, ConfirmModalProps } from './component
 import { ShareButton } from './components/ShareButton';
 import { calculateLayoutDimensions } from './utils';
 import { loadAppState, saveAppState } from './utils/localStorage';
-import { loadDataFromUrl } from './utils/shareUtils';
 
 export type RackViewPerspective = 'front' | 'rear' | 'left' | 'right';
 
@@ -148,7 +147,6 @@ function App() {
   // ドラッグ&ドロップ
   const {
     draggedItem,
-    draggedEquipmentInfo,
     hoveredInfo,
     handleDragStart,
     handleEquipmentDragStart,

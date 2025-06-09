@@ -3,7 +3,7 @@ import { Rack, Equipment, FloorSettings, createDefaultPhysicalStructure, RailTyp
 import { deepCopy, autoInstallCageNuts } from '../utils';
 import { rackTypes } from '../constants';
 import { placementManager } from '../services/EquipmentPlacementManager';
-import { loadAppState, saveAppState } from '../utils/localStorage';
+import { loadAppState } from '../utils/localStorage';
 import { loadDataFromUrl } from '../utils/shareUtils';
 
 // 初期ラック設定
@@ -152,12 +152,13 @@ export const useRackState = () => {
 
   // 状態変更時にLocalStorageに保存
   useEffect(() => {
-    const stateToSave = {
-      racks,
-      selectedRack,
-      floorSettings,
-      isProMode,
-    };
+    // saveAppState処理はApp.tsxに移動したため、このeffectは不要
+    // const stateToSave = {
+    //   racks,
+    //   selectedRack,
+    //   floorSettings,
+    //   isProMode,
+    // };
     // saveAppState(stateToSave); // App.tsx に移動したためコメントアウト
   }, [racks, selectedRack, floorSettings, isProMode]);
 

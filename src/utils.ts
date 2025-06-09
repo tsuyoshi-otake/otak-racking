@@ -6,7 +6,6 @@ import { placementManager } from './services/EquipmentPlacementManager';
  * 個別ラック統計計算（メモ化対応）
  */
 const rackStatsCache = new WeakMap<Rack, { stats: RackStats; version: number }>();
-let rackVersion = 0;
 
 export const calculateRackStats = (rack: Rack): RackStats => {
   // キャッシュチェック

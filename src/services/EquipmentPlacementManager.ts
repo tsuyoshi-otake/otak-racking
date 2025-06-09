@@ -10,9 +10,7 @@ import {
   PlacementOptions,
   PlacementResult,
   PlacementChange,
-  EquipmentPlacement,
-  RackOccupancy,
-  PlacementState
+  RackOccupancy
 } from '../types';
 import { rackTypes } from '../constants';
 
