@@ -532,3 +532,30 @@ export interface PlacementState {
   lastModified: Date;
 }
 export type RackViewPerspective = 'front' | 'rear' | 'left' | 'right';
+
+// 共有機能用の型定義
+export interface ShareableData {
+  version: string;
+  timestamp: number;
+  racks: Record<string, Rack>;
+  floorSettings: FloorSettings;
+  selectedRack: string;
+  activeViewMode: string | null;
+  rackViewPerspective: RackViewPerspective;
+  isProMode: boolean;
+  zoomLevel: number;
+}
+
+export interface CompressionStats {
+  original: number;
+  compressed: number;
+  ratio: number;
+  improvement: number;
+}
+
+export interface ShareResult {
+  success: boolean;
+  url?: string;
+  error?: string;
+  stats?: CompressionStats;
+}

@@ -7,8 +7,10 @@ import { LeftSidebar } from './components/LeftSidebar'; // Sidebar を LeftSideb
 import { RightSidebar } from './components/RightSidebar'; // RightSidebar を追加
 import { RackView } from './components/RackView';
 import { ModalsAndDialogs, InfoModalProps, ConfirmModalProps } from './components/ModalsAndDialogs';
+import { ShareButton } from './components/ShareButton';
 import { calculateLayoutDimensions } from './utils';
 import { loadAppState, saveAppState } from './utils/localStorage';
+import { loadDataFromUrl } from './utils/shareUtils';
 
 export type RackViewPerspective = 'front' | 'rear' | 'left' | 'right';
 
@@ -79,6 +81,7 @@ function App() {
     addPduToSlot,
     removePdu,
     moveEquipment,
+    isSharedDataLoaded,
   } = useRackState();
   // モーダル表示関数（メモ化）
   const showInfoModal = useCallback((title: string, message: string) => {
@@ -119,6 +122,16 @@ function App() {
     };
     saveAppState(appState);
   }, [zoomLevel, selectedRack, activeViewMode, rackViewPerspective, racks, floorSettings, isProMode]);
+
+  // 共有データが読み込まれた場合の通知
+  useEffect(() => {
+    if (isSharedDataLoaded) {
+      showInfoModal(
+        '共有データを読み込みました',
+        '共有URLからラック設計データを読み込みました。\n\n設計を変更する場合は、新しい共有URLを生成してください。'
+      );
+    }
+  }, [isSharedDataLoaded, showInfoModal]);
 
   // 選択中の機器情報が更新されたら、モーダルに表示されている情報も更新する
   useEffect(() => {
@@ -282,6 +295,16 @@ function App() {
     <div className="min-h-screen dark">
       <div className="min-h-screen bg-gray-800 text-gray-100">
         <div className="fixed top-4 right-4 z-50 flex items-center gap-2">
+          <ShareButton
+            racks={racks}
+            floorSettings={floorSettings}
+            selectedRack={selectedRack}
+            activeViewMode={activeViewMode}
+            rackViewPerspective={rackViewPerspective}
+            isProMode={isProMode}
+            zoomLevel={zoomLevel}
+            onShowModal={showInfoModal}
+          />
           <button
             onClick={toggleFullscreen}
             className="p-2 rounded-full bg-gray-700 text-gray-300 hover:bg-gray-600 focus:outline-none"

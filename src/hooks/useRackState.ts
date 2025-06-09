@@ -4,6 +4,7 @@ import { deepCopy, autoInstallCageNuts } from '../utils';
 import { rackTypes } from '../constants';
 import { placementManager } from '../services/EquipmentPlacementManager';
 import { loadAppState, saveAppState } from '../utils/localStorage';
+import { loadDataFromUrl } from '../utils/shareUtils';
 
 // 初期ラック設定
 const createInitialRack = (id: string, name: string, rackCount: number): Rack => ({
@@ -107,8 +108,10 @@ const initialFloorSettings: FloorSettings = {
 };
 
 export const useRackState = () => {
-  // LocalStorageから初期状態を読み込み
-  const loadedState = loadAppState();
+  // URLからの共有データを優先的に読み込み
+  const sharedData = loadDataFromUrl();
+  const loadedState = sharedData || loadAppState();
+  const [isSharedDataLoaded] = useState(() => !!sharedData);
   
   const [racks, setRacks] = useState<Record<string, Rack>>(() => {
     if (loadedState.racks && Object.keys(loadedState.racks).length > 0) {
@@ -137,6 +140,15 @@ export const useRackState = () => {
   });
 
   const [isProMode, setIsProMode] = useState<boolean>(() => loadedState.isProMode || false);
+
+  // 共有データが読み込まれた場合、URLパラメータをクリア
+  useEffect(() => {
+    if (sharedData) {
+      const url = new URL(window.location.href);
+      url.searchParams.delete('data');
+      window.history.replaceState({}, '', url.toString());
+    }
+  }, [sharedData]);
 
   // 状態変更時にLocalStorageに保存
   useEffect(() => {
@@ -944,6 +956,7 @@ export const useRackState = () => {
     selectedRack,
     floorSettings,
     isProMode,
+    isSharedDataLoaded,
     
     // Actions
     setSelectedRack,
