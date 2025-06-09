@@ -267,6 +267,37 @@ export const mountingEquipment: Equipment[] = [
 // その他機器
 export const otherEquipment: Equipment[] = [
   {
+    id: 'lcd-console-1u',
+    name: '1U LCDコンソール',
+    height: 1,
+    depth: 650,
+    power: 45,
+    heat: 154,
+    weight: 7,
+    type: 'console',
+    role: 'monitoring',
+    color: '#374151',
+    opacity: 0,
+    dualPower: false,
+    airflow: 'front-to-rear',
+    cfm: 20,
+    heatGeneration: 154,
+    description: 'KVM機能付きLCDコンソール。引き出し式でキーボード・マウス一体型。サーバー管理とメンテナンス作業用。',
+    specifications: {
+      display: '17インチ TFT液晶',
+      resolution: '1280×1024 SXGA',
+      kvm: 'PS/2・USB対応',
+      ports: '最大16台接続',
+      keyboard: '日本語109キー',
+      mouse: 'タッチパッド内蔵',
+      rail: 'スライドレール付属'
+    },
+    mountingNotes: 'スライドレール必須。引き出し時の前面スペース要確保。',
+    mountingMethod: 'rails',
+    requiresRails: true,
+    requiresCageNuts: false
+  },
+  {
     id: 'blank-panel-1u',
     name: '1Uブランクパネル',
     height: 1,

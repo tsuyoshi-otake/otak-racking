@@ -9,7 +9,8 @@ import {
   Wrench,
   Info,
   Power,
-  Move
+  Move,
+  Monitor
 } from 'lucide-react';
 import { Equipment } from '../types';
 import {
@@ -117,6 +118,8 @@ export const EquipmentLibrary: React.FC<EquipmentLibraryProps> = ({
         return <Zap size={size} className={iconClass} />;
       case 'power':
         return <Activity size={size} className={iconClass} />;
+      case 'console':
+        return <Monitor size={size} className={iconClass} />;
       case 'mounting':
         return <Wrench size={size} className={iconClass} />;
       case 'rail':
