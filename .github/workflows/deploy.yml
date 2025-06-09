@@ -36,7 +36,9 @@ jobs:
       run: npm test -- --coverage --watchAll=false
       
     - name: Build
-      run: npm run build
+      run: |
+        echo "REACT_APP_COMMIT_HASH=$(git rev-parse HEAD)" > .env
+        npm run build
       
     - name: Setup Pages
       uses: actions/configure-pages@v4
