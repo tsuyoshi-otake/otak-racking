@@ -158,7 +158,7 @@ export const networkEquipment: Equipment[] = [
   },
   {
     id: 'load-balancer',
-    name: 'F5 BIG-IP',
+    name: 'ロードバランサー',
     height: 1,
     depth: 450,
     power: 200,
