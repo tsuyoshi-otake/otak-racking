@@ -39,7 +39,7 @@ export const EquipmentLibrary: React.FC<EquipmentLibraryProps> = ({
     >
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          {getEquipmentIcon(item.type, item.id)}
+          {getEquipmentIcon(item.type)}
           <span className="font-medium text-xs">{item.name}</span>
           <button
             onClick={(e) => {
@@ -99,21 +99,9 @@ export const EquipmentLibrary: React.FC<EquipmentLibraryProps> = ({
     </div>
   );
 
-  const getEquipmentIcon = (type: string, equipmentId?: string) => {
+  const getEquipmentIcon = (type: string) => {
     const iconClass = 'text-gray-400';
     const size = 14;
-
-    // BIG-IP専用アイコン
-    if (equipmentId === 'load-balancer') {
-      return (
-        <div className="relative flex items-center justify-center">
-          <Network size={size} className={iconClass} />
-          <div className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-blue-500 rounded-full text-xs flex items-center justify-center">
-            <span className="text-white text-[6px] font-bold">F5</span>
-          </div>
-        </div>
-      );
-    }
 
     switch (type) {
       case 'server':

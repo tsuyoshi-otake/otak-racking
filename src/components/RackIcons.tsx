@@ -25,20 +25,8 @@ import {
 } from 'lucide-react';
 
 // アイコン取得関数
-export const getEquipmentIcon = (type: string, size: number, color: string = "text-white", equipmentId?: string) => {
+export const getEquipmentIcon = (type: string, size: number, color: string = "text-white") => {
   const iconProps = { size, className: color };
-  
-  // BIG-IP専用アイコン
-  if (equipmentId === 'load-balancer') {
-    return (
-      <div className="relative flex items-center justify-center">
-        <Network {...iconProps} />
-        <div className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-blue-500 rounded-full text-xs flex items-center justify-center">
-          <span className="text-white text-[6px] font-bold">F5</span>
-        </div>
-      </div>
-    );
-  }
   
   switch (type) {
     case 'server': return <Server {...iconProps} />;
