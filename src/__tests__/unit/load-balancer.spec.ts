@@ -1,7 +1,7 @@
 import { describe, it, expect } from '@jest/globals';
-import { calculateRackStats, canPlaceEquipment } from '../utils';
-import { networkEquipment } from '../constants';
-import { Rack, Equipment, createDefaultPhysicalStructure } from '../types';
+import { calculateRackStats, canPlaceEquipment } from '../../utils';
+import { networkEquipment } from '../../constants';
+import { Rack, Equipment, createDefaultPhysicalStructure } from '../../types';
 
 describe('負荷分散装置のテスト', () => {
   const createTestRack = (): Rack => ({
@@ -153,9 +153,9 @@ describe('負荷分散装置のテスト', () => {
         isMainUnit: true
       };
       
-      // 2Uに1Uサーバー配置のテスト（既存のサーバー機器を使用）
+      // 2Uに1Uサーバー配置のテスト
       const server1u: Equipment = {
-        id: 'server-1u-test',
+        id: 'server-1u',
         name: '1Uサーバー',
         height: 1,
         depth: 650,
@@ -163,13 +163,25 @@ describe('負荷分散装置のテスト', () => {
         heat: 1024,
         weight: 15,
         type: 'server',
-        color: '#4F46E5',
+        role: 'compute',
+        color: '#374151',
+        opacity: 100,
         dualPower: true,
-        requiresRails: true,
         airflow: 'front-to-rear',
         cfm: 65,
         heatGeneration: 1024,
-        description: 'テスト用1Uサーバー'
+        description: '汎用的なラックマウントサーバー。Webサーバーやアプリケーションサーバーとして広く使用される。前面から背面へのエアフローで効率的な冷却を実現。',
+        specifications: {
+          cpu: '最大2ソケット',
+          memory: '最大512GB',
+          storage: '2.5インチ×4台',
+          network: 'Gigabit×2, 10GbE対応',
+          powerSupply: '冗長電源対応'
+        },
+        mountingNotes: 'スライドレール必須。ケーブルアーム推奨。',
+        mountingMethod: 'rails',
+        requiresRails: true,
+        requiresCageNuts: false
       };
       
       const result = canPlaceEquipment(rack, 2, server1u);

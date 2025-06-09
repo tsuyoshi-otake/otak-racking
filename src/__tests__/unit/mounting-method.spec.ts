@@ -1,7 +1,7 @@
 import { describe, it, test, expect, beforeEach } from '@jest/globals';
-import { Equipment } from '../types';
-import { EquipmentPlacementManager } from '../services/EquipmentPlacementManager';
-import { rackTypes } from '../constants';
+import { Equipment } from '../../types';
+import { EquipmentPlacementManager } from '../../services/EquipmentPlacementManager';
+import { rackTypes } from '../../constants';
 
 describe('機器取り付け方法テスト', () => {
   let placementManager: EquipmentPlacementManager;
@@ -70,38 +70,6 @@ describe('機器取り付け方法テスト', () => {
       expect(result.validation.warnings[0].message).toContain('スライドレールが必要');
     });
 
-    test('2Uサーバーはレールが必要な警告が表示される', async () => {
-      const server: Equipment = {
-        id: 'server-2u',
-        name: '2Uサーバー',
-        height: 2,
-        depth: 700,
-        power: 500,
-        heat: 1707,
-        weight: 25,
-        type: 'server',
-        color: '#7C3AED',
-        dualPower: true,
-        airflow: 'front-to-rear',
-        cfm: 120,
-        heatGeneration: 1707,
-        description: 'テスト用2Uサーバー',
-        mountingMethod: 'rails',
-        requiresRails: true,
-        requiresCageNuts: false
-      };
-
-      const result = await placementManager.placeEquipment(
-        testRack,
-        1,
-        server,
-        { validateOnly: true }
-      );
-
-      expect(result.success).toBe(true);
-      expect(result.validation.warnings).toHaveLength(1);
-      expect(result.validation.warnings[0].code).toBe('RAILS_REQUIRED');
-    });
   });
 
   describe('ネットワーク機器 - ケージナット取り付け', () => {

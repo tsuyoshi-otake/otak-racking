@@ -93,94 +93,7 @@ export const serverEquipment: Equipment[] = [
     mountingMethod: 'rails',
     requiresRails: true,
     requiresCageNuts: false
-  },
-  {
-    id: 'server-2u',
-    name: '2Uサーバー',
-    height: 2,
-    depth: 700,
-    power: 500,
-    heat: 1707,
-    weight: 25,
-    type: 'server',
-    role: 'compute',
-    color: '#374151',
-    opacity: 100,
-    dualPower: true,
-    airflow: 'front-to-rear',
-    cfm: 120,
-    heatGeneration: 1707,
-    description: '高性能サーバー用。データベースサーバーや仮想化基盤として使用。拡張性に優れ、多くのドライブベイを搭載可能。',
-    specifications: {
-      cpu: '最大2ソケット',
-      memory: '最大1TB',
-      storage: '2.5インチ×8台または3.5インチ×4台',
-      network: 'Gigabit×4, 10GbE×2',
-      expansion: 'PCIeスロット×3'
-    },
-    mountingNotes: '重量があるため、しっかりとしたレール必須。',
-    mountingMethod: 'rails',
-    requiresRails: true,
-    requiresCageNuts: false
-  },
-  {
-    id: 'server-4u',
-    name: '4Uサーバー',
-    height: 4,
-    depth: 750,
-    power: 800,
-    heat: 2730,
-    weight: 40,
-    type: 'server',
-    role: 'compute',
-    color: '#374151',
-    opacity: 100,
-    dualPower: true,
-    airflow: 'front-to-rear',
-    cfm: 200,
-    heatGeneration: 2730,
-    description: '高密度ストレージサーバー。大容量データベースやファイルサーバー用。多数のドライブベイと高い拡張性を提供。',
-    specifications: {
-      cpu: '最大4ソケット',
-      memory: '最大2TB',
-      storage: '3.5インチ×12台',
-      network: '10GbE×4, InfiniBand対応',
-      expansion: 'PCIeスロット×6'
-    },
-    mountingNotes: '大型・重量機器。設置前に床耐荷重要確認。',
-    mountingMethod: 'rails',
-    requiresRails: true,
-    requiresCageNuts: false
-  },
-{
-      id: 'blade-chassis',
-      name: 'ブレードシャーシ',
-      height: 10,
-      depth: 800,
-      power: 2000,
-      heat: 6826,
-      weight: 80,
-      type: 'server',
-      role: 'compute',
-      color: '#374151',
-      opacity: 100,
-      dualPower: true,
-      airflow: 'front-to-rear',
-      cfm: 450,
-      heatGeneration: 6826,
-      description: '高密度仮想化環境用。最大16枚のブレードサーバーを収容可能。共有電源・冷却システムで効率的な運用を実現。',
-      specifications: {
-        blades: '最大16枚',
-        power: '冗長電源×6',
-        cooling: '可変速ファン×8',
-        network: '内蔵スイッチ対応',
-        management: '統合管理コンソール'
-      },
-      mountingNotes: '専用レール必須。設置前配線計画要検討。',
-      mountingMethod: 'rails',
-      requiresRails: true,
-      requiresCageNuts: false
-    },
+  }
 ];
 
 // ネットワーク機器
@@ -243,35 +156,6 @@ export const networkEquipment: Equipment[] = [
     requiresRails: true,
     requiresCageNuts: false
   },
-{
-      id: 'core-switch',
-      name: 'コアスイッチ',
-      height: 3,
-      depth: 500,
-      power: 400,
-      heat: 1365,
-      weight: 20,
-      type: 'network',
-      role: 'network',
-      color: '#374151',
-      opacity: 100,
-      dualPower: true,
-      airflow: 'front-to-rear',
-      cfm: 150,
-      heatGeneration: 1365,
-      description: 'データセンターコア用高性能スイッチ。高スループットと低遅延を実現。モジュラー設計で柔軟な拡張が可能。',
-      specifications: {
-        capacity: '最大3.2Tbps',
-        ports: '10GbE×48, 40GbE×8',
-        latency: '1μs未満',
-        redundancy: '冗長電源・制御部',
-        modules: '拡張モジュール対応'
-      },
-      mountingNotes: '重要機器につき耐震対策必須。',
-      mountingMethod: 'cage-nuts',
-      requiresRails: false,
-      requiresCageNuts: true
-    },
   {
     id: 'firewall',
     name: 'ファイアウォール',
@@ -335,64 +219,7 @@ export const networkEquipment: Equipment[] = [
 
 // ストレージ機器
 export const storageEquipment: Equipment[] = [
-  {
-    id: 'storage-2u',
-    name: '2Uストレージ',
-    height: 2,
-    depth: 700,
-    power: 400,
-    heat: 1365,
-    weight: 30,
-    type: 'storage',
-    role: 'storage',
-    color: '#374151',
-    opacity: 100,
-    dualPower: true,
-    airflow: 'front-to-rear',
-    cfm: 110,
-    heatGeneration: 1365,
-    description: '汎用ストレージアレイ。SASドライブを最大12本搭載可能。RAID構成でデータ冗長化を実現。',
-    specifications: {
-      drives: '2.5インチSAS×12',
-      capacity: '最大24TB',
-      raid: 'RAID0/1/5/6/10',
-      interface: 'FC/iSCSI/SAS',
-      controller: '冗長コントローラー'
-    },
-    mountingNotes: 'ドライブ交換頻度を考慮し前面アクセス確保。',
-    mountingMethod: 'rails',
-    requiresRails: true,
-    requiresCageNuts: false
-  },
-{
-      id: 'storage-4u',
-      name: '4Uストレージ',
-      height: 4,
-      depth: 750,
-      power: 600,
-      heat: 2048,
-      weight: 50,
-      type: 'storage',
-      role: 'storage',
-      color: '#374151',
-      opacity: 100,
-      dualPower: true,
-      airflow: 'front-to-rear',
-      cfm: 180,
-      heatGeneration: 2048,
-      description: '大容量ストレージシステム。3.5インチドライブ24本搭載で最大容量を実現。',
-      specifications: {
-        drives: '3.5インチSAS×24',
-        capacity: '最大480TB',
-        raid: '全RAIDレベル対応',
-        snapshot: 'スナップショット機能',
-        replication: 'リモートレプリケーション'
-      },
-      mountingNotes: '大容量・重量機器。床荷重要確認。',
-      mountingMethod: 'rails',
-      requiresRails: true,
-      requiresCageNuts: false
-    },
+  // 1U機器のみに限定するため、ストレージ機器は一旦空配列とする
 ];
 
 // 電源機器
@@ -427,67 +254,7 @@ export const powerEquipment: Equipment[] = [
     mountingMethod: 'direct',
     requiresRails: false,
     requiresCageNuts: false
-  },
-  {
-    id: 'ups-3u',
-    name: '3U UPS',
-    height: 3,
-    depth: 600,
-    power: 0,
-    heat: 341,
-    weight: 45,
-    type: 'ups',
-    role: 'power-source',
-    color: '#374151',
-    opacity: 100,
-    dualPower: false,
-    airflow: 'front-to-rear',
-    cfm: 85,
-    heatGeneration: 341,
-    description: 'ラックマウント型無停電電源装置。瞬停・停電対策用。1.5kVA容量。',
-    specifications: {
-      capacity: '1.5kVA/1.35kW',
-      backup: '5-10分（負荷率50%時）',
-      outlets: 'C13×8, C19×2',
-      battery: 'シール鉛蓄電池',
-      monitoring: 'SNMP/USB監視'
-    },
-    mountingNotes: 'バッテリー交換要スペース確保。',
-    mountingMethod: 'cage-nuts',
-    requiresRails: false,
-    requiresCageNuts: true
-  },
-{
-      id: 'pdu-vertical-smart',
-      name: '縦型スマートPDU',
-      height: 0,
-      depth: 100,
-      power: 0,
-      heat: 0,
-      weight: 7,
-      type: 'pdu',
-      role: 'power-distribution',
-      color: '#374151',
-      opacity: 100,
-      dualPower: false,
-      system: 'A',
-      airflow: 'natural',
-      cfm: 0,
-      heatGeneration: 0,
-      description: 'ネットワーク監視機能付き縦型PDU。リモートでの電力監視・制御が可能。',
-      specifications: {
-        outlets: 'C13×16, C19×6',
-        input: '単相100V 20A',
-        monitoring: 'アウトレット別監視',
-        network: 'SNMP/Web管理',
-        control: 'リモート電源制御'
-      },
-      mountingNotes: 'ネットワーク配線必要。管理用IPアドレス要設定。',
-      pduType: 'vertical-smart',
-      mountingMethod: 'direct',
-      requiresRails: false,
-      requiresCageNuts: false
-    },
+  }
 ];
 
 // 取り付け部品

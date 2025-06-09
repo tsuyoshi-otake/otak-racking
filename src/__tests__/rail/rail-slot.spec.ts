@@ -1,5 +1,5 @@
 import { describe, test, expect, beforeEach } from '@jest/globals';
-import { Rack, createDefaultPhysicalStructure } from '../types';
+import { Rack, createDefaultPhysicalStructure } from '../../types';
 
 describe('Rail Slot Display Tests', () => {
   let testRack: Rack;
@@ -48,16 +48,16 @@ describe('Rail Slot Display Tests', () => {
     testRack.rails[10] = {
       frontLeft: {
         installed: true,
-        railType: '2u',
+        railType: '1u',
         startUnit: 10,
-        endUnit: 11,
+        endUnit: 10,
         railId: 'rail-1'
       },
       frontRight: {
         installed: true,
-        railType: '2u',
+        railType: '1u',
         startUnit: 10,
-        endUnit: 11,
+        endUnit: 10,
         railId: 'rail-2'
       },
       rearLeft: {
@@ -81,50 +81,6 @@ describe('Rail Slot Display Tests', () => {
     expect(testRack.rails[10].frontRight.installed).toBe(true);
     expect(testRack.rails[10].rearLeft.installed).toBe(false);
     expect(testRack.rails[10].rearRight.installed).toBe(false);
-  });
-
-  test('複数ユニットにまたがるレール設定', () => {
-    // 4Uレールの設定
-    for (let unit = 20; unit <= 23; unit++) {
-      testRack.rails[unit] = {
-        frontLeft: {
-          installed: true,
-          railType: '4u',
-          startUnit: 20,
-          endUnit: 23,
-          railId: 'rail-4u-1'
-        },
-        frontRight: {
-          installed: true,
-          railType: '4u',
-          startUnit: 20,
-          endUnit: 23,
-          railId: 'rail-4u-2'
-        },
-        rearLeft: {
-          installed: true,
-          railType: '4u',
-          startUnit: 20,
-          endUnit: 23,
-          railId: 'rail-4u-3'
-        },
-        rearRight: {
-          installed: true,
-          railType: '4u',
-          startUnit: 20,
-          endUnit: 23,
-          railId: 'rail-4u-4'
-        }
-      };
-    }
-
-    // 各ユニットでレールが設定されていることを確認
-    for (let unit = 20; unit <= 23; unit++) {
-      expect(testRack.rails[unit].frontLeft.installed).toBe(true);
-      expect(testRack.rails[unit].frontLeft.railType).toBe('4u');
-      expect(testRack.rails[unit].frontLeft.startUnit).toBe(20);
-      expect(testRack.rails[unit].frontLeft.endUnit).toBe(23);
-    }
   });
 
   test('レールとケージナットの共存', () => {
@@ -174,7 +130,7 @@ describe('Rail Slot Display Tests', () => {
   });
 
   test('レールタイプの検証', () => {
-    const railTypes = ['1u', '2u', '4u'];
+    const railTypes = ['1u'];
     
     railTypes.forEach((railType, index) => {
       const unit = 30 + index * 5;

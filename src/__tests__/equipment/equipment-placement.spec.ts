@@ -1,6 +1,6 @@
 import { describe, it, expect } from '@jest/globals';
-import { canPlaceEquipment } from '../utils';
-import { Rack, Equipment, createDefaultPhysicalStructure } from '../types';
+import { canPlaceEquipment } from '../../utils';
+import { Rack, Equipment, createDefaultPhysicalStructure } from '../../types';
 
 describe('機器配置ロジック', () => {
   const createTestRack = (): Rack => ({
@@ -15,7 +15,7 @@ describe('機器配置ロジック', () => {
     mountingOptions: {},
     labels: {},
     cageNuts: {},
-    railInventory: {},
+    rails: {},
     partInventory: {},
     fans: { count: 4, rpm: 3000 },
     position: { row: 'A', column: 1 },
@@ -37,7 +37,7 @@ describe('機器配置ロジック', () => {
     type: 'server',
     color: '#7C3AED',
     dualPower: true,
-    needsRails: true,
+    requiresRails: true,
     airflow: 'front-to-rear',
     cfm: 120,
     heatGeneration: 1707,
@@ -55,7 +55,7 @@ describe('機器配置ロジック', () => {
     type: 'server',
     color: '#4F46E5',
     dualPower: true,
-    needsRails: true,
+    requiresRails: true,
     airflow: 'front-to-rear',
     cfm: 65,
     heatGeneration: 1024,
@@ -240,7 +240,7 @@ describe('機器配置ロジック', () => {
         type: 'shelf',
         color: '#64748B',
         dualPower: false,
-        needsRails: false,
+        requiresRails: false,
         airflow: 'natural',
         cfm: 0,
         heatGeneration: 0,
@@ -258,7 +258,7 @@ describe('機器配置ロジック', () => {
         type: 'console',
         color: '#374151',
         dualPower: false,
-        needsRails: false,
+        requiresRails: false,
         airflow: 'natural',
         cfm: 20,
         heatGeneration: 170,
@@ -276,8 +276,8 @@ describe('機器配置ロジック', () => {
         isMainUnit: true
       };
       
-      // 2Uにモニターを設置
-      const result2 = canPlaceEquipment(rack, 2, monitor);
+      // 3Uにモニターを設置
+      const result2 = canPlaceEquipment(rack, 3, monitor);
       expect(result2.canPlace).toBe(true);
     });
   });

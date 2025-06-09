@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from '@jest/globals';
-import { EquipmentPlacementManager } from '../services/EquipmentPlacementManager';
-import { Rack, Equipment } from '../types';
+import { EquipmentPlacementManager } from '../../services/EquipmentPlacementManager';
+import { Rack, Equipment } from '../../types';
 
 describe('EquipmentPlacementManager', () => {
   let manager: EquipmentPlacementManager;
@@ -288,8 +288,8 @@ describe('EquipmentPlacementManager', () => {
       expect(result1.success).toBe(true);
       expect(result1.updatedRack).toBeDefined();
       
-      // 2Uに神棚を設置
-      const result2 = await manager.placeEquipment(result1.updatedRack!, 2, kamidana);
+      // 3Uに神棚を設置
+      const result2 = await manager.placeEquipment(result1.updatedRack!, 3, kamidana);
       expect(result2.success).toBe(true);
     });
   });
@@ -419,14 +419,14 @@ describe('EquipmentPlacementManager', () => {
       
       // レールを設置
       rack.rails[10] = {
-        frontLeft: { installed: true, railType: '2u', startUnit: 10, endUnit: 11, railId: 'rail-1' },
-        frontRight: { installed: true, railType: '2u', startUnit: 10, endUnit: 11, railId: 'rail-1' },
+        frontLeft: { installed: true, railType: '1u', startUnit: 10, endUnit: 10, railId: 'rail-1' },
+        frontRight: { installed: true, railType: '1u', startUnit: 10, endUnit: 10, railId: 'rail-1' },
         rearLeft: { installed: false, railType: null, startUnit: null, endUnit: null, railId: null },
         rearRight: { installed: false, railType: null, startUnit: null, endUnit: null, railId: null }
       };
-      
+
       // 機器を追加
-      const server = create2UServer();
+      const server = create1UServer();
       await manager.placeEquipment(rack, 20, server);
       
       const result = await manager.clearAllEquipment(rack);

@@ -1,11 +1,11 @@
 import { describe, it, expect } from '@jest/globals';
-import { 
-  calculateRackStats, 
-  calculateCoolingStats, 
+import {
+  calculateRackStats,
+  calculateCoolingStats,
   calculateTotalStats,
-  getCageNutStatus 
-} from '../utils';
-import { Rack, Equipment } from '../types';
+  getCageNutStatus
+} from '../../utils';
+import { Rack, Equipment, createDefaultPhysicalStructure } from '../../types';
 
 describe('ラック統計計算', () => {
   const mockRack: Rack = {
@@ -35,13 +35,15 @@ describe('ラック統計計算', () => {
     mountingOptions: {},
     labels: {},
     cageNuts: {},
-    railInventory: {},
+    rails: {},
     partInventory: {},
     fans: { count: 4, rpm: 3000 },
     position: { row: 'A', column: 1 },
     cabling: { external: {}, overhead: {}, underfloor: {} },
     housing: { type: 'full', startUnit: 1, endUnit: 42, frontPanel: 'perforated', rearPanel: 'perforated' },
-    environment: { ambientTemp: 22, humidity: 45, pressureDiff: 0.2 }
+    environment: { ambientTemp: 22, humidity: 45, pressureDiff: 0.2 },
+    pduPlacements: [],
+    physicalStructure: createDefaultPhysicalStructure()
   };
 
   it('個別ラック統計を正しく計算する', () => {
@@ -78,27 +80,57 @@ describe('全体統計計算', () => {
       name: 'ラック1',
       type: '42u-standard',
       units: 42,
+      depth: 1000,
+      width: 600,
       equipment: {
         1: { power: 300, heat: 1024, weight: 15, height: 1, isMainUnit: true } as Equipment
-      }
+      },
+      powerConnections: {},
+      mountingOptions: {},
+      labels: {},
+      cageNuts: {},
+      rails: {},
+      partInventory: {},
+      fans: { count: 4, rpm: 3000 },
+      position: { row: 'A', column: 1 },
+      cabling: { external: {}, overhead: {}, underfloor: {} },
+      housing: { type: 'full', startUnit: 1, endUnit: 42, frontPanel: 'perforated', rearPanel: 'perforated' },
+      environment: { ambientTemp: 22, humidity: 45, pressureDiff: 0.2 },
+      pduPlacements: [],
+      physicalStructure: createDefaultPhysicalStructure()
     } as Rack,
     'rack-2': {
-      id: 'rack-2', 
+      id: 'rack-2',
       name: 'ラック2',
       type: '42u-standard',
       units: 42,
+      depth: 1000,
+      width: 600,
       equipment: {
-        1: { power: 500, heat: 1707, weight: 25, height: 2, isMainUnit: true } as Equipment
-      }
+        1: { power: 300, heat: 1024, weight: 15, height: 1, isMainUnit: true } as Equipment
+      },
+      powerConnections: {},
+      mountingOptions: {},
+      labels: {},
+      cageNuts: {},
+      rails: {},
+      partInventory: {},
+      fans: { count: 4, rpm: 3000 },
+      position: { row: 'A', column: 1 },
+      cabling: { external: {}, overhead: {}, underfloor: {} },
+      housing: { type: 'full', startUnit: 1, endUnit: 42, frontPanel: 'perforated', rearPanel: 'perforated' },
+      environment: { ambientTemp: 22, humidity: 45, pressureDiff: 0.2 },
+      pduPlacements: [],
+      physicalStructure: createDefaultPhysicalStructure()
     } as Rack
   };
 
   it('全体統計を正しく計算する', () => {
     const stats = calculateTotalStats(mockRacks);
     
-    expect(stats.totalPower).toBe(800);
-    expect(stats.totalHeat).toBe(2731);
-    expect(stats.totalWeight).toBe(40);
+    expect(stats.totalPower).toBe(600);
+    expect(stats.totalHeat).toBe(2048);
+    expect(stats.totalWeight).toBe(30);
     expect(stats.rackCount).toBe(2);
   });
 });
