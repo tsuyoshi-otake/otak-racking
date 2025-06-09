@@ -82,7 +82,7 @@ export const RackPDU: React.FC<RackPDUProps> = ({
             border: '1px dashed #3c4656', // 設置前の枠線
             opacity: 0.05
           }}
-          title="48口PDUスロット (左)"
+          title="PDUスロット (左)"
           onClick={() => onPduInstall?.('left', top)}
         >
           {/* PDUスロット左側（文字なし） */}
@@ -106,7 +106,7 @@ export const RackPDU: React.FC<RackPDUProps> = ({
             border: '1px dashed #3c4656', // 設置前の枠線
             opacity: 0.05
           }}
-          title="48口PDUスロット (右)"
+          title="PDUスロット (右)"
           onClick={() => onPduInstall?.('right', top)}
         >
           {/* PDUスロット右側（文字なし） */}
