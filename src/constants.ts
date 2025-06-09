@@ -1,7 +1,7 @@
 import { RackType, Equipment } from './types';
 
 // 基本サイズ定義
-export const BASE_UNIT_HEIGHT = 32; // 1Uの基本高さ (px)
+export const BASE_UNIT_HEIGHT = 32; // 1ユニットの基本高さ (px)
 export const BASE_FONT_SIZE = 12; // 基本フォントサイズ (px)
 export const BASE_MARGIN_LEFT = 24; // U番号の基本左マージン (px)
 export const BASE_CAGE_NUT_SIZE = 16; // ケージナットの基本サイズ (px)
@@ -67,7 +67,7 @@ export const rackTypes: Record<string, RackType> = {
 export const serverEquipment: Equipment[] = [
   {
     id: 'server-1u',
-    name: '1Uサーバー',
+    name: 'ラックマウントサーバー',
     height: 1,
     depth: 650,
     power: 300,
@@ -100,7 +100,7 @@ export const serverEquipment: Equipment[] = [
 export const networkEquipment: Equipment[] = [
   {
     id: 'switch-1u',
-    name: '1Uスイッチ',
+    name: 'ネットワークスイッチ',
     height: 1,
     depth: 400,
     power: 150,
@@ -183,49 +183,49 @@ export const networkEquipment: Equipment[] = [
       features: 'iRules/ASM/APM/GTM対応',
       platform: 'TMOS OS搭載'
     },
-    mountingNotes: '冗長構成必須。管理・データネットワーク分離推奨。',
-    mountingMethod: 'cage-nuts',
-    requiresRails: false,
-    requiresCageNuts: true
+    mountingNotes: '冗長構成必須。管理・データネットワーク分離推奨。スライドレール必須。',
+    mountingMethod: 'rails',
+    requiresRails: true,
+    requiresCageNuts: false
   }
 ];
 
 // ストレージ機器
 export const storageEquipment: Equipment[] = [
-  // 1U機器のみに限定するため、ストレージ機器は一旦空配列とする
+  // 単一ユニット機器のみに限定するため、ストレージ機器は一旦空配列とする
 ];
 
 // 電源機器
 export const powerEquipment: Equipment[] = [
   {
-    id: 'pdu-vertical-basic',
-    name: '縦型PDU (基本)',
-    height: 42,
-    depth: 100,
-    power: 0,
-    heat: 0,
-    weight: 5,
-    type: 'pdu',
-    role: 'power-distribution',
-    color: '#374151',
+    id: 'ups-rackmount',
+    name: 'ラックマウントUPS',
+    height: 1,
+    depth: 600,
+    power: 50,
+    heat: 171,
+    weight: 45,
+    type: 'ups',
+    role: 'power-source',
+    color: '#2D3748',
     opacity: 0,
     dualPower: false,
-    system: 'A',
-    airflow: 'natural',
-    cfm: 0,
-    heatGeneration: 0,
-    description: 'ラック左右・背面に設置する縦型PDU。基本的な配電機能を提供。16A/100V対応。',
+    airflow: 'front-to-rear',
+    cfm: 80,
+    heatGeneration: 171,
+    description: '無停電電源装置。停電時の電力供給とサージ保護を提供。Smart-UPS 3000VA相当。',
     specifications: {
-      outlets: 'C13×12, C19×4',
-      input: '単相100V 16A',
-      mounting: 'ラック左右・背面縦型',
-      protection: 'ブレーカー内蔵',
-      monitoring: '基本電流監視'
+      capacity: '3000VA/2700W',
+      runtime: '約10分（フル負荷時）',
+      outlets: 'C13×6, C19×2',
+      input: '単相100V 15A',
+      battery: 'シールド型鉛蓄電池',
+      management: 'ネットワーク管理カード対応',
+      protection: 'サージ保護、ノイズフィルタ'
     },
-    mountingNotes: 'ラック左右または背面に縦型設置。ケーブル長要確認。',
-    pduType: 'vertical-basic',
-    mountingMethod: 'direct',
-    requiresRails: false,
+    mountingNotes: 'スライドレール必須。バッテリー交換時の前面アクセス要確保。',
+    mountingMethod: 'rails',
+    requiresRails: true,
     requiresCageNuts: false
   }
 ];
@@ -268,7 +268,7 @@ export const mountingEquipment: Equipment[] = [
 export const otherEquipment: Equipment[] = [
   {
     id: 'lcd-console-1u',
-    name: '1U LCDコンソール',
+    name: 'LCDコンソール',
     height: 1,
     depth: 650,
     power: 45,
@@ -299,7 +299,7 @@ export const otherEquipment: Equipment[] = [
   },
   {
     id: 'blank-panel-1u',
-    name: '1Uブランクパネル',
+    name: 'ブランクパネル',
     height: 1,
     depth: 50,
     power: 0,
@@ -328,7 +328,7 @@ export const otherEquipment: Equipment[] = [
   },
   {
     id: 'shelf-1u-standard',
-    name: '1U棚板 (標準)',
+    name: '棚板 (標準)',
     height: 1,
     depth: 450,
     power: 0,
@@ -357,7 +357,7 @@ export const otherEquipment: Equipment[] = [
   },
   {
     id: 'shelf-1u-vented',
-    name: '1U棚板 (通気孔付き)',
+    name: '棚板 (通気孔付き)',
     height: 1,
     depth: 450,
     power: 0,

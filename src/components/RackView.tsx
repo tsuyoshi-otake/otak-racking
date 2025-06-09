@@ -25,6 +25,7 @@ interface RackViewProps {
   onDrop?: (e: React.DragEvent, unit: number) => void;
   onEquipmentClick?: (equipment: Equipment) => void;
   onEquipmentRemove?: (unit: number) => void;
+  onEquipmentDragStart?: (equipment: Equipment, unit: number, e: React.DragEvent) => void;
   onRackHeaderClick?: () => void;
   onCageNutInstall?: (unit: number, side: string, position: string, nutType: string) => void;
   onCageNutRemove?: (unit: number, side: string, position: string) => void;
@@ -48,6 +49,7 @@ export const RackView: React.FC<RackViewProps> = React.memo(({
   onDrop,
   onEquipmentClick,
   onEquipmentRemove,
+  onEquipmentDragStart,
   onRackHeaderClick,
   onCageNutInstall,
   onCageNutRemove,
@@ -142,6 +144,7 @@ export const RackView: React.FC<RackViewProps> = React.memo(({
               onDrop={onDrop}
               onEquipmentClick={onEquipmentClick}
               onEquipmentRemove={onEquipmentRemove}
+              onEquipmentDragStart={onEquipmentDragStart}
               onCageNutInstall={onCageNutInstall}
               onCageNutRemove={onCageNutRemove}
               onAutoInstallCageNuts={onAutoInstallCageNuts}

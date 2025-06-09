@@ -30,6 +30,7 @@ interface RackUnitProps {
   onDrop?: (e: React.DragEvent, unit: number) => void;
   onEquipmentClick?: (equipment: Equipment) => void;
   onEquipmentRemove?: (unit: number) => void;
+  onEquipmentDragStart?: (equipment: Equipment, unit: number, e: React.DragEvent) => void;
   onCageNutInstall?: (unit: number, side: string, position: string, nutType: string) => void;
   onCageNutRemove?: (unit: number, side: string, position: string) => void;
   onAutoInstallCageNuts?: (unit: number, nutType: string) => void;
@@ -53,6 +54,7 @@ export const RackUnit: React.FC<RackUnitProps> = React.memo(({
   onDrop,
   onEquipmentClick,
   onEquipmentRemove,
+  onEquipmentDragStart,
   onCageNutInstall,
   onCageNutRemove,
   onAutoInstallCageNuts,
@@ -211,7 +213,14 @@ export const RackUnit: React.FC<RackUnitProps> = React.memo(({
       
       {item && isMainUnit && (
         <div
-          className={`absolute inset-0 flex items-center justify-between px-2 ${
+          draggable={selectedRack !== 'all'}
+          onDragStart={(e) => {
+            if (selectedRack !== 'all') {
+              onEquipmentDragStart?.(item, unit, e);
+              e.dataTransfer.effectAllowed = 'move';
+            }
+          }}
+          className={`absolute inset-0 flex items-center justify-between px-2 cursor-move ${
             ['showPowerView', 'showMountingView', 'showLabelView', 'showCablingView', 'showCageNutView', 'showRailView'].includes(activeViewMode ?? '') ? 'border-2 border-dashed border-gray-400' : ''
           }`}
           style={{

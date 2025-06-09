@@ -310,6 +310,60 @@ export const useRackState = () => {
     }
   }, [racks]);
 
+  // 機器移動（新しいEquipmentPlacementManagerを使用）
+  const moveEquipment = useCallback(async (rackId: string, fromUnit: number, toUnit: number) => {
+    const currentRack = racks[rackId];
+    if (!currentRack) {
+      return {
+        success: false,
+        validation: {
+          isValid: false,
+          errors: [{
+            code: 'RACK_NOT_FOUND',
+            message: '指定されたラックが見つかりません。',
+            affectedUnits: [fromUnit, toUnit],
+            severity: 'error' as const
+          }],
+          warnings: []
+        },
+        appliedChanges: [],
+      };
+    }
+
+    try {
+      const rackCopy = JSON.parse(JSON.stringify(currentRack));
+      const result = await placementManager.moveEquipment(rackCopy, fromUnit, toUnit, {
+        autoInstallCageNuts: !isProMode
+      }, isProMode);
+
+      if (result.success && result.updatedRack) {
+        setRacks(prev => ({
+          ...prev,
+          [rackId]: result.updatedRack!
+        }));
+      } else {
+        console.error('機器の移動に失敗しました:', result.validation.errors);
+      }
+      return result;
+    } catch (error) {
+      console.error('機器移動中にエラーが発生しました:', error);
+      return {
+        success: false,
+        validation: {
+          isValid: false,
+          errors: [{
+            code: 'UNEXPECTED_ERROR',
+            message: '予期せぬエラーが発生しました。',
+            affectedUnits: [fromUnit, toUnit],
+            severity: 'error' as const
+          }],
+          warnings: []
+        },
+        appliedChanges: [],
+      };
+    }
+  }, [racks, isProMode]);
+
   // 全機器削除（ラッククリア）
   const clearAllEquipment = useCallback(async (rackId: string) => {
     const currentRack = racks[rackId];
@@ -809,6 +863,7 @@ export const useRackState = () => {
     updateRack,
     addEquipment,
     removeEquipment,
+    moveEquipment,
     clearAllEquipment,
     updateLabel,
     updateEquipmentColor,

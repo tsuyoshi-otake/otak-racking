@@ -77,6 +77,7 @@ function App() {
     toggleProMode,
     addPduToSlot,
     removePdu,
+    moveEquipment,
   } = useRackState();
   // モーダル表示関数（メモ化）
   const showInfoModal = useCallback((title: string, message: string) => {
@@ -133,14 +134,17 @@ function App() {
   // ドラッグ&ドロップ
   const {
     draggedItem,
+    draggedEquipmentInfo,
     hoveredInfo,
     handleDragStart,
+    handleEquipmentDragStart,
     handleDragOver,
     handleDrop,
     handleDragEnd,
   } = useDragAndDrop(
     racks,
     addEquipment,
+    moveEquipment,
     autoInstallCageNutsForUnit,
     showInfoModal,
     showConfirmModal
@@ -345,6 +349,7 @@ function App() {
                       onDrop={(e, unit) => handleDrop(e, unit, rack.id)}
                       onEquipmentClick={handleEquipmentClick}
                       onEquipmentRemove={(unit) => handleEquipmentRemove(unit, rack.id)}
+                      onEquipmentDragStart={(equipment: Equipment, unit: number, e: React.DragEvent) => handleEquipmentDragStart(e, equipment, rack.id, unit)}
                       onRackHeaderClick={() => handleRackHeaderClick(rack.id)}
                       onCageNutInstall={(unit, side, position, nutType) =>
                         installCageNut(rack.id, unit, side, position, nutType)
@@ -396,6 +401,7 @@ function App() {
                     onDrop={(e, unit) => handleDrop(e, unit, selectedRack)}
                     onEquipmentClick={handleEquipmentClick}
                     onEquipmentRemove={(unit) => handleEquipmentRemove(unit, selectedRack)}
+                    onEquipmentDragStart={(equipment: Equipment, unit: number, e: React.DragEvent) => handleEquipmentDragStart(e, equipment, selectedRack, unit)}
                     onRackHeaderClick={() => handleRackHeaderClick(selectedRack)}
                     onCageNutInstall={(unit, side, position, nutType) =>
                       installCageNut(selectedRack, unit, side, position, nutType)

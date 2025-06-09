@@ -348,6 +348,111 @@ export class EquipmentPlacementManager {
   }
 
   /**
+   * 機器の移動
+   */
+  async moveEquipment(
+    rack: Rack,
+    fromUnit: number,
+    toUnit: number,
+    options: PlacementOptions = {},
+    isProMode: boolean = false
+  ): Promise<PlacementResult> {
+    // 移動元の機器を取得
+    const equipment = rack.equipment[fromUnit];
+    if (!equipment) {
+      return {
+        success: false,
+        validation: {
+          isValid: false,
+          errors: [{
+            code: 'EQUIPMENT_NOT_FOUND',
+            message: `移動元のユニット${fromUnit}に機器が見つかりません`,
+            affectedUnits: [fromUnit],
+            severity: 'error' as const
+          }],
+          warnings: []
+        },
+        appliedChanges: [],
+        updatedRack: rack
+      };
+    }
+
+    // メインユニットでない場合はエラー
+    if (!equipment.isMainUnit) {
+      return {
+        success: false,
+        validation: {
+          isValid: false,
+          errors: [{
+            code: 'INVALID_MOVE_UNIT',
+            message: 'メインユニット以外からの移動はできません',
+            affectedUnits: [fromUnit],
+            severity: 'error' as const
+          }],
+          warnings: []
+        },
+        appliedChanges: [],
+        updatedRack: rack
+      };
+    }
+
+    // 不変性を保つためにラックのディープコピーを作成
+    const rackCopy = JSON.parse(JSON.stringify(rack));
+    
+    // 1. 移動元から機器を削除
+    const removeResult = await this.removeEquipment(rackCopy, fromUnit);
+    if (!removeResult.success || !removeResult.updatedRack) {
+      return removeResult;
+    }
+
+    // 2. 移動先に機器を配置
+    const updatedRack = removeResult.updatedRack;
+    const placeResult = await this.placeEquipment(
+      updatedRack,
+      toUnit,
+      equipment,
+      options,
+      isProMode // 実際のProモード状態を渡す
+    );
+
+    if (!placeResult.success) {
+      return {
+        success: false,
+        validation: {
+          isValid: false,
+          errors: [{
+            code: 'MOVE_PLACEMENT_FAILED',
+            message: `移動先への配置に失敗しました: ${placeResult.validation.errors[0]?.message || '不明なエラー'}`,
+            affectedUnits: [toUnit],
+            severity: 'error' as const
+          }],
+          warnings: placeResult.validation.warnings
+        },
+        appliedChanges: [],
+        updatedRack: rack
+      };
+    }
+
+    // 3. すべての変更を統合
+    const allChanges = [
+      ...removeResult.appliedChanges,
+      ...placeResult.appliedChanges
+    ];
+
+    return {
+      success: true,
+      position: placeResult.position,
+      validation: {
+        isValid: true,
+        errors: [],
+        warnings: placeResult.validation.warnings
+      },
+      appliedChanges: allChanges,
+      updatedRack: placeResult.updatedRack
+    };
+  }
+
+  /**
    * ラック内の全機器をクリア
    */
   async clearAllEquipment(rack: Rack): Promise<PlacementResult> {
@@ -834,22 +939,24 @@ export class EquipmentPlacementManager {
     const cageNuts = rack.cageNuts[unit];
     if (!cageNuts) return false;
     
-    const positions = [
-      cageNuts.frontLeft?.top, cageNuts.frontLeft?.middle, cageNuts.frontLeft?.bottom,
-      cageNuts.frontRight?.top, cageNuts.frontRight?.middle, cageNuts.frontRight?.bottom,
-      cageNuts.rearLeft?.top, cageNuts.rearLeft?.middle, cageNuts.rearLeft?.bottom,
-      cageNuts.rearRight?.top, cageNuts.rearRight?.middle, cageNuts.rearRight?.bottom
+    // 1ユニット機器では上段と下段のみ必要（真ん中は不要）
+    const requiredPositions = [
+      cageNuts.frontLeft?.top, cageNuts.frontLeft?.bottom,
+      cageNuts.frontRight?.top, cageNuts.frontRight?.bottom,
+      cageNuts.rearLeft?.top, cageNuts.rearLeft?.bottom,
+      cageNuts.rearRight?.top, cageNuts.rearRight?.bottom
     ];
     
-    return positions.filter(Boolean).length === 12;
+    return requiredPositions.filter(Boolean).length === 8;
   }
 
   private hasRequiredCageNutsForProMode(rack: Rack, unit: number): boolean {
     const cageNuts = rack.cageNuts[unit];
     if (!cageNuts) return false;
 
-    const frontLeftOk = cageNuts.frontLeft?.top && cageNuts.frontLeft?.middle && cageNuts.frontLeft?.bottom;
-    const frontRightOk = cageNuts.frontRight?.top && cageNuts.frontRight?.middle && cageNuts.frontRight?.bottom;
+    // 1ユニットの機器では上段と下段のみ必要（真ん中は不要）
+    const frontLeftOk = cageNuts.frontLeft?.top && cageNuts.frontLeft?.bottom;
+    const frontRightOk = cageNuts.frontRight?.top && cageNuts.frontRight?.bottom;
 
     return !!(frontLeftOk && frontRightOk);
   }
@@ -883,11 +990,11 @@ export class EquipmentPlacementManager {
       return true;
     }
 
-    // ケース2: 1Uレールが複数設置されている場合の対応
+    // ケース2: 単一ユニットレールが複数設置されている場合の対応
     if (railType === '1u' && equipment.height > 1) {
       console.log(`[Pro Mode Rail Check] Checking for multiple 1U rails for ${equipment.height}U equipment`);
       
-      // 必要な全てのユニットに1Uレールが設置されているかチェック
+      // 必要な全てのユニットに単一ユニットレールが設置されているかチェック
       let allUnitsHaveRails = true;
       const startUnit = unit;
       const endUnit = unit + equipment.height - 1;
@@ -900,15 +1007,15 @@ export class EquipmentPlacementManager {
             !checkRailInfo.frontLeft.installed ||
             !checkRailInfo.frontRight.installed ||
             checkRailInfo.frontLeft.railType !== '1u') {
-          console.log(`[Pro Mode Rail Check] Unit ${checkUnit} missing 1U rail`);
+          console.log(`[Pro Mode Rail Check] Unit ${checkUnit} missing single unit rail`);
           allUnitsHaveRails = false;
           break;
         }
-        console.log(`[Pro Mode Rail Check] Unit ${checkUnit} has 1U rail`);
+        console.log(`[Pro Mode Rail Check] Unit ${checkUnit} has single unit rail`);
       }
       
       if (allUnitsHaveRails) {
-        console.log(`[Pro Mode Rail Check] All ${equipment.height} units have 1U rails - acceptable configuration`);
+        console.log(`[Pro Mode Rail Check] All ${equipment.height} units have single unit rails - acceptable configuration`);
         return true;
       }
     }
@@ -918,11 +1025,12 @@ export class EquipmentPlacementManager {
   }
 
   private createCompleteCageNutConfig(nutType: string) {
+    // 1ユニット機器では上段と下段のみ設置（真ん中は不要）
     return {
-      frontLeft: { top: nutType, middle: nutType, bottom: nutType },
-      frontRight: { top: nutType, middle: nutType, bottom: nutType },
-      rearLeft: { top: nutType, middle: nutType, bottom: nutType },
-      rearRight: { top: nutType, middle: nutType, bottom: nutType }
+      frontLeft: { top: nutType, middle: null, bottom: nutType },
+      frontRight: { top: nutType, middle: null, bottom: nutType },
+      rearLeft: { top: nutType, middle: null, bottom: nutType },
+      rearRight: { top: nutType, middle: null, bottom: nutType }
     };
   }
 

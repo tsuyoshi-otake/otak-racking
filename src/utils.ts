@@ -172,20 +172,21 @@ export const calculateCoolingStats = (rack: Rack): CoolingStats => {
  */
 export const getCageNutStatus = (unit: number, rack: Rack): CageNutStatus => {
   const cageNuts = rack.cageNuts[unit] || {
-    frontLeft: { top: null, bottom: null },
-    frontRight: { top: null, bottom: null },
-    rearLeft: { top: null, bottom: null },
-    rearRight: { top: null, bottom: null }
+    frontLeft: { top: null, middle: null, bottom: null },
+    frontRight: { top: null, middle: null, bottom: null },
+    rearLeft: { top: null, middle: null, bottom: null },
+    rearRight: { top: null, middle: null, bottom: null }
   };
   
-  const allPositions = [
+  // 1ユニット機器では上段と下段のみ必要（真ん中は不要）
+  const requiredPositions = [
     cageNuts.frontLeft?.top, cageNuts.frontLeft?.bottom,
     cageNuts.frontRight?.top, cageNuts.frontRight?.bottom,
     cageNuts.rearLeft?.top, cageNuts.rearLeft?.bottom,
     cageNuts.rearRight?.top, cageNuts.rearRight?.bottom
   ];
   
-  const installed = allPositions.filter(Boolean).length;
+  const installed = requiredPositions.filter(Boolean).length;
   return { installed, total: 8, isComplete: installed === 8 };
 };
 
@@ -327,11 +328,12 @@ export const canPlaceEquipmentAdvanced = async (
  * ゲージナット自動設置
  */
 export const autoInstallCageNuts = (unit: number, nutType: string = 'm6') => {
+  // 1ユニット機器では上段と下段のみ設置（真ん中は不要）
   return {
-    frontLeft: { top: nutType, middle: nutType, bottom: nutType },
-    frontRight: { top: nutType, middle: nutType, bottom: nutType },
-    rearLeft: { top: nutType, middle: nutType, bottom: nutType },
-    rearRight: { top: nutType, middle: nutType, bottom: nutType }
+    frontLeft: { top: nutType, middle: null, bottom: nutType },
+    frontRight: { top: nutType, middle: null, bottom: nutType },
+    rearLeft: { top: nutType, middle: null, bottom: nutType },
+    rearRight: { top: nutType, middle: null, bottom: nutType }
   };
 };
 
