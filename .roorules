@@ -393,6 +393,9 @@ classDiagram
     note for EquipmentPlacementManager "機器配置の制約チェックと実行\n移動・サイズ変更など複雑なロジックを担当"
     note for useRackState "ラック状態管理\nレール・PDU操作を含む\nLocalStorage連携"
     note for Rack "ラックの完全な状態表現\nレールやPDUの情報も含む"
+    note for RackView "ラック全体の描画を担当。\nヘッダー、物理構造(RackStructure)、PDU(RackPDU)を描画し、\nユニット数分RackUnitコンポーネントをループで描画する。\nドラッグ中の機器のプレビュー表示も行う。"
+    note for RackUnit "個々のUの描画を担当。\n空きユニットか設置済み機器かによって表示を切り替え。\nactiveViewModeに応じて、電源、マウント、エアフロー等の情報をオーバーレイ表示する。\nマウント用の穴(MountingHoles)も描画する。"
+    note for useRackState "updateEquipmentSize(rackId, equipmentId, newHeight):\n1. 対象機器を特定し、サイズ変更が可能かチェック。\n2. EquipmentPlacementManagerを使い、既存機器を一時的に削除。\n3. 新しいサイズの機器データを作成。\n4. EquipmentPlacementManagerを使い、新しいサイズで再配置。\n5. 失敗した場合は、元の機器を再配置して状態を復元（ロールバック）。"
 ```
 
 ## 主要設計パターン
