@@ -1,10 +1,19 @@
 import { useState, useCallback, useEffect, useMemo } from 'react';
-import { Rack, Equipment, FloorSettings, createDefaultPhysicalStructure, RailType } from '../types';
+import { Rack, Equipment, FloorSettings, createDefaultPhysicalStructure, RailType, PowerOutlet } from '../types';
 import { deepCopy, autoInstallCageNuts } from '../utils';
 import { rackTypes } from '../constants';
 import { placementManager } from '../services/EquipmentPlacementManager';
 import { loadAppState } from '../utils/localStorage';
 import { loadDataFromUrl } from '../utils/shareUtils';
+
+const createPduOutlets = (count: number, type: string): PowerOutlet[] => {
+  return Array.from({ length: count }, (_, i) => ({
+    id: i + 1,
+    type: type,
+    inUse: false,
+    connectedEquipmentId: null,
+  }));
+};
 
 // 初期ラック設定
 const createInitialRack = (id: string, name: string, rackCount: number): Rack => ({
@@ -59,7 +68,8 @@ const createInitialRack = (id: string, name: string, rackCount: number): Rack =>
         airflow: 'natural',
         cfm: 0,
         heatGeneration: 0,
-        description: 'ラックの左側に設置されたPDU A系統'
+        description: 'ラックの左側に設置されたPDU A系統',
+        powerOutlets: createPduOutlets(24, 'IEC C13'),
       },
       position: 'left',
       offset: 0, // renderPDUsで再計算するため、仮の値
@@ -83,7 +93,8 @@ const createInitialRack = (id: string, name: string, rackCount: number): Rack =>
         airflow: 'natural',
         cfm: 0,
         heatGeneration: 0,
-        description: 'ラックの右側に設置されたPDU B系統'
+        description: 'ラックの右側に設置されたPDU B系統',
+        powerOutlets: createPduOutlets(24, 'IEC C13'),
       },
       position: 'right',
       offset: 0, // renderPDUsで再計算するため、仮の値
@@ -641,11 +652,73 @@ export const useRackState = () => {
   // 電源接続更新
   const updatePowerConnection = useCallback((rackId: string, equipmentId: string, field: string, value: any) => {
     setRacks(prev => {
-      const newRack = deepCopy(prev[rackId]);
-      newRack.powerConnections[equipmentId] = {
-        ...newRack.powerConnections[equipmentId],
-        [field]: value
+      const rack = prev[rackId];
+      if (!rack) return prev;
+
+      const newRack = deepCopy(rack);
+      const equipment = Object.values(newRack.equipment).find(e => e.id === equipmentId);
+      if (!equipment) return prev;
+
+      const connection = newRack.powerConnections[equipmentId] || {};
+      const oldPduId = field === 'primarySource' ? connection.primaryPduId : connection.secondaryPduId;
+      
+      // 接続情報を更新
+      const updatedConnection = {
+        ...connection,
+        [field]: value,
       };
+
+      let pduToUpdateId: string | undefined;
+      let pduToUpdate: Equipment | undefined;
+
+      // PDU接続が変更された場合の処理
+      if (field === 'primaryPduId' || field === 'secondaryPduId') {
+        const pduId = value;
+        const outletField = field === 'primaryPduId' ? 'primaryPduOutlet' : 'secondaryPduOutlet';
+        
+        // 古いPDUのアウトレットを解放
+        if (oldPduId) {
+          const oldPdu = newRack.pduPlacements.find(p => p.equipment.id === oldPduId)?.equipment;
+          if (oldPdu && oldPdu.powerOutlets) {
+            const oldOutletIndex = oldPdu.powerOutlets.findIndex(o => o.connectedEquipmentId === equipmentId);
+            if (oldOutletIndex > -1) {
+              oldPdu.powerOutlets[oldOutletIndex].inUse = false;
+              oldPdu.powerOutlets[oldOutletIndex].connectedEquipmentId = null;
+            }
+          }
+        }
+
+        // 新しいPDUの最初のアベイラブルなアウトレットに接続
+        if (pduId) {
+          pduToUpdate = newRack.pduPlacements.find(p => p.equipment.id === pduId)?.equipment;
+          if (pduToUpdate && pduToUpdate.powerOutlets) {
+            const availableOutlet = pduToUpdate.powerOutlets.find(o => !o.inUse);
+            if (availableOutlet) {
+              availableOutlet.inUse = true;
+              availableOutlet.connectedEquipmentId = equipmentId;
+              updatedConnection[outletField] = availableOutlet.id;
+              pduToUpdateId = pduToUpdate.id;
+            } else {
+              // 空きがない場合は接続しない
+              updatedConnection[outletField] = null;
+            }
+          }
+        } else {
+          // PDUから切断
+          updatedConnection[outletField] = null;
+        }
+      }
+      
+      newRack.powerConnections[equipmentId] = updatedConnection;
+
+      // PDUの状態を更新
+      if (pduToUpdateId && pduToUpdate) {
+        const pduPlacementIndex = newRack.pduPlacements.findIndex(p => p.equipment.id === pduToUpdateId);
+        if (pduPlacementIndex > -1) {
+          newRack.pduPlacements[pduPlacementIndex].equipment = pduToUpdate;
+        }
+      }
+
       return { ...prev, [rackId]: newRack };
     });
   }, []);
@@ -913,7 +986,8 @@ export const useRackState = () => {
         airflow: 'natural',
         cfm: 0,
         heatGeneration: 0,
-        description: `ラックの${side === 'left' ? '左' : '右'}側に設置されたPDU ${side === 'left' ? 'A' : 'B'}系統`
+        description: `ラックの${side === 'left' ? '左' : '右'}側に設置されたPDU ${side === 'left' ? 'A' : 'B'}系統`,
+        powerOutlets: createPduOutlets(24, 'IEC C13'),
       };
 
       if (!newRack.pduPlacements) {

@@ -40,6 +40,14 @@ export interface Equipment {
   // サイズバリエーション機能
   availableSizes?: EquipmentSize[];
   selectedSize?: number; // 選択されたサイズ（height）
+  powerOutlets?: PowerOutlet[];
+}
+
+export interface PowerOutlet {
+  id: number;
+  type: string;
+  inUse: boolean;
+  connectedEquipmentId?: string | null;
 }
 
 export interface EquipmentSize {
@@ -84,6 +92,10 @@ export interface PowerConnection {
   secondarySource?: string | null;
   secondaryType?: string;
   powerPath: 'single' | 'redundant';
+  primaryPduId?: string | null;
+  primaryPduOutlet?: number | null;
+  secondaryPduId?: string | null;
+  secondaryPduOutlet?: number | null;
 }
 
 export interface MountingOption {

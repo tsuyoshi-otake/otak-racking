@@ -37,9 +37,9 @@ export const RackPDU: React.FC<RackPDUProps> = ({
       };
 
       if (pdu.position === 'left') {
-        positionStyle.left = '-40px';
+        positionStyle.left = '-34px';
       } else if (pdu.position === 'right') {
-        positionStyle.left = '772px';
+        positionStyle.left = '620px';
       }
       positionStyle.border = '1px solid #181c23'; // 設置後の枠線
 
@@ -75,7 +75,7 @@ export const RackPDU: React.FC<RackPDUProps> = ({
           className="absolute bg-gray-600 rounded-sm shadow-lg cursor-pointer hover:border-blue-500"
           style={{
             top: `${top}px`,
-            left: '-40px',
+            left: '-34px',
             width: `${slotWidth}px`,
             height: `${slotHeight}px`,
             zIndex: 2,
@@ -99,7 +99,7 @@ export const RackPDU: React.FC<RackPDUProps> = ({
           className="absolute bg-gray-600 rounded-sm shadow-lg cursor-pointer hover:border-blue-500"
           style={{
             top: `${top}px`,
-            left: '772px',
+            left: '620px',
             width: `${slotWidth}px`,
             height: `${slotHeight}px`,
             zIndex: 2,

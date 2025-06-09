@@ -320,38 +320,66 @@ export const ModalsAndDialogs: React.FC<ModalsAndDialogsProps> = ({
                 
                 <div className="space-y-3">
                   {/* プライマリ電源 */}
-                  <div>
-                    <label className="block text-sm font-medium mb-1">プライマリ電源</label>
+                  <div className="space-y-2 p-2 border rounded border-gray-600">
+                    <label className="block text-sm font-medium">プライマリ電源</label>
                     <select
-                      value={powerConnection.primarySource || ''}
-                      onChange={(e) => onUpdatePowerConnection(selectedEquipment.id, 'primarySource', e.target.value)}
+                      value={powerConnection.primaryPduId || ''}
+                      onChange={(e) => onUpdatePowerConnection(selectedEquipment.id, 'primaryPduId', e.target.value)}
                       className={`w-full p-2 border rounded text-sm ${inputBg}`}
                     >
-                      <option value="">未接続</option>
-                      {powerSources.all.map(source => (
-                        <option key={source.id} value={source.id}>
-                          {source.name} ({source.system || 'A系統'})
+                      <option value="">PDU未接続</option>
+                      {powerSources.pdus.map(pdu => (
+                        <option key={pdu.id} value={pdu.id}>
+                          {pdu.name}
                         </option>
                       ))}
                     </select>
+                    {powerConnection.primaryPduId && (
+                      <select
+                        value={powerConnection.primaryPduOutlet || ''}
+                        onChange={(e) => onUpdatePowerConnection(selectedEquipment.id, 'primaryPduOutlet', parseInt(e.target.value))}
+                        className={`w-full p-2 border rounded text-sm ${inputBg}`}
+                      >
+                        <option value="">コンセント選択</option>
+                        {powerSources.pdus.find(p => p.id === powerConnection.primaryPduId)?.powerOutlets?.map(outlet => (
+                          <option key={outlet.id} value={outlet.id} disabled={outlet.inUse && outlet.connectedEquipmentId !== selectedEquipment.id}>
+                            コンセント #{outlet.id} ({outlet.type}) {outlet.inUse ? `(使用中: ${outlet.connectedEquipmentId === selectedEquipment.id ? 'この機器' : '他機器'})` : ''}
+                          </option>
+                        ))}
+                      </select>
+                    )}
                   </div>
 
                   {/* セカンダリ電源（冗長電源機器のみ） */}
                   {selectedEquipment.dualPower && (
-                    <div>
-                      <label className="block text-sm font-medium mb-1">セカンダリ電源</label>
+                    <div className="space-y-2 p-2 border rounded border-gray-600">
+                      <label className="block text-sm font-medium">セカンダリ電源</label>
                       <select
-                        value={powerConnection.secondarySource || ''}
-                        onChange={(e) => onUpdatePowerConnection(selectedEquipment.id, 'secondarySource', e.target.value)}
+                        value={powerConnection.secondaryPduId || ''}
+                        onChange={(e) => onUpdatePowerConnection(selectedEquipment.id, 'secondaryPduId', e.target.value)}
                         className={`w-full p-2 border rounded text-sm ${inputBg}`}
                       >
-                        <option value="">未接続</option>
-                        {powerSources.all.map(source => (
-                          <option key={source.id} value={source.id}>
-                            {source.name} ({source.system || 'B系統'})
+                        <option value="">PDU未接続</option>
+                        {powerSources.pdus.map(pdu => (
+                          <option key={pdu.id} value={pdu.id}>
+                            {pdu.name}
                           </option>
                         ))}
                       </select>
+                      {powerConnection.secondaryPduId && (
+                        <select
+                          value={powerConnection.secondaryPduOutlet || ''}
+                          onChange={(e) => onUpdatePowerConnection(selectedEquipment.id, 'secondaryPduOutlet', parseInt(e.target.value))}
+                          className={`w-full p-2 border rounded text-sm ${inputBg}`}
+                        >
+                          <option value="">コンセント選択</option>
+                          {powerSources.pdus.find(p => p.id === powerConnection.secondaryPduId)?.powerOutlets?.map(outlet => (
+                            <option key={outlet.id} value={outlet.id} disabled={outlet.inUse && outlet.connectedEquipmentId !== selectedEquipment.id}>
+                              コンセント #{outlet.id} ({outlet.type}) {outlet.inUse ? `(使用中: ${outlet.connectedEquipmentId === selectedEquipment.id ? 'この機器' : '他機器'})` : ''}
+                            </option>
+                          ))}
+                        </select>
+                      )}
                     </div>
                   )}
 
