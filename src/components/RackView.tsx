@@ -35,6 +35,8 @@ interface RackViewProps {
   onRailInstall?: (unit: number, side: 'left' | 'right', railType: string) => void;
   onRailRemove?: (unit: number, side: 'left' | 'right') => void;
   hoveredUnit?: number | null;
+  onPduInstall?: (side: 'left' | 'right', top: number) => void;
+  onPduRemove?: (pduId: string) => void;
 }
 
 export const RackView: React.FC<RackViewProps> = React.memo(({
@@ -56,7 +58,9 @@ export const RackView: React.FC<RackViewProps> = React.memo(({
   onUpdatePhysicalStructure,
   onRailInstall,
   onRailRemove,
-  hoveredUnit
+  hoveredUnit,
+  onPduInstall,
+  onPduRemove
 }) => {
   // メモ化された計算値
   const unitHeight = useMemo(() => getZoomedUnitHeight(zoomLevel), [zoomLevel]);
@@ -108,7 +112,7 @@ export const RackView: React.FC<RackViewProps> = React.memo(({
           />
           {/* PDUは背面のみ表示 */}
           {perspective === 'rear' && (
-            <MemoizedRackPDU rack={rack} zoomLevel={zoomLevel} unitHeight={unitHeight} />
+            <MemoizedRackPDU rack={rack} zoomLevel={zoomLevel} unitHeight={unitHeight} perspective={perspective} rackWidth={rackWidth} onPduInstall={onPduInstall} onPduRemove={onPduRemove} />
           )}
           
           {draggedItem && hoveredUnit && draggedItem.height > 0 && (

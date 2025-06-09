@@ -10,7 +10,7 @@ import {
   getEquipmentDisplayName,
   getZoomedMarginLeft
 } from '../utils';
-import { getEquipmentIcon, getAirflowIcon, getMountingIcon } from './RackIcons';
+import { getAirflowIcon, getMountingIcon } from './RackIcons';
 import { MountingHoles } from './MountingHoles';
 
 // メモ化されたコンポーネント
@@ -143,6 +143,107 @@ const SwitchRearView: React.FC = React.memo(() => (
   </div>
 ));
 SwitchRearView.displayName = 'SwitchRearView';
+
+const LoadBalancerFrontView: React.FC = React.memo(() => (
+  <div className="w-full h-full flex items-center bg-gray-900 border border-gray-700 rounded-sm overflow-hidden">
+    {/* 左側: ステータスLEDとコンソール */}
+    <div className="h-full w-1/12 flex flex-col justify-center gap-1 p-1 bg-gray-900">
+      {/* ステータスLED */}
+      <div className="w-2 h-2 bg-green-500 rounded-full mx-auto" title="STATUS" />
+      <div className="w-2 h-2 bg-yellow-500 rounded-full mx-auto" title="ALARM" />
+      <div className="w-2 h-2 bg-green-500 rounded-full mx-auto" title="POWER 1" />
+      <div className="w-2 h-2 bg-green-500 rounded-full mx-auto" title="POWER 2" />
+    </div>
+    
+    {/* コンソールポート */}
+    <div className="h-full w-1/12 flex flex-col justify-center p-1 bg-gray-900">
+      <div className="w-full h-3 bg-gray-700 rounded-sm" title="CONSOLE" />
+      <div className="text-white text-center" style={{ fontSize: '5px' }}>CONSOLE</div>
+    </div>
+    
+    {/* 中央: ネットワークポート */}
+    <div className="h-full flex-1 flex items-center justify-center gap-2 p-2 bg-gray-900">
+      {/* 1GbEポート群 */}
+      <div className="flex gap-1">
+        {Array.from({ length: 4 }).map((_, i) => (
+          <div key={i} className="w-6 h-4 bg-gray-700 border border-gray-600 rounded-sm flex items-center justify-center">
+            <span className="text-gray-400" style={{ fontSize: '6px' }}>{i + 1}</span>
+          </div>
+        ))}
+      </div>
+      
+      {/* 10GbEポート */}
+      <div className="flex gap-1 ml-2">
+        <div className="w-8 h-5 bg-blue-800 border border-blue-700 rounded-sm flex items-center justify-center">
+          <span className="text-blue-300" style={{ fontSize: '6px' }}>10GbE</span>
+        </div>
+        <div className="w-8 h-5 bg-blue-800 border border-blue-700 rounded-sm flex items-center justify-center">
+          <span className="text-blue-300" style={{ fontSize: '6px' }}>10GbE</span>
+        </div>
+      </div>
+    </div>
+    
+    {/* 右側: ディスプレイとコントロール */}
+    <div className="h-full flex-1 flex items-center justify-end gap-2 p-2 bg-gray-900">
+      {/* LCD ディスプレイ */}
+      <div className="h-4/5 w-24 bg-gray-700 rounded-sm flex items-center justify-center border border-gray-600">
+        <span className="text-green-400" style={{ fontSize: '8px' }}>BIG-IP 4000</span>
+      </div>
+      
+      {/* コントロールボタン */}
+      <div className="flex flex-col gap-1">
+        <div className="flex gap-1">
+          <div className="w-3 h-3 bg-gray-600 rounded-sm" />
+          <div className="w-3 h-3 bg-gray-600 rounded-sm" />
+        </div>
+        <div className="flex gap-1">
+          <div className="w-3 h-3 bg-gray-600 rounded-sm" />
+          <div className="w-3 h-3 bg-gray-600 rounded-sm" />
+        </div>
+      </div>
+      
+      {/* F5ロゴ */}
+      <div className="w-8 h-8 bg-red-600 rounded-full flex items-center justify-center">
+        <span className="text-white font-bold" style={{ fontSize: '10px' }}>F5</span>
+      </div>
+    </div>
+  </div>
+));
+LoadBalancerFrontView.displayName = 'LoadBalancerFrontView';
+
+const LoadBalancerRearView: React.FC = React.memo(() => (
+  <div className="w-full h-full flex items-center justify-between bg-gray-900 border border-gray-700 rounded-sm overflow-hidden p-1">
+    {/* 電源モジュール */}
+    <div className="h-full w-1/3 flex gap-1">
+      <div className="flex-1 h-full bg-gray-800 rounded-sm flex flex-col items-center justify-center p-1">
+        <div className="w-full h-3/4 bg-black rounded-sm grid grid-cols-3 gap-px p-px">
+          {Array.from({ length: 9 }).map((_, j) => <div key={j} className="bg-gray-700 rounded-full" />)}
+        </div>
+        <div className="w-4 h-2 bg-gray-600 rounded-full mt-1" />
+      </div>
+      <div className="flex-1 h-full bg-gray-800 rounded-sm flex flex-col items-center justify-center p-1">
+        <div className="w-full h-3/4 bg-black rounded-sm grid grid-cols-3 gap-px p-px">
+          {Array.from({ length: 9 }).map((_, j) => <div key={j} className="bg-gray-700 rounded-full" />)}
+        </div>
+        <div className="w-4 h-2 bg-gray-600 rounded-full mt-1" />
+      </div>
+    </div>
+    
+    {/* 拡張スロット */}
+    <div className="h-full flex-1 flex gap-1 mx-2">
+      <div className="flex-1 h-full bg-gray-700 rounded-sm" />
+      <div className="flex-1 h-full bg-gray-700 rounded-sm" />
+    </div>
+    
+    {/* ファンモジュール */}
+    <div className="h-full w-1/4 bg-gray-800 rounded-sm flex items-center justify-center">
+      <div className="w-10 h-10 rounded-full bg-blue-900 flex items-center justify-center">
+        <div className="w-3 h-3 bg-blue-400 rounded-full" />
+      </div>
+    </div>
+  </div>
+));
+LoadBalancerRearView.displayName = 'LoadBalancerRearView';
 
 export const RackUnit: React.FC<RackUnitProps> = React.memo(({
   rack,
@@ -332,7 +433,9 @@ export const RackUnit: React.FC<RackUnitProps> = React.memo(({
             {item.type === 'network' && (
               perspective === 'front' ? <SwitchFrontView /> : <SwitchRearView />
             )}
-            {/* 他の機器タイプのビューもここに追加 */}
+            {item.id === 'load-balancer' && (
+              perspective === 'front' ? <LoadBalancerFrontView /> : <LoadBalancerRearView />
+            )}
           </div>
           <div className="relative z-10 text-white font-normal text-xs truncate flex-1 text-center flex items-center justify-center gap-1 [text-shadow:0_1px_2px_rgba(0,0,0,0.5)]">
             <span>{displayName}</span>

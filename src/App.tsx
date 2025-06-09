@@ -75,6 +75,8 @@ function App() {
     removeRail,
     isProMode,
     toggleProMode,
+    addPduToSlot,
+    removePdu,
   } = useRackState();
   // モーダル表示関数（メモ化）
   const showInfoModal = useCallback((title: string, message: string) => {
@@ -327,7 +329,7 @@ function App() {
               </div>
               
               <div
-                className={`flex gap-16 ${
+                className={`flex gap-32 ${
                   layoutDimensions.needsScroll ? 'overflow-x-auto pb-4 custom-scrollbar' : 'justify-center'
                 }`}
                 style={{ minWidth: layoutDimensions.needsScroll ? `${layoutDimensions.totalContentWidth}px` : 'auto' }}
@@ -371,6 +373,10 @@ function App() {
                       onRailRemove={(unit, side) =>
                         removeRail(rack.id, unit, side)
                       }
+                      onPduInstall={(side, top) =>
+                        addPduToSlot(rack.id, side, top)
+                      }
+                      onPduRemove={(pduId) => removePdu(rack.id, pduId)}
                     />
                   </div>
                 ))}
@@ -411,6 +417,10 @@ function App() {
                     onRailRemove={(unit, side) =>
                       removeRail(selectedRack, unit, side)
                     }
+                    onPduInstall={(side, top) =>
+                      addPduToSlot(selectedRack, side, top)
+                    }
+                    onPduRemove={(pduId) => removePdu(selectedRack, pduId)}
                   />
                 </div>
               </div>

@@ -1,81 +1,127 @@
 import React from 'react';
-import { Zap } from 'lucide-react';
 import { Rack } from '../types';
 
 interface RackPDUProps {
   rack: Rack;
   zoomLevel: number;
   unitHeight: number;
+  perspective: 'front' | 'rear' | 'left' | 'right';
+  rackWidth: number;
+  onPduInstall?: (side: 'left' | 'right', top: number) => void;
+  onPduRemove?: (pduId: string) => void;
 }
 
 export const RackPDU: React.FC<RackPDUProps> = ({
   rack,
   zoomLevel,
-  unitHeight
+  unitHeight,
+  perspective,
+  rackWidth,
+  onPduInstall,
+  onPduRemove
 }) => {
   // PDU描画機能
   const renderPDUs = () => {
     if (!rack.pduPlacements || rack.pduPlacements.length === 0) return null;
 
     return rack.pduPlacements.map((pdu, index) => {
-      const pduWidth = 20 * (zoomLevel / 100); // PDUの幅をズームに対応
-      const pduHeight = Math.min(rack.units * unitHeight * 0.8, pdu.equipment.height * unitHeight || rack.units * unitHeight * 0.6);
-      
-      let positionStyle: React.CSSProperties = {};
-      
-      switch (pdu.position) {
-        case 'left':
-          positionStyle = {
-            left: `-${pduWidth + 10 * (zoomLevel / 100)}px`,
-            top: `${pdu.offset}px`,
-            width: `${pduWidth}px`,
-            height: `${pduHeight}px`
-          };
-          break;
-        case 'right':
-          positionStyle = {
-            right: `-${pduWidth + 10 * (zoomLevel / 100)}px`,
-            top: `${pdu.offset}px`,
-            width: `${pduWidth}px`,
-            height: `${pduHeight}px`
-          };
-          break;
-        case 'rear':
-          positionStyle = {
-            left: '50%',
-            transform: 'translateX(-50%)',
-            top: `${pdu.offset}px`,
-            width: `${pduWidth * 0.7}px`,
-            height: `${pduHeight}px`,
-            zIndex: 1
-          };
-          break;
+      const pduWidth = 12 * (zoomLevel / 100); // スロットと同じ幅
+      const pduHeightU = Math.min(pdu.equipment.height, rack.units);
+      const pduHeight = pduHeightU * unitHeight;
+
+      const top = (rack.units - pduHeightU) * unitHeight / 2; // 中央に配置
+      let positionStyle: React.CSSProperties = {
+        top: `${top}px`,
+        width: `${pduWidth}px`,
+        height: `${pduHeight}px`,
+      };
+
+      if (pdu.position === 'left') {
+        positionStyle.left = '-40px';
+      } else if (pdu.position === 'right') {
+        positionStyle.left = '772px';
       }
+      positionStyle.border = '1px solid #181c23'; // 設置後の枠線
 
       return (
         <div
           key={`pdu-${index}`}
-          className={`absolute border-2 border-gray-600 bg-gray-700 opacity-80 hover:opacity-100 transition-opacity cursor-pointer`}
-          style={positionStyle}
-          title={`${pdu.equipment.name} (${pdu.position})`}
+          className="absolute rounded-sm shadow-lg cursor-pointer hover:border-red-500"
+          style={{...positionStyle, backgroundColor: '#181c23'}}
+          title={`${pdu.equipment.name} - クリックして削除`}
+          onClick={() => onPduRemove?.(pdu.id)}
         >
-          <div className="w-full h-full flex flex-col items-center justify-center text-white text-xs">
-            <Zap size={Math.max(8, pduWidth * 0.4)} />
-            <span className="writing-vertical-rl text-vertical transform rotate-180 mt-1 truncate">
-              {pdu.equipment.name.substring(0, 8)}
-            </span>
-          </div>
-          {/* PDUコンセント表現 */}
-          <div className="absolute right-0 top-2 bottom-2 w-1 flex flex-col justify-around">
-            {Array.from({ length: Math.floor(pduHeight / 20) }, (_, i) => (
-              <div key={i} className="w-1 h-1 bg-gray-400 rounded-full" />
-            ))}
-          </div>
+          {/* PDU本体の表示（文字なし） */}
         </div>
       );
     });
   };
 
-  return <>{renderPDUs()}</>;
+  const renderPDUSlots = () => {
+    if (perspective !== 'rear') return null;
+
+    const slotWidth = 12 * (zoomLevel / 100);
+    const slots = [];
+    const pduHeightU = Math.min(42, rack.units);
+    const slotHeight = pduHeightU * unitHeight;
+    const top = (rack.units - pduHeightU) * unitHeight / 2; // 中央に配置
+
+    // 左側のスロット
+    const isLeftSlotFilled = rack.pduPlacements?.some(p => p.position === 'left');
+    if (!isLeftSlotFilled) {
+      slots.push(
+        <div
+          key="pdu-slot-left"
+          className="absolute bg-gray-600 rounded-sm shadow-lg cursor-pointer hover:border-blue-500"
+          style={{
+            top: `${top}px`,
+            left: '-40px',
+            width: `${slotWidth}px`,
+            height: `${slotHeight}px`,
+            zIndex: 2,
+            border: '1px dashed #3c4656', // 設置前の枠線
+            opacity: 0.05
+          }}
+          title="48口PDUスロット (左)"
+          onClick={() => onPduInstall?.('left', top)}
+        >
+          {/* PDUスロット左側（文字なし） */}
+        </div>
+      );
+    }
+
+    // 右側のスロット
+    const isRightSlotFilled = rack.pduPlacements?.some(p => p.position === 'right');
+    if (!isRightSlotFilled) {
+      slots.push(
+        <div
+          key="pdu-slot-right"
+          className="absolute bg-gray-600 rounded-sm shadow-lg cursor-pointer hover:border-blue-500"
+          style={{
+            top: `${top}px`,
+            left: '772px',
+            width: `${slotWidth}px`,
+            height: `${slotHeight}px`,
+            zIndex: 2,
+            border: '1px dashed #3c4656', // 設置前の枠線
+            opacity: 0.05
+          }}
+          title="48口PDUスロット (右)"
+          onClick={() => onPduInstall?.('right', top)}
+        >
+          {/* PDUスロット右側（文字なし） */}
+        </div>
+      );
+    }
+
+    return slots;
+  };
+
+  return (
+    <>
+      {renderPDUs()}
+      {renderPDUSlots()}
+    </>
+  );
 };
 export {};

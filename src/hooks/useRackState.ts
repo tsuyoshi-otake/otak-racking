@@ -41,15 +41,15 @@ const createInitialRack = (id: string, name: string, rackCount: number): Rack =>
   },
   pduPlacements: [
     {
-      id: 'pdu-left-1',
+      id: `pdu-left-${id}`,
       equipment: {
-        id: 'pdu-vertical-basic',
-        name: '縦型PDU (基本)',
+        id: `pdu-equipment-left-${id}`,
+        name: 'PDU A系統',
         height: 42,
         depth: 100,
         power: 0,
         heat: 0,
-        weight: 5,
+        weight: 8,
         type: 'pdu',
         role: 'power-distribution',
         color: '#374151',
@@ -58,22 +58,22 @@ const createInitialRack = (id: string, name: string, rackCount: number): Rack =>
         airflow: 'natural',
         cfm: 0,
         heatGeneration: 0,
-        description: 'ラック左側に設置されたPDU'
+        description: 'ラックの左側に設置されたPDU A系統'
       },
       position: 'left',
-      offset: 50,
+      offset: 0, // renderPDUsで再計算するため、仮の値
       orientation: 'vertical'
     },
     {
-      id: 'pdu-right-1',
+      id: `pdu-right-${id}`,
       equipment: {
-        id: 'pdu-vertical-smart',
-        name: 'スマートPDU',
+        id: `pdu-equipment-right-${id}`,
+        name: 'PDU B系統',
         height: 42,
         depth: 100,
         power: 0,
         heat: 0,
-        weight: 7,
+        weight: 8,
         type: 'pdu',
         role: 'power-distribution',
         color: '#374151',
@@ -82,10 +82,10 @@ const createInitialRack = (id: string, name: string, rackCount: number): Rack =>
         airflow: 'natural',
         cfm: 0,
         heatGeneration: 0,
-        description: 'ラック右側に設置されたスマートPDU'
+        description: 'ラックの右側に設置されたPDU B系統'
       },
       position: 'right',
-      offset: 50,
+      offset: 0, // renderPDUsで再計算するため、仮の値
       orientation: 'vertical'
     }
   ],
@@ -730,6 +730,63 @@ export const useRackState = () => {
     []
   );
 
+  // PDUをスロットに設置
+  const addPduToSlot = useCallback((rackId: string, side: 'left' | 'right', top: number) => {
+    setRacks(prev => {
+      const rack = prev[rackId];
+      if (!rack) return prev;
+
+      const newRack = deepCopy(rack);
+      const newPduId = `pdu-${side}-${Date.now()}`;
+      
+      const newPduEquipment: Equipment = {
+        id: `pdu-equipment-${Date.now()}`,
+        name: `PDU ${side === 'left' ? 'A' : 'B'}系統`,
+        height: 42, // 42U PDU
+        depth: 100,
+        power: 0,
+        heat: 0,
+        weight: 8,
+        type: 'pdu',
+        role: 'power-distribution',
+        color: '#374151',
+        opacity: 100,
+        dualPower: false,
+        airflow: 'natural',
+        cfm: 0,
+        heatGeneration: 0,
+        description: `ラックの${side === 'left' ? '左' : '右'}側に設置されたPDU ${side === 'left' ? 'A' : 'B'}系統`
+      };
+
+      if (!newRack.pduPlacements) {
+        newRack.pduPlacements = [];
+      }
+
+      newRack.pduPlacements.push({
+        id: newPduId,
+        equipment: newPduEquipment,
+        position: side,
+        offset: top, // RackPDUから渡されたtop値をオフセットとして使用
+        orientation: 'vertical'
+      });
+
+      return { ...prev, [rackId]: newRack };
+    });
+  }, []);
+
+  // PDUを削除
+  const removePdu = useCallback((rackId: string, pduId: string) => {
+    setRacks(prev => {
+      const rack = prev[rackId];
+      if (!rack || !rack.pduPlacements) return prev;
+
+      const newRack = deepCopy(rack);
+      newRack.pduPlacements = newRack.pduPlacements.filter(p => p.id !== pduId);
+
+      return { ...prev, [rackId]: newRack };
+    });
+  }, []);
+
   // 計算値をメモ化
   const currentRack = useMemo(() =>
     racks[selectedRack] || racks[Object.keys(racks)[0]],
@@ -766,6 +823,8 @@ export const useRackState = () => {
     installRail,
     removeRail,
     toggleProMode,
+    addPduToSlot,
+    removePdu,
     
     // Computed
     currentRack
