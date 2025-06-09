@@ -84,6 +84,7 @@ export const serverEquipment: Equipment[] = [
     airflow: 'front-to-rear',
     cfm: 65,
     heatGeneration: 1024,
+    healthStatus: 'normal',
     description: '汎用的な1Uラックマウントサーバー。Webサーバーやアプリケーションサーバーとして広く使用される。前面から背面へのエアフローで効率的な冷却を実現。',
     specifications: {
       cpu: '最大2ソケット',
@@ -161,6 +162,7 @@ export const serverEquipment: Equipment[] = [
     airflow: 'front-to-rear',
     cfm: 120,
     heatGeneration: 2048,
+    healthStatus: 'normal',
     description: '高性能2Uラックマウントサーバー。データベースサーバーや仮想化基盤として使用される。拡張性と冷却性能を重視した設計。',
     specifications: {
       cpu: '最大4ソケット',
@@ -190,6 +192,7 @@ export const serverEquipment: Equipment[] = [
     airflow: 'front-to-rear',
     cfm: 240,
     heatGeneration: 4096,
+    healthStatus: 'normal',
     description: '最高性能4Uラックマウントサーバー。ミッションクリティカルなアプリケーションや大規模仮想化環境向け。最大拡張性と冗長性を提供。',
     specifications: {
       cpu: '最大8ソケット',
@@ -219,6 +222,7 @@ export const serverEquipment: Equipment[] = [
     airflow: 'front-to-rear',
     cfm: 800,
     heatGeneration: 10240,
+    healthStatus: 'normal',
     description: '10Uブレードサーバーシャーシ。最大16枚のブレードサーバーを収容可能。高密度仮想化環境やクラウド基盤向け。',
     specifications: {
       blades: '最大16枚のブレードサーバー',
@@ -254,6 +258,7 @@ export const networkEquipment: Equipment[] = [
     airflow: 'side-to-side',
     cfm: 45,
     heatGeneration: 512,
+    healthStatus: 'normal',
     description: '1Uアクセススイッチ。24-48ポートのGigabitEthernetを提供。小規模から中規模ネットワーク向け。',
     specifications: {
       ports: 'Gigabit×24-48',
@@ -283,6 +288,7 @@ export const networkEquipment: Equipment[] = [
     airflow: 'front-to-rear',
     cfm: 90,
     heatGeneration: 1024,
+    healthStatus: 'normal',
     description: '2U高密度スイッチ。48-96ポートのGigabitEthernet + 高速アップリンクを提供。大規模ネットワーク向け。',
     specifications: {
       ports: 'Gigabit×48-96',
@@ -312,6 +318,7 @@ export const networkEquipment: Equipment[] = [
     airflow: 'front-to-rear',
     cfm: 180,
     heatGeneration: 2048,
+    healthStatus: 'normal',
     description: '4Uモジュラースイッチ。最大384ポートのGigabitEthernet + 超高速アップリンクを提供。データセンター向け。',
     specifications: {
       ports: 'Gigabit×192-384',
@@ -341,6 +348,7 @@ export const networkEquipment: Equipment[] = [
     airflow: 'front-to-rear',
     cfm: 55,
     heatGeneration: 614,
+    healthStatus: 'normal',
     description: '1U次世代ファイアウォール。アプリケーション制御、IPS、アンチウイルス機能を統合。中小規模向け。',
     specifications: {
       throughput: '最大5Gbps',
@@ -370,6 +378,7 @@ export const networkEquipment: Equipment[] = [
     airflow: 'front-to-rear',
     cfm: 110,
     heatGeneration: 1195,
+    healthStatus: 'normal',
     description: '2U高性能次世代ファイアウォール。高スループット処理とアドバンスドセキュリティ機能を提供。大規模企業向け。',
     specifications: {
       throughput: '最大20Gbps',
@@ -399,6 +408,7 @@ export const networkEquipment: Equipment[] = [
     airflow: 'front-to-rear',
     cfm: 60,
     heatGeneration: 683,
+    healthStatus: 'normal',
     description: '1U F5 BIG-IP アプリケーション配信コントローラ。高度な負荷分散、SSL処理、アプリケーションファイアウォール機能を統合。中規模向け。',
     specifications: {
       throughput: '最大40Gbps',
@@ -431,6 +441,7 @@ export const networkEquipment: Equipment[] = [
     airflow: 'front-to-rear',
     cfm: 120,
     heatGeneration: 1365,
+    healthStatus: 'normal',
     description: '2U F5 BIG-IP 高性能アプリケーション配信コントローラ。超高スループット処理とエンタープライズ機能を提供。大規模向け。',
     specifications: {
       throughput: '最大100Gbps',
@@ -463,6 +474,7 @@ export const networkEquipment: Equipment[] = [
     airflow: 'front-to-rear',
     cfm: 450,
     heatGeneration: 5120,
+    healthStatus: 'normal',
     description: '6U基幹スイッチ。データセンターのコア層を担う高性能スイッチ。超高速スループットと高可用性を提供。',
     specifications: {
       ports: '最大576ポート（モジュラー構成）',
@@ -494,6 +506,7 @@ export const networkEquipment: Equipment[] = [
     airflow: 'front-to-rear',
     cfm: 1200,
     heatGeneration: 11946,
+    healthStatus: 'normal',
     description: '14U大型基幹スイッチ。Cisco Catalyst 6509相当。データセンターのコア・ディストリビューション層を担う超高性能モジュラースイッチ。',
     specifications: {
       chassis: 'Catalyst 6509相当シャーシ',
@@ -527,6 +540,7 @@ export const networkEquipment: Equipment[] = [
     airflow: 'front-to-rear',
     cfm: 2000,
     heatGeneration: 20480,
+    healthStatus: 'normal',
     description: '21U超大型基幹スイッチ。データセンター向け最大級のモジュラースイッチ。超高密度ポート実装と最高性能を提供。',
     specifications: {
       chassis: '超大型モジュラーシャーシ',
@@ -560,6 +574,7 @@ export const networkEquipment: Equipment[] = [
     airflow: 'front-to-rear',
     cfm: 60,
     heatGeneration: 683,
+    healthStatus: 'normal',
     description: 'アプリケーション配信コントローラ。高度な負荷分散、SSL処理機能を統合。',
     specifications: {
       throughput: '最大10Gbps',
@@ -569,6 +584,34 @@ export const networkEquipment: Equipment[] = [
     mountingNotes: 'レール不要で簡単設置。冗長構成推奨。',
     mountingMethod: 'cage-nuts',
     requiresRails: false,
+    requiresCageNuts: true
+  },
+  {
+    id: 'fc-switch-1u',
+    name: 'Fibre Channel Switch',
+    height: 1,
+    depth: 610,
+    power: 350,
+    heat: 1194,
+    weight: 8,
+    type: 'network',
+    role: 'network',
+    color: '#c0a0e0',
+    opacity: 30,
+    dualPower: true,
+    airflow: 'front-to-rear',
+    cfm: 120,
+    heatGeneration: 1194,
+    healthStatus: 'normal',
+    description: 'A high-performance Fibre Channel switch for Storage Area Networks (SAN).',
+    specifications: {
+      ports: '32',
+      speed: '32Gb/s',
+      protocol: 'Fibre Channel'
+    },
+    mountingNotes: 'スライドレール必須。ケージナット取り付け。SAN環境での高速ストレージ接続用。',
+    mountingMethod: 'rails',
+    requiresRails: true,
     requiresCageNuts: true
   }
 ];
@@ -591,6 +634,7 @@ export const storageEquipment: Equipment[] = [
     airflow: 'front-to-rear',
     cfm: 45,
     heatGeneration: 512,
+    healthStatus: 'normal',
     description: '1Uストレージアレイ。小規模から中規模向け。SSD/HDD対応。',
     specifications: {
       capacity: '最大24TB',
@@ -598,10 +642,10 @@ export const storageEquipment: Equipment[] = [
       network: '10GbE×2',
       management: 'Web管理画面'
     },
-    mountingNotes: 'ケージナット固定。前面アクセス要確保。',
-    mountingMethod: 'cage-nuts',
-    requiresRails: false,
-    requiresCageNuts: true
+    mountingNotes: 'スライドレール必須。前面アクセス要確保。',
+    mountingMethod: 'rails',
+    requiresRails: true,
+    requiresCageNuts: false
   },
   {
     id: 'storage-2u',
@@ -619,6 +663,7 @@ export const storageEquipment: Equipment[] = [
     airflow: 'front-to-rear',
     cfm: 90,
     heatGeneration: 1024,
+    healthStatus: 'normal',
     description: '2Uストレージアレイ。中規模から大規模向け。高性能SSD/HDD対応。',
     specifications: {
       capacity: '最大96TB',
@@ -647,6 +692,7 @@ export const storageEquipment: Equipment[] = [
     airflow: 'front-to-rear',
     cfm: 135,
     heatGeneration: 1536,
+    healthStatus: 'normal',
     description: '3Uストレージアレイ。大規模向け。オールフラッシュ対応。',
     specifications: {
       capacity: '最大200TB',
@@ -675,6 +721,7 @@ export const storageEquipment: Equipment[] = [
     airflow: 'front-to-rear',
     cfm: 180,
     heatGeneration: 2048,
+    healthStatus: 'normal',
     description: '4Uストレージアレイ。エンタープライズ向け。高性能・高可用性。',
     specifications: {
       capacity: '最大500TB',
@@ -703,6 +750,7 @@ export const storageEquipment: Equipment[] = [
     airflow: 'front-to-rear',
     cfm: 270,
     heatGeneration: 3072,
+    healthStatus: 'normal',
     description: '6Uストレージアレイ。大規模エンタープライズ向け。最高性能・可用性。',
     specifications: {
       capacity: '最大1PB',
@@ -731,6 +779,7 @@ export const storageEquipment: Equipment[] = [
     airflow: 'front-to-rear',
     cfm: 55,
     heatGeneration: 614,
+    healthStatus: 'normal',
     description: '2U LTOテープライブラリ。自動バックアップとアーカイブ用。長期保存に最適。',
     specifications: {
       capacity: 'LTO-9×24本（432TB）',
@@ -760,6 +809,7 @@ export const storageEquipment: Equipment[] = [
     airflow: 'front-to-rear',
     cfm: 110,
     heatGeneration: 1195,
+    healthStatus: 'normal',
     description: '4U LTOテープライブラリ。大容量バックアップとアーカイブ用。エンタープライズ向け。',
     specifications: {
       capacity: 'LTO-9×48本（864TB）',
@@ -789,6 +839,7 @@ export const storageEquipment: Equipment[] = [
     airflow: 'front-to-rear',
     cfm: 150,
     heatGeneration: 1707,
+    healthStatus: 'normal',
     description: '6U LTOテープライブラリ。超大容量バックアップとアーカイブ用。データセンター向け。',
     specifications: {
       capacity: 'LTO-9×96本（1.7PB）',
@@ -1216,6 +1267,7 @@ export const otherEquipment: Equipment[] = [
     airflow: 'front-to-rear',
     cfm: 25,
     heatGeneration: 273,
+    healthStatus: 'normal',
     description: '1U NTPサーバー。GPS対応高精度時刻同期。ネットワーク全体の時刻統一用。Stratum 1対応。',
     specifications: {
       accuracy: '±1マイクロ秒（GPS同期時）',

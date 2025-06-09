@@ -48,6 +48,7 @@ interface ModalsAndDialogsProps {
   onUpdateEquipmentOpacity: (equipmentId: string, opacity: number) => void;
   onUpdateEquipmentSpecs?: (equipmentId: string, field: 'power' | 'cfm' | 'weight', value: number) => void;
   onUpdateEquipmentSize?: (equipmentId: string, newHeight: number) => Promise<void>;
+  onToggleEquipmentHealth?: (equipmentId: string) => void;
   
   // 新しいモーダル用props
   racks?: Record<string, Rack>;
@@ -92,6 +93,7 @@ export const ModalsAndDialogs: React.FC<ModalsAndDialogsProps> = ({
   onUpdateEquipmentOpacity,
   onUpdateEquipmentSpecs,
   onUpdateEquipmentSize,
+  onToggleEquipmentHealth,
   
   // 新しいモーダル用props
   racks,
@@ -300,6 +302,34 @@ export const ModalsAndDialogs: React.FC<ModalsAndDialogsProps> = ({
                   </div>
                   <p className="text-sm mt-1 text-orange-700 dark:text-orange-300">
                     {selectedEquipment.mountingNotes}
+                  </p>
+                </div>
+              )}
+              
+              {/* ヘルス状態切り替えボタン（サーバー、スイッチ、ストレージ機器のみ） */}
+              {(selectedEquipment.type === 'server' || selectedEquipment.type === 'network' || selectedEquipment.type === 'storage') && (
+                <div>
+                  <h4 className="font-medium mb-2">ヘルス状態</h4>
+                  <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2">
+                      <div
+                        className={`w-3 h-3 rounded-full ${
+                          selectedEquipment.healthStatus === 'error' ? 'bg-red-500' : 'bg-green-500'
+                        }`}
+                      />
+                      <span className="text-sm">
+                        {selectedEquipment.healthStatus === 'error' ? 'エラー' : '正常'}
+                      </span>
+                    </div>
+                    <button
+                      onClick={() => onToggleEquipmentHealth?.(selectedEquipment.id)}
+                      className="px-3 py-1 text-xs rounded bg-gray-600 hover:bg-gray-500 text-white"
+                    >
+                      ヘルス状態をトグル
+                    </button>
+                  </div>
+                  <p className="text-xs text-gray-400 mt-1">
+                    LEDの表示確認用。実際の機器状態とは連動しません。
                   </p>
                 </div>
               )}

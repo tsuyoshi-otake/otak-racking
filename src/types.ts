@@ -18,6 +18,7 @@ export interface Equipment {
   description: string;
   specifications?: Record<string, string>;
   mountingNotes?: string;
+  healthStatus?: 'normal' | 'error'; // 機器の健康状態
   
   // ラック配置関連
   startUnit?: number;

@@ -12,6 +12,7 @@ import {
 } from '../utils';
 import { getAirflowIcon, getMountingIcon } from './RackIcons';
 import { MountingHoles } from './MountingHoles';
+import { StatusLEDs } from './StatusLEDs';
 
 // メモ化されたコンポーネント
 const MemoizedMountingHoles = React.memo(MountingHoles);
@@ -238,6 +239,16 @@ export const RackUnit: React.FC<RackUnitProps> = React.memo(({
             {temperatureStatus && <span className="ml-1">{temperatureStatus}</span>}
             {cageNutDisplay && <span className="ml-1">{cageNutDisplay}</span>}
             {railDisplay && <span className="ml-1">{railDisplay}</span>}
+            {/* サーバー、スイッチ、ストレージ機器の場合にStatusLEDsを表示 */}
+            {(item.type === 'server' || item.type === 'network' || item.type === 'storage') && (
+              <StatusLEDs
+                powerStatus={(() => {
+                  const status = getPowerStatus(item, rack.powerConnections);
+                  return status.status;
+                })()}
+                healthStatus={item.healthStatus || 'normal'}
+              />
+            )}
           </div>
           <button
             onClick={(e) => {

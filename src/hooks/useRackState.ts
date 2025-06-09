@@ -1093,6 +1093,47 @@ export const useRackState = () => {
     [racks, selectedRack]
   );
 
+  // 機器のヘルス状態をトグル
+  const toggleEquipmentHealth = useCallback((rackId: string, equipmentId: string) => {
+    setRacks(prev => {
+      const currentRack = prev[rackId];
+      if (!currentRack) return prev;
+      
+      // 該当機器を探す
+      let targetUnit: number | null = null;
+      let targetEquipment: Equipment | null = null;
+      
+      for (const [unit, equipment] of Object.entries(currentRack.equipment)) {
+        if (equipment.id === equipmentId) {
+          targetUnit = parseInt(unit);
+          targetEquipment = equipment;
+          break;
+        }
+      }
+      
+      if (!targetUnit || !targetEquipment) {
+        return prev;
+      }
+      
+      // ヘルス状態をトグル
+      const newHealthStatus = targetEquipment.healthStatus === 'error' ? 'normal' : 'error';
+      
+      return {
+        ...prev,
+        [rackId]: {
+          ...currentRack,
+          equipment: {
+            ...currentRack.equipment,
+            [targetUnit]: {
+              ...targetEquipment,
+              healthStatus: newHealthStatus
+            }
+          }
+        }
+      };
+    });
+  }, []);
+
   return {
     // State
     racks,
@@ -1128,6 +1169,7 @@ export const useRackState = () => {
     toggleProMode,
     addPduToSlot,
     removePdu,
+    toggleEquipmentHealth,
     
     // Computed
     currentRack

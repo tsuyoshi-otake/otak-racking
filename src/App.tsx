@@ -80,6 +80,7 @@ function App() {
     addPduToSlot,
     removePdu,
     moveEquipment,
+    toggleEquipmentHealth,
     isSharedDataLoaded,
   } = useRackState();
   // モーダル表示関数（メモ化）
@@ -507,6 +508,9 @@ function App() {
             showInfoModal('エラー', '機器サイズの変更に失敗しました。');
           }
         }}
+        onToggleEquipmentHealth={(equipmentId) =>
+          toggleEquipmentHealth(selectedRack, equipmentId)
+        }
         
         // 新しいモーダル用props
         racks={racks}
