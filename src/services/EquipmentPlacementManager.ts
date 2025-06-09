@@ -583,8 +583,7 @@ export class EquipmentPlacementManager {
       this.createCapacityConstraint(),
       this.createOccupancyConstraint(),
       this.createProModeCageNutConstraint(),
-      this.createShelfRequirementConstraint(),
-      this.createProModeRailConstraint(), // 新しい制約を追加
+      this.createProModeRailConstraint(),
       this.createMountingMethodWarningConstraint(),
       this.createRailConflictConstraint()
     ];
@@ -773,36 +772,6 @@ export class EquipmentPlacementManager {
     };
   }
 
-  /**
-   * 棚板要求制約（神棚用）
-   */
-  private createShelfRequirementConstraint(): PlacementConstraint {
-    return {
-      id: 'shelf-requirement',
-      name: '棚板要求チェック',
-      priority: 6, // 優先度を調整
-      validate: (context: PlacementContext): PlacementValidation => {
-        const { rack, position, equipment } = context;
-        const errors: PlacementError[] = [];
-        
-        if (equipment.requiresShelf) {
-          const shelfUnit = position.startUnit - 1;
-          const shelfItem = rack.equipment[shelfUnit];
-          
-          if (!shelfItem || shelfItem.type !== 'shelf') {
-            errors.push({
-              code: 'SHELF_REQUIRED',
-              message: '神棚は棚板の上にのみ設置できます。まず棚板を設置してください',
-              affectedUnits: [position.startUnit, shelfUnit],
-              severity: 'error' as const
-            });
-          }
-        }
-        
-        return { isValid: errors.length === 0, errors, warnings: [] };
-      }
-    };
-  }
 
   /**
    * 取り付け方法に関する警告制約

@@ -24,7 +24,7 @@ export interface Equipment {
   isMainUnit?: boolean;
   
   // 取り付け方法
-  mountingMethod?: 'rails' | 'cage-nuts' | 'shelf' | 'direct';
+  mountingMethod?: 'rails' | 'cage-nuts' | 'direct';
   requiresRails?: boolean;
   requiresCageNuts?: boolean;
   
@@ -33,7 +33,6 @@ export interface Equipment {
   nutType?: string;
   screwType?: string;
   washerType?: string;
-  requiresShelf?: boolean;
   system?: string;
   role?: EquipmentRole;
   
@@ -234,10 +233,10 @@ export interface LayoutDimensions {
 }
 
 // 定数型
-export type EquipmentType = 'server' | 'network' | 'security' | 'storage' | 'pdu' | 'ups' | 'power' | 'console' | 'monitoring' | 'cooling' | 'shelf' | 'spiritual' | 'cable' | 'mounting' | 'panel' | 'rail' | 'other';
+export type EquipmentType = 'server' | 'network' | 'security' | 'storage' | 'pdu' | 'ups' | 'power' | 'console' | 'monitoring' | 'cooling' | 'shelf' | 'cable' | 'mounting' | 'panel' | 'rail' | 'other';
 
 // 取り付け方法の型定義
-export type MountingMethod = 'rails' | 'cage-nuts' | 'shelf' | 'direct';
+export type MountingMethod = 'rails' | 'cage-nuts' | 'direct';
 
 // レール関連の型定義
 export interface RailConfiguration {

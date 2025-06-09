@@ -1,7 +1,7 @@
 import { describe, it, expect } from '@jest/globals';
-import { calculateRackStats, canPlaceEquipment } from '../utils';
-import { otherEquipment } from '../constants';
-import { Rack, Equipment, createDefaultPhysicalStructure } from '../types';
+import { calculateRackStats, canPlaceEquipment } from '../../utils';
+import { otherEquipment } from '../../constants';
+import { Rack, Equipment, createDefaultPhysicalStructure } from '../../types';
 
 describe('棚板のテスト', () => {
   const createTestRack = (): Rack => ({

@@ -1,6 +1,10 @@
-import { placementManager } from '../services/EquipmentPlacementManager';
-import { Rack, Equipment } from '../types';
-import { createDefaultPhysicalStructure } from '../types';
+import { describe, beforeEach, test, expect } from '@jest/globals';
+import { EquipmentPlacementManager } from '../../services/EquipmentPlacementManager';
+import { Rack, Equipment } from '../../types';
+import { createDefaultPhysicalStructure } from '../../types';
+
+// placementManagerインスタンスを作成
+const placementManager = new EquipmentPlacementManager();
 
 describe('レール要求制約のテスト', () => {
   let rack: Rack;

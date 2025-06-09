@@ -126,26 +126,6 @@ describe('EquipmentPlacementManager', () => {
     description: '棚板'
   });
 
-  const createKamidana = (): Equipment => ({
-    id: 'kamidana',
-    name: '神棚',
-    height: 1,
-    depth: 200,
-    power: 0,
-    heat: 0,
-    weight: 1,
-    type: 'spiritual',
-    color: '#F59E0B',
-    dualPower: false,
-    requiresRails: false,
-    mountingMethod: 'shelf' as const,
-    requiresCageNuts: false,
-    requiresShelf: true,
-    airflow: 'natural',
-    cfm: 0,
-    heatGeneration: 0,
-    description: '神棚'
-  });
 
   beforeEach(() => {
     manager = new EquipmentPlacementManager();
@@ -270,29 +250,6 @@ describe('EquipmentPlacementManager', () => {
     });
   });
 
-  describe('特殊機器設置テスト', () => {
-    it('神棚は棚板なしでは設置できない', async () => {
-      const kamidana = createKamidana();
-      
-      const result = await manager.placeEquipment(testRack, 2, kamidana);
-      expect(result.success).toBe(false);
-      expect(result.validation.errors[0].code).toBe('SHELF_REQUIRED');
-    });
-
-    it('棚板上に神棚を設置できる', async () => {
-      const shelf = createShelf();
-      const kamidana = createKamidana();
-      
-      // 1Uに棚板を設置
-      const result1 = await manager.placeEquipment(testRack, 1, shelf, { skipWarnings: true });
-      expect(result1.success).toBe(true);
-      expect(result1.updatedRack).toBeDefined();
-      
-      // 3Uに神棚を設置
-      const result2 = await manager.placeEquipment(result1.updatedRack!, 3, kamidana);
-      expect(result2.success).toBe(true);
-    });
-  });
 
   describe('ゲージナット自動設置テスト', () => {
     it('autoInstallCageNutsオプションでゲージナットが自動設置される', async () => {

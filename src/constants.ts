@@ -540,6 +540,33 @@ export const networkEquipment: Equipment[] = [
     mountingMethod: 'rails',
     requiresRails: true,
     requiresCageNuts: false
+  },
+  {
+    id: 'load-balancer',
+    name: 'ロードバランサー',
+    height: 1,
+    depth: 450,
+    power: 200,
+    heat: 683,
+    weight: 12,
+    type: 'network',
+    role: 'network',
+    color: '#1E40AF',
+    opacity: 30,
+    dualPower: true,
+    airflow: 'front-to-rear',
+    cfm: 60,
+    heatGeneration: 683,
+    description: 'アプリケーション配信コントローラ。高度な負荷分散、SSL処理機能を統合。',
+    specifications: {
+      throughput: '最大10Gbps',
+      connections: '最大100万同時接続',
+      ssl: 'SSL終端・オフロード対応'
+    },
+    mountingNotes: 'レール不要で簡単設置。冗長構成推奨。',
+    mountingMethod: 'cage-nuts',
+    requiresRails: false,
+    requiresCageNuts: true
   }
 ];
 
@@ -1297,7 +1324,6 @@ export const equipmentTypeIcons = {
   'monitoring': 'Eye',
   'cooling': 'Snowflake',
   'shelf': 'Package',
-  'spiritual': 'Flame',
   'cable': 'Cable',
   'mounting': 'Wrench',
   'rail': 'Move',

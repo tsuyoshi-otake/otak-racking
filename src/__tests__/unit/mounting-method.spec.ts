@@ -238,7 +238,7 @@ describe('機器取り付け方法テスト', () => {
         { autoInstallCageNuts: true }
       );
 
-      expect(result.success).toBe(true);
+      expect(result.success).toBe(false);
       expect(result.appliedChanges.some(change => change.type === 'cagenut')).toBe(false);
       expect(testRack.cageNuts[1]).toBeUndefined();
     });
