@@ -123,7 +123,7 @@ export const RackView: React.FC<RackViewProps> = React.memo(({
               style={{
                 height: `${draggedItem.height * unitHeight}px`,
                 width: '100%',
-                top: `${(rack.units - hoveredUnit) * unitHeight}px`,
+                top: `${(rack.units - hoveredUnit - draggedItem.height + 1) * unitHeight}px`,
                 zIndex: 20,
               }}
             />
@@ -178,7 +178,7 @@ export const RackView: React.FC<RackViewProps> = React.memo(({
                 backgroundColor: eq.color,
                 height: `${eq.height * getZoomedUnitHeight(zoomLevel)}px`,
                 width: `${Math.max(20, eq.depth / (zoomLevel > 75 ? 3 : zoomLevel > 50 ? 4 : 5) * 0.8)}px`,
-                top: `${(rack.units - (eq.startUnit || 0) - eq.height + 1) * getZoomedUnitHeight(zoomLevel)}px`,
+                top: `${(rack.units - (eq.startUnit || 0)) * getZoomedUnitHeight(zoomLevel)}px`,
                 left: perspective === 'left' ? '10%' : undefined,
                 right: perspective === 'right' ? '10%' : undefined,
                 opacity: 0.7

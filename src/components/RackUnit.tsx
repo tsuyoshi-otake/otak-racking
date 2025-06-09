@@ -156,11 +156,6 @@ export const RackUnit: React.FC<RackUnitProps> = React.memo(({
       style={{ height: unitHeight }}
       onDragOver={isEmpty && selectedRack !== 'all' ? (e) => onDragOver?.(e, unit) : undefined}
       onDrop={isEmpty && selectedRack !== 'all' ? (e) => onDrop?.(e, unit) : undefined}
-      onClick={() => {
-        if (item && isMainUnit && selectedRack !== 'all') {
-          onEquipmentClick?.(item);
-        }
-      }}
     >
       <div className="flex items-center gap-1">
         <span
@@ -197,7 +192,7 @@ export const RackUnit: React.FC<RackUnitProps> = React.memo(({
         )}
       </div>
 
-      {(activeViewMode === 'showCageNutView' || isEmpty || (item && !isMainUnit)) && (perspective === 'front' || perspective === 'rear') && (
+      {(activeViewMode === 'showCageNutView' || activeViewMode === 'showRailView' || isEmpty) && (perspective === 'front' || perspective === 'rear') && (
         <MemoizedMountingHoles
           rack={rack}
           unit={unit}
@@ -226,7 +221,13 @@ export const RackUnit: React.FC<RackUnitProps> = React.memo(({
           style={{
             backgroundColor: `${item.color}${Math.round((item.opacity ?? 100) / 100 * 255).toString(16).padStart(2, '0')}`,
             height: `${item.height * unitHeight}px`,
+            top: `${-(item.height - 1) * unitHeight}px`,
             zIndex: 10
+          }}
+          onClick={() => {
+            if (item && isMainUnit && selectedRack !== 'all') {
+              onEquipmentClick?.(item);
+            }
           }}
         >
           <div className="relative z-10 text-white font-normal text-xs truncate flex-1 text-center flex items-center justify-center gap-1 [text-shadow:0_1px_2px_rgba(0,0,0,0.5)]">

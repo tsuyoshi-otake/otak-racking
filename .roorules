@@ -453,3 +453,53 @@ classDiagram
 
 ### 3. 拡張子
 テストファイルの拡張子は `.spec.ts` を使用します。
+
+## シーケンス図
+
+### 機器のドラッグ＆ドロップによる配置
+
+```mermaid
+sequenceDiagram
+    actor User
+    participant EL as EquipmentLibrary
+    participant App
+    participant DND as useDragAndDrop
+    participant RV as RackView
+    participant RS as useRackState
+    participant EPM as EquipmentPlacementManager
+
+    User->>EL: 機器をドラッグ開始
+    EL->>App: onDragStart(e, equipment)
+    App->>DND: handleDragStart(e, equipment)
+    DND->>DND: setDraggedItem(equipment)
+
+    User->>RV: 機器をドラッグオーバー
+    RV->>App: onDragOver(e, unit, rackId)
+    App->>DND: handleDragOver(e, unit, rackId)
+    DND->>DND: setHoveredInfo({rackId, unit})
+    note right of DND: プレビュー表示用のホバー情報を更新
+
+    User->>RV: 機器をドロップ
+    RV->>App: onDrop(e, unit, rackId)
+    App->>DND: handleDrop(e, unit, rackId)
+    
+    alt 新規配置
+        DND->>RS: addEquipment(rackId, unit, equipment)
+        RS->>EPM: placeEquipment(rack, unit, equipment)
+        EPM->>EPM: validatePlacement(context)
+        note right of EPM: 各制約(Constraint)をチェック
+        EPM-->>RS: PlacementResult (success/fail)
+        RS-->>DND: PlacementResult
+        DND->>App: (UI更新 or エラー表示)
+    else 機器移動
+        DND->>RS: moveEquipment(rackId, fromUnit, toUnit)
+        RS->>EPM: moveEquipment(rack, from, to)
+        EPM->>EPM: removeEquipment(rack, from)
+        EPM->>EPM: placeEquipment(rack, to, equipment)
+        EPM-->>RS: PlacementResult (success/fail)
+        RS-->>DND: PlacementResult
+        DND->>App: (UI更新 or エラー表示)
+    end
+
+    DND->>DND: handleDragEnd()
+    note right of DND: ドラッグ状態をリセット

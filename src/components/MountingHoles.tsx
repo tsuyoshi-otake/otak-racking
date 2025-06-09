@@ -69,6 +69,7 @@ export const MountingHoles: React.FC<MountingHolesProps> = ({
             : '1px dashed rgba(71, 85, 105, 0.4)',
           borderRadius: '2px',
           boxShadow: hasRail ? 'inset 0 2px 4px rgba(0,0,0,0.5), 0 1px 2px rgba(255,255,255,0.1)' : 'none',
+          zIndex: 5,
         }}
         title={`${position === 'left' ? '左' : '右'}レールスロット: ${hasRail ? 'レール設置済み（クリックで削除）' : 'クリックでレール設置'}`}
         onClick={(e) => {
@@ -115,6 +116,7 @@ export const MountingHoles: React.FC<MountingHolesProps> = ({
           top: vertical === 'top' ? '2px' : vertical === 'middle' ? '50%' : undefined,
           bottom: vertical === 'bottom' ? '2px' : undefined,
           transform: vertical === 'middle' ? 'translateY(-50%)' : undefined,
+          zIndex: 5,
         }}
       >
         {/* ケージナット穴 */}

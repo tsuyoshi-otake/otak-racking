@@ -67,7 +67,7 @@ export const rackTypes: Record<string, RackType> = {
 export const serverEquipment: Equipment[] = [
   {
     id: 'server-1u',
-    name: 'ラックマウントサーバー',
+    name: 'ラックマウントサーバー (1U)',
     height: 1,
     depth: 650,
     power: 300,
@@ -81,7 +81,7 @@ export const serverEquipment: Equipment[] = [
     airflow: 'front-to-rear',
     cfm: 65,
     heatGeneration: 1024,
-    description: '汎用的なラックマウントサーバー。Webサーバーやアプリケーションサーバーとして広く使用される。前面から背面へのエアフローで効率的な冷却を実現。',
+    description: '汎用的な1Uラックマウントサーバー。Webサーバーやアプリケーションサーバーとして広く使用される。前面から背面へのエアフローで効率的な冷却を実現。',
     specifications: {
       cpu: '最大2ソケット',
       memory: '最大512GB',
@@ -141,6 +141,64 @@ export const serverEquipment: Equipment[] = [
       }
     ],
     selectedSize: 1
+  },
+  {
+    id: 'server-2u',
+    name: 'ラックマウントサーバー (2U)',
+    height: 2,
+    depth: 650,
+    power: 600,
+    heat: 2048,
+    weight: 28,
+    type: 'server',
+    role: 'compute',
+    color: '#374151',
+    opacity: 0,
+    dualPower: true,
+    airflow: 'front-to-rear',
+    cfm: 120,
+    heatGeneration: 2048,
+    description: '高性能2Uラックマウントサーバー。データベースサーバーや仮想化基盤として使用される。拡張性と冷却性能を重視した設計。',
+    specifications: {
+      cpu: '最大4ソケット',
+      memory: '最大1TB',
+      storage: '2.5インチ×8台',
+      network: 'Gigabit×4, 10GbE×2対応',
+      powerSupply: '冗長電源対応'
+    },
+    mountingNotes: 'スライドレール必須。重量のため2人作業推奨。ケーブルアーム推奨。',
+    mountingMethod: 'rails',
+    requiresRails: true,
+    requiresCageNuts: false
+  },
+  {
+    id: 'server-4u',
+    name: 'ラックマウントサーバー (4U)',
+    height: 4,
+    depth: 650,
+    power: 1200,
+    heat: 4096,
+    weight: 55,
+    type: 'server',
+    role: 'compute',
+    color: '#374151',
+    opacity: 0,
+    dualPower: true,
+    airflow: 'front-to-rear',
+    cfm: 240,
+    heatGeneration: 4096,
+    description: '最高性能4Uラックマウントサーバー。ミッションクリティカルなアプリケーションや大規模仮想化環境向け。最大拡張性と冗長性を提供。',
+    specifications: {
+      cpu: '最大8ソケット',
+      memory: '最大2TB',
+      storage: '2.5インチ×16台',
+      network: 'Gigabit×8, 10GbE×4対応',
+      powerSupply: '冗長電源対応'
+    },
+    mountingNotes: 'スライドレール必須。重量のため複数人作業必須。専用ケーブルアーム推奨。',
+    mountingMethod: 'rails',
+    requiresRails: true,
+    requiresCageNuts: false
   }
 ];
 
