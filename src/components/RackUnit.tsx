@@ -151,11 +151,11 @@ export const RackUnit: React.FC<RackUnitProps> = React.memo(({
       className={`relative border flex items-center justify-between px-2 ${unitBorderClass} ${
         isEmpty ? emptyUnitClass : ''
       } ${
-        item && !isMainUnit ? `border-t-0 ${emptyUnitClass}` : ''
+        item && !isMainUnit ? 'border-t-0' : ''
       }`}
       style={{ height: unitHeight }}
-      onDragOver={(isEmpty || (item && !isMainUnit)) && selectedRack !== 'all' ? (e) => onDragOver?.(e, unit) : undefined}
-      onDrop={(isEmpty || (item && !isMainUnit)) && selectedRack !== 'all' ? (e) => onDrop?.(e, unit) : undefined}
+      onDragOver={isEmpty && selectedRack !== 'all' ? (e) => onDragOver?.(e, unit) : undefined}
+      onDrop={isEmpty && selectedRack !== 'all' ? (e) => onDrop?.(e, unit) : undefined}
       onClick={() => {
         if (item && isMainUnit && selectedRack !== 'all') {
           onEquipmentClick?.(item);
@@ -220,7 +220,7 @@ export const RackUnit: React.FC<RackUnitProps> = React.memo(({
               e.dataTransfer.effectAllowed = 'move';
             }
           }}
-          className={`absolute inset-0 flex items-center justify-between px-2 cursor-move ${
+          className={`absolute top-0 left-0 w-full flex items-center justify-between px-2 cursor-move ${
             ['showPowerView', 'showMountingView', 'showLabelView', 'showCablingView', 'showCageNutView', 'showRailView'].includes(activeViewMode ?? '') ? 'border-2 border-dashed border-gray-400' : ''
           }`}
           style={{

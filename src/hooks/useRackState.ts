@@ -534,6 +534,49 @@ export const useRackState = () => {
     });
   }, []);
 
+  // 機器のサイズを更新
+  const updateEquipmentSize = useCallback((rackId: string, equipmentId: string, newHeight: number) => {
+    setRacks(prev => {
+      const currentRack = prev[rackId];
+      if (!currentRack) return prev;
+
+      let targetUnit: number | null = null;
+      let targetEquipment: Equipment | null = null;
+
+      for (const [unit, equipment] of Object.entries(currentRack.equipment)) {
+        if (equipment.id === equipmentId) {
+          targetUnit = parseInt(unit);
+          targetEquipment = equipment;
+          break;
+        }
+      }
+
+      if (!targetUnit || !targetEquipment || !targetEquipment.availableSizes) {
+        return prev;
+      }
+
+      const newSize = targetEquipment.availableSizes.find(s => s.height === newHeight);
+      if (!newSize) return prev;
+
+      const updatedEquipment = {
+        ...targetEquipment,
+        ...newSize,
+        selectedSize: newHeight,
+      };
+
+      return {
+        ...prev,
+        [rackId]: {
+          ...currentRack,
+          equipment: {
+            ...currentRack.equipment,
+            [targetUnit]: updatedEquipment,
+          },
+        },
+      };
+    });
+  }, []);
+
   // 電源接続更新
   const updatePowerConnection = useCallback((rackId: string, equipmentId: string, field: string, value: any) => {
     setRacks(prev => {
@@ -869,6 +912,7 @@ export const useRackState = () => {
     updateEquipmentColor,
     updateEquipmentOpacity,
     updateEquipmentSpecs,
+    updateEquipmentSize,
     updatePowerConnection,
     updateMountingOption,
     installCageNut,

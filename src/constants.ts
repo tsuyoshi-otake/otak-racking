@@ -92,7 +92,55 @@ export const serverEquipment: Equipment[] = [
     mountingNotes: 'スライドレール必須。ケーブルアーム推奨。',
     mountingMethod: 'rails',
     requiresRails: true,
-    requiresCageNuts: false
+    requiresCageNuts: false,
+    availableSizes: [
+      {
+        height: 1,
+        power: 300,
+        heat: 1024,
+        weight: 15,
+        cfm: 65,
+        heatGeneration: 1024,
+        specifications: {
+          cpu: '最大2ソケット',
+          memory: '最大512GB',
+          storage: '2.5インチ×4台',
+          network: 'Gigabit×2, 10GbE対応',
+          powerSupply: '冗長電源対応'
+        }
+      },
+      {
+        height: 2,
+        power: 600,
+        heat: 2048,
+        weight: 28,
+        cfm: 120,
+        heatGeneration: 2048,
+        specifications: {
+          cpu: '最大4ソケット',
+          memory: '最大1TB',
+          storage: '2.5インチ×8台',
+          network: 'Gigabit×4, 10GbE×2対応',
+          powerSupply: '冗長電源対応'
+        }
+      },
+      {
+        height: 4,
+        power: 1200,
+        heat: 4096,
+        weight: 55,
+        cfm: 240,
+        heatGeneration: 4096,
+        specifications: {
+          cpu: '最大8ソケット',
+          memory: '最大2TB',
+          storage: '2.5インチ×16台',
+          network: 'Gigabit×8, 10GbE×4対応',
+          powerSupply: '冗長電源対応'
+        }
+      }
+    ],
+    selectedSize: 1
   }
 ];
 
@@ -213,7 +261,7 @@ export const powerEquipment: Equipment[] = [
     airflow: 'front-to-rear',
     cfm: 80,
     heatGeneration: 171,
-    description: '無停電電源装置。停電時の電力供給とサージ保護を提供。Smart-UPS 3000VA相当。',
+    description: '無停電電源装置。停電時の電力供給とサージ保護を提供。Smart-UPS相当。',
     specifications: {
       capacity: '3000VA/2700W',
       runtime: '約10分（フル負荷時）',
@@ -226,7 +274,58 @@ export const powerEquipment: Equipment[] = [
     mountingNotes: 'スライドレール必須。バッテリー交換時の前面アクセス要確保。',
     mountingMethod: 'rails',
     requiresRails: true,
-    requiresCageNuts: false
+    requiresCageNuts: false,
+    availableSizes: [
+      {
+        height: 1,
+        power: 50,
+        heat: 171,
+        weight: 45,
+        cfm: 80,
+        heatGeneration: 171,
+        specifications: {
+          capacity: '3000VA/2700W',
+          runtime: '約10分（フル負荷時）',
+          outlets: 'C13×6, C19×2',
+          input: '単相100V 15A',
+          battery: 'シールド型鉛蓄電池',
+          management: 'ネットワーク管理カード対応'
+        }
+      },
+      {
+        height: 2,
+        power: 80,
+        heat: 273,
+        weight: 75,
+        cfm: 140,
+        heatGeneration: 273,
+        specifications: {
+          capacity: '5000VA/4500W',
+          runtime: '約15分（フル負荷時）',
+          outlets: 'C13×8, C19×4',
+          input: '単相100V 20A',
+          battery: 'シールド型鉛蓄電池×2',
+          management: 'ネットワーク管理カード対応'
+        }
+      },
+      {
+        height: 4,
+        power: 150,
+        heat: 512,
+        weight: 140,
+        cfm: 280,
+        heatGeneration: 512,
+        specifications: {
+          capacity: '10000VA/9000W',
+          runtime: '約20分（フル負荷時）',
+          outlets: 'C13×12, C19×8',
+          input: '単相100V 30A',
+          battery: 'シールド型鉛蓄電池×4',
+          management: 'ネットワーク管理カード対応'
+        }
+      }
+    ],
+    selectedSize: 1
   }
 ];
 

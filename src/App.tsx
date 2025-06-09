@@ -68,6 +68,7 @@ function App() {
     updateEquipmentColor,
     updateEquipmentOpacity,
     updateEquipmentSpecs,
+    updateEquipmentSize,
     autoInstallCageNutsForUnit,
     installCageNut,
     removeCageNut,
@@ -475,6 +476,9 @@ function App() {
         }
         onUpdateEquipmentSpecs={(equipmentId, field, value) =>
           updateEquipmentSpecs(selectedRack, equipmentId, field, value)
+        }
+        onUpdateEquipmentSize={(equipmentId, newHeight) =>
+          updateEquipmentSize(selectedRack, equipmentId, newHeight)
         }
         
         // 新しいモーダル用props

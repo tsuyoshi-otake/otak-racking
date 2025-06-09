@@ -36,6 +36,21 @@ export interface Equipment {
   requiresShelf?: boolean;
   system?: string;
   role?: EquipmentRole;
+  
+  // サイズバリエーション機能
+  availableSizes?: EquipmentSize[];
+  selectedSize?: number; // 選択されたサイズ（height）
+}
+
+export interface EquipmentSize {
+  height: number; // 1, 2, 4
+  power: number;
+  heat: number;
+  weight: number;
+  cfm: number;
+  heatGeneration: number;
+  specifications?: Record<string, string>;
+  priceMultiplier?: number; // 基本価格からの倍率
 }
 
 export type EquipmentRole = 'compute' | 'network' | 'storage' | 'power-source' | 'power-distribution' | 'cooling' | 'security' | 'monitoring' | 'accessory' | 'other';

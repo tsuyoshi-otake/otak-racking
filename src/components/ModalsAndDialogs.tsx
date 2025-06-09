@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { Equipment, Rack, FloorSettings } from '../types';
 import { getPowerSources } from '../utils';
+import EquipmentSizeSelector from './EquipmentSizeSelector';
 
 // +++ 新しい InfoModal 用の Props (簡易版) +++
 export interface InfoModalProps { // export を追加
@@ -46,6 +47,7 @@ interface ModalsAndDialogsProps {
   onUpdateEquipmentColor: (equipmentId: string, color: string) => void;
   onUpdateEquipmentOpacity: (equipmentId: string, opacity: number) => void;
   onUpdateEquipmentSpecs?: (equipmentId: string, field: 'power' | 'cfm' | 'weight', value: number) => void;
+  onUpdateEquipmentSize?: (equipmentId: string, newHeight: number) => void;
   
   // 新しいモーダル用props
   racks?: Record<string, Rack>;
@@ -89,6 +91,7 @@ export const ModalsAndDialogs: React.FC<ModalsAndDialogsProps> = ({
   onUpdateEquipmentColor,
   onUpdateEquipmentOpacity,
   onUpdateEquipmentSpecs,
+  onUpdateEquipmentSize,
   
   // 新しいモーダル用props
   racks,
@@ -211,6 +214,10 @@ export const ModalsAndDialogs: React.FC<ModalsAndDialogsProps> = ({
                 </div>
               </div>
 
+              <EquipmentSizeSelector
+                equipment={selectedEquipment}
+                onSizeChange={(newHeight) => onUpdateEquipmentSize?.(selectedEquipment.id, newHeight)}
+              />
               {/* 編集可能な仕様 */}
               <div>
                 <h4 className="font-medium mb-2">編集可能な仕様</h4>
