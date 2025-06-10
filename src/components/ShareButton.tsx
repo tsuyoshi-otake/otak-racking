@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import { Share2, Check } from 'lucide-react';
+import { Save, Check } from 'lucide-react';
 import { generateShareUrl, createShareableData } from '../utils/shareUtils';
 
 interface ShareButtonProps {
@@ -74,7 +74,7 @@ export const ShareButton: React.FC<ShareButtonProps> = ({
       ) : copied ? (
         <Check size={20} />
       ) : (
-        <Share2 size={20} />
+        <Save size={20} />
       )}
     </button>
   );
