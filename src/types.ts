@@ -19,6 +19,7 @@ export interface Equipment {
   specifications?: Record<string, string>;
   mountingNotes?: string;
   healthStatus?: 'normal' | 'error'; // 機器の健康状態
+  powerOn?: boolean; // 電源ON/OFF状態
   
   // ラック配置関連
   startUnit?: number;

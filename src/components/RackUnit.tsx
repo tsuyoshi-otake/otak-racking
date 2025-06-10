@@ -38,6 +38,7 @@ interface RackUnitProps {
   showConfirmModal?: (title: string, message: string, onConfirm: () => void, confirmText?: string, cancelText?: string) => void;
   onRailInstall?: (unit: number, side: 'left' | 'right', railType: string) => void;
   onRailRemove?: (unit: number, side: 'left' | 'right') => void;
+  onPowerToggle?: (equipmentId: string) => void;
 }
 
 
@@ -61,7 +62,8 @@ export const RackUnit: React.FC<RackUnitProps> = React.memo(({
   onAutoInstallCageNuts,
   showConfirmModal,
   onRailInstall,
-  onRailRemove
+  onRailRemove,
+  onPowerToggle
 }) => {
   const item = rack.equipment[unit];
   const isEmpty = !item;
@@ -216,14 +218,17 @@ export const RackUnit: React.FC<RackUnitProps> = React.memo(({
               e.dataTransfer.effectAllowed = 'move';
             }
           }}
-          className={`absolute top-0 left-0 w-full flex items-center justify-between px-2 cursor-move ${
-            ['showPowerView', 'showMountingView', 'showLabelView', 'showCablingView', 'showCageNutView', 'showRailView'].includes(activeViewMode ?? '') ? 'border-2 border-dashed border-gray-400' : ''
+          className={`absolute top-0 left-0 w-full flex items-center justify-between px-2 cursor-move border-2 border-solid rounded-sm ${
+            ['showPowerView', 'showMountingView', 'showLabelView', 'showCablingView', 'showCageNutView', 'showRailView'].includes(activeViewMode ?? '')
+              ? 'border-gray-400 border-dashed'
+              : 'border-gray-800 border-solid shadow-lg'
           }`}
           style={{
-            backgroundColor: `${item.color}${Math.round((item.opacity ?? 100) / 100 * 255).toString(16).padStart(2, '0')}`,
-            height: `${item.height * unitHeight}px`,
-            top: `${-(item.height - 1) * unitHeight}px`,
-            zIndex: 10
+            backgroundColor: `${item.color}${Math.round(10 / 100 * 255).toString(16).padStart(2, '0')}`,
+            height: `${item.height * unitHeight - 2}px`,
+            top: `${-(item.height - 1) * unitHeight + 1}px`,
+            zIndex: 10,
+            boxShadow: '0 2px 4px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1)'
           }}
           onClick={() => {
             if (item && isMainUnit && selectedRack !== 'all') {
@@ -231,7 +236,8 @@ export const RackUnit: React.FC<RackUnitProps> = React.memo(({
             }
           }}
         >
-          <div className="relative z-10 text-white font-normal text-xs truncate flex-1 text-center flex items-center justify-center gap-1 [text-shadow:0_1px_2px_rgba(0,0,0,0.5)]">
+          {/* 機器名ラベル */}
+          <div className="relative z-10 text-gray-300 font-normal text-xs truncate flex-1 text-center flex items-center justify-center gap-1 [text-shadow:0_1px_2px_rgba(0,0,0,0.5)]">
             <span>{displayName}</span>
             {powerStatus && <span className="ml-1">{powerStatus}</span>}
             {mountingStatus && <span className="ml-1">{mountingStatus}</span>}
@@ -239,19 +245,29 @@ export const RackUnit: React.FC<RackUnitProps> = React.memo(({
             {temperatureStatus && <span className="ml-1">{temperatureStatus}</span>}
             {cageNutDisplay && <span className="ml-1">{cageNutDisplay}</span>}
             {railDisplay && <span className="ml-1">{railDisplay}</span>}
-            {/* サーバー、スイッチ、ストレージ機器の場合にStatusLEDsを表示 */}
-            {(item.type === 'server' || item.type === 'network' || item.type === 'storage') && (
-              <div className="absolute right-1 top-1/2 transform -translate-y-1/2">
-                <StatusLEDs
-                  powerStatus={(() => {
-                    const status = getPowerStatus(item, rack.powerConnections);
-                    return status.status;
-                  })()}
-                  healthStatus={item.healthStatus || 'normal'}
-                />
-              </div>
-            )}
           </div>
+          
+          {/* LEDコンポーネント - 右上隅に絶対配置 */}
+          {(item.type === 'server' || item.type === 'network' || item.type === 'storage') && (
+            <div
+              className="absolute z-20"
+              style={{
+                top: `${2 * (zoomLevel / 100)}px`,
+                right: `${2 * (zoomLevel / 100)}px`
+              }}
+            >
+              <StatusLEDs
+                powerStatus={(() => {
+                  const status = getPowerStatus(item, rack.powerConnections);
+                  return status.status;
+                })()}
+                healthStatus={item.healthStatus || 'normal'}
+                powerOn={item.powerOn !== false}
+                onPowerToggle={onPowerToggle ? () => onPowerToggle(item.id) : undefined}
+                zoomLevel={zoomLevel}
+              />
+            </div>
+          )}
         </div>
       )}
     </div>

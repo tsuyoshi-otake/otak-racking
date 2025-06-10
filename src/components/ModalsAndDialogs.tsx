@@ -16,7 +16,6 @@ import {
 } from 'lucide-react';
 import { Equipment, Rack, FloorSettings } from '../types';
 import { getPowerSources } from '../utils';
-import EquipmentSizeSelector from './EquipmentSizeSelector';
 
 // +++ 新しい InfoModal 用の Props (簡易版) +++
 export interface InfoModalProps { // export を追加
@@ -46,7 +45,6 @@ interface ModalsAndDialogsProps {
   onUpdateEquipmentColor: (equipmentId: string, color: string) => void;
   onUpdateEquipmentOpacity: (equipmentId: string, opacity: number) => void;
   onUpdateEquipmentSpecs?: (equipmentId: string, field: 'power' | 'cfm' | 'weight', value: number) => void;
-  onUpdateEquipmentSize?: (equipmentId: string, newHeight: number) => Promise<void>;
   onToggleEquipmentHealth?: (equipmentId: string) => void;
   
   // 新しいモーダル用props
@@ -91,7 +89,6 @@ export const ModalsAndDialogs: React.FC<ModalsAndDialogsProps> = ({
   onUpdateEquipmentColor,
   onUpdateEquipmentOpacity,
   onUpdateEquipmentSpecs,
-  onUpdateEquipmentSize,
   onToggleEquipmentHealth,
   
   // 新しいモーダル用props
@@ -143,9 +140,9 @@ export const ModalsAndDialogs: React.FC<ModalsAndDialogsProps> = ({
     const powerConnection = currentRack.powerConnections?.[selectedEquipment.id] || {};
     const mountingOption = currentRack.mountingOptions?.[selectedEquipment.id] || {};
 
-    const modalBg = 'bg-gray-800 text-white';
-    const inputBg = 'bg-gray-700 border-gray-600 text-white';
-    const tabActiveClass = 'bg-gray-600 text-white';
+    const modalBg = 'bg-gray-800 text-gray-200';
+    const inputBg = 'bg-gray-700 border-gray-600 text-gray-200';
+    const tabActiveClass = 'bg-gray-600 text-gray-200';
     const tabInactiveClass = 'bg-gray-700 text-gray-300 hover:bg-gray-600';
 
     return (
@@ -215,16 +212,6 @@ export const ModalsAndDialogs: React.FC<ModalsAndDialogsProps> = ({
                 </div>
               </div>
 
-              <EquipmentSizeSelector
-                equipment={selectedEquipment}
-                onSizeChange={async (newHeight: number) => {
-                  try {
-                    await onUpdateEquipmentSize?.(selectedEquipment.id, newHeight);
-                  } catch (error) {
-                    console.error('機器サイズ変更に失敗しました:', error);
-                  }
-                }}
-              />
               {/* 編集可能な仕様 */}
               <div>
                 <h4 className="font-medium mb-2">編集可能な仕様</h4>
@@ -322,7 +309,7 @@ export const ModalsAndDialogs: React.FC<ModalsAndDialogsProps> = ({
                     </div>
                     <button
                       onClick={() => onToggleEquipmentHealth?.(selectedEquipment.id)}
-                      className="px-3 py-1 text-xs rounded bg-gray-600 hover:bg-gray-500 text-white"
+                      className="px-3 py-1 text-xs rounded bg-gray-600 hover:bg-gray-500 text-gray-200"
                     >
                       ヘルス状態をトグル
                     </button>
@@ -687,7 +674,7 @@ export const ModalsAndDialogs: React.FC<ModalsAndDialogsProps> = ({
   const renderRackManagerModal = () => {
     if (!showRackManager || !racks) return null;
 
-    const modalBg = 'bg-gray-800 text-white';
+    const modalBg = 'bg-gray-800 text-gray-200';
 
     return (
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -711,7 +698,7 @@ export const ModalsAndDialogs: React.FC<ModalsAndDialogsProps> = ({
                 <h4 className="font-medium">登録ラック一覧</h4>
                 <button
                   onClick={onAddRack}
-                  className="p-2 rounded flex items-center gap-1 text-sm bg-gray-600 hover:bg-custom-gray text-white"
+                  className="p-2 rounded flex items-center gap-1 text-sm bg-gray-600 hover:bg-custom-gray text-gray-200"
                 >
                   <Plus size={14} />
                   追加
@@ -740,7 +727,7 @@ export const ModalsAndDialogs: React.FC<ModalsAndDialogsProps> = ({
                               onUpdateRackName?.(rack.id, editingRackName);
                               setEditingRackId(null);
                             }}
-                            className="px-2 py-1 text-sm bg-gray-600 border border-gray-500 rounded text-white"
+                            className="px-2 py-1 text-sm bg-gray-600 border border-gray-500 rounded text-gray-200"
                             autoFocus
                           />
                         </div>
@@ -788,8 +775,8 @@ export const ModalsAndDialogs: React.FC<ModalsAndDialogsProps> = ({
   const renderFloorSettingsModal = () => {
     if (!showFloorSettings || !floorSettings) return null;
 
-    const modalBg = 'bg-gray-800 text-white';
-    const inputBg = 'bg-gray-700 border-gray-600 text-white';
+    const modalBg = 'bg-gray-800 text-gray-200';
+    const inputBg = 'bg-gray-700 border-gray-600 text-gray-200';
     
     const settings = tempFloorSettings || floorSettings;
 
@@ -959,13 +946,13 @@ export const ModalsAndDialogs: React.FC<ModalsAndDialogsProps> = ({
                   }
                   onCloseFloorSettings?.();
                 }}
-                className="flex-1 p-2 rounded text-sm font-medium bg-gray-600 hover:bg-custom-gray text-white"
+                className="flex-1 p-2 rounded text-sm font-medium bg-gray-600 hover:bg-custom-gray text-gray-200"
               >
                 保存
               </button>
               <button
                 onClick={onCloseFloorSettings}
-                className="flex-1 p-2 rounded text-sm bg-gray-600 hover:bg-gray-700 text-white"
+                className="flex-1 p-2 rounded text-sm bg-gray-600 hover:bg-gray-700 text-gray-200"
               >
                 キャンセル
               </button>
@@ -980,7 +967,7 @@ export const ModalsAndDialogs: React.FC<ModalsAndDialogsProps> = ({
   const renderCoolingConfigModal = () => {
     if (!showCoolingConfig) return null;
 
-    const modalBg = 'bg-gray-800 text-white';
+    const modalBg = 'bg-gray-800 text-gray-200';
 
     return (
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -1014,7 +1001,7 @@ export const ModalsAndDialogs: React.FC<ModalsAndDialogsProps> = ({
   const renderPowerConfigModal = () => {
     if (!showPowerConfig) return null;
 
-    const modalBg = 'bg-gray-800 text-white';
+    const modalBg = 'bg-gray-800 text-gray-200';
 
     return (
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -1047,7 +1034,7 @@ export const ModalsAndDialogs: React.FC<ModalsAndDialogsProps> = ({
   // +++ InfoModal レンダリング関数 +++
   const renderInfoModal = () => {
     if (!infoModal || !infoModal.isOpen) return null;
-    const modalBg = 'bg-gray-800 text-white';
+    const modalBg = 'bg-gray-800 text-gray-200';
     return (
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
         <div className={`${modalBg} rounded-lg shadow-xl w-full max-w-md`}>
@@ -1068,7 +1055,7 @@ export const ModalsAndDialogs: React.FC<ModalsAndDialogsProps> = ({
           <div className="p-4 border-t flex justify-end border-custom-gray">
             <button
               onClick={infoModal.onClose}
-              className="px-4 py-2 rounded text-sm font-medium bg-gray-600 hover:bg-custom-gray text-white"
+              className="px-4 py-2 rounded text-sm font-medium bg-gray-600 hover:bg-custom-gray text-gray-200"
             >
               OK
             </button>
@@ -1081,7 +1068,7 @@ export const ModalsAndDialogs: React.FC<ModalsAndDialogsProps> = ({
   // +++ ConfirmModal レンダリング関数 +++
   const renderConfirmModal = () => {
     if (!confirmModal || !confirmModal.isOpen) return null;
-    const modalBg = 'bg-gray-800 text-white';
+    const modalBg = 'bg-gray-800 text-gray-200';
     return (
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
         <div className={`${modalBg} rounded-lg shadow-xl w-full max-w-md`}>
@@ -1111,7 +1098,7 @@ export const ModalsAndDialogs: React.FC<ModalsAndDialogsProps> = ({
                 confirmModal.onConfirm();
                 confirmModal.onClose(); // 確認後も閉じる
               }}
-              className="px-4 py-2 rounded text-sm font-medium bg-gray-600 hover:bg-custom-gray text-white"
+              className="px-4 py-2 rounded text-sm font-medium bg-gray-600 hover:bg-custom-gray text-gray-200"
             >
               {confirmModal.confirmText || 'OK'}
             </button>
@@ -1128,8 +1115,8 @@ export const ModalsAndDialogs: React.FC<ModalsAndDialogsProps> = ({
     const currentRack = racks[selectedRackForDetails];
     if (!currentRack) return null;
     
-    const modalBg = 'bg-gray-800 text-white';
-    const inputBg = 'bg-gray-700 border-gray-600 text-white';
+    const modalBg = 'bg-gray-800 text-gray-200';
+    const inputBg = 'bg-gray-700 border-gray-600 text-gray-200';
     
     const details = tempRackDetails || {
       name: currentRack.name,
@@ -1246,7 +1233,7 @@ export const ModalsAndDialogs: React.FC<ModalsAndDialogsProps> = ({
                   setTempRackDetails(null);
                   onCloseRackDetailsModal?.();
                 }}
-                className="flex-1 p-2 rounded text-sm font-medium bg-gray-600 hover:bg-custom-gray text-white"
+                className="flex-1 p-2 rounded text-sm font-medium bg-gray-600 hover:bg-custom-gray text-gray-200"
               >
                 保存
               </button>
@@ -1255,7 +1242,7 @@ export const ModalsAndDialogs: React.FC<ModalsAndDialogsProps> = ({
                   setTempRackDetails(null);
                   onCloseRackDetailsModal?.();
                 }}
-                className="flex-1 p-2 rounded text-sm bg-gray-600 hover:bg-gray-700 text-white"
+                className="flex-1 p-2 rounded text-sm bg-gray-600 hover:bg-gray-700 text-gray-200"
               >
                 キャンセル
               </button>

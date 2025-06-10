@@ -38,6 +38,7 @@ interface RackViewProps {
   hoveredUnit?: number | null;
   onPduInstall?: (side: 'left' | 'right', top: number) => void;
   onPduRemove?: (pduId: string) => void;
+  onPowerToggle?: (equipmentId: string) => void;
 }
 
 export const RackView: React.FC<RackViewProps> = React.memo(({
@@ -62,7 +63,8 @@ export const RackView: React.FC<RackViewProps> = React.memo(({
   onRailRemove,
   hoveredUnit,
   onPduInstall,
-  onPduRemove
+  onPduRemove,
+  onPowerToggle
 }) => {
   // メモ化された計算値
   const unitHeight = useMemo(() => getZoomedUnitHeight(zoomLevel), [zoomLevel]);
@@ -152,6 +154,7 @@ export const RackView: React.FC<RackViewProps> = React.memo(({
               onRailInstall={onRailInstall}
               onRailRemove={onRailRemove}
               perspective={perspective}
+              onPowerToggle={onPowerToggle}
             />
           ))}
         </div>
@@ -173,7 +176,7 @@ export const RackView: React.FC<RackViewProps> = React.memo(({
           {Object.values(rack.equipment).filter(eq => eq.isMainUnit).map(eq => (
             <div
               key={eq.id}
-              className="absolute border text-white text-xs flex items-center justify-center"
+              className="absolute border text-gray-200 text-xs flex items-center justify-center"
               style={{
                 backgroundColor: eq.color,
                 height: `${eq.height * getZoomedUnitHeight(zoomLevel)}px`,

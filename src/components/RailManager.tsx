@@ -55,8 +55,8 @@ export const RailManager: React.FC<RailManagerProps> = ({
                 onClick={() => handleInstallRail('left', rail.value)}
                 className={`px-2 py-1 text-xs rounded transition-colors ${
                   darkMode
-                    ? 'bg-gray-600 hover:bg-gray-700 text-white'
-                    : 'bg-custom-gray hover:bg-gray-600 text-white'
+                    ? 'bg-gray-600 hover:bg-gray-700 text-gray-200'
+                    : 'bg-custom-gray hover:bg-gray-600 text-gray-200'
                 }`}
                 title={`左側に${rail.label}を設置`}
               >
@@ -85,8 +85,8 @@ export const RailManager: React.FC<RailManagerProps> = ({
                 onClick={() => handleInstallRail('right', rail.value)}
                 className={`px-2 py-1 text-xs rounded transition-colors ${
                   darkMode
-                    ? 'bg-gray-600 hover:bg-gray-700 text-white'
-                    : 'bg-custom-gray hover:bg-gray-600 text-white'
+                    ? 'bg-gray-600 hover:bg-gray-700 text-gray-200'
+                    : 'bg-custom-gray hover:bg-gray-600 text-gray-200'
                 }`}
                 title={`右側に${rail.label}を設置`}
               >

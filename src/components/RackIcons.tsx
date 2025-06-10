@@ -25,7 +25,7 @@ import {
 } from 'lucide-react';
 
 // アイコン取得関数
-export const getEquipmentIcon = (type: string, size: number, color: string = "text-white") => {
+export const getEquipmentIcon = (type: string, size: number, color: string = "text-gray-200") => {
   const iconProps = { size, className: color };
   
   switch (type) {

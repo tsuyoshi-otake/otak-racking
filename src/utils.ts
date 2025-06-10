@@ -348,7 +348,7 @@ export const getContainerStyle = (): string => 'bg-gray-800 text-gray-100';
 export const getSidebarStyle = (): string => 'bg-gray-700 border-custom-gray text-gray-100';
 
 export const getButtonStyle = (isActive: boolean = false): string =>
-  isActive ? 'bg-custom-gray text-white' : 'bg-gray-600 text-gray-200 hover:bg-custom-gray';
+  isActive ? 'bg-custom-gray text-gray-200' : 'bg-gray-600 text-gray-200 hover:bg-custom-gray';
 
 /**
  * ユニット表示ヘルパー（定数化）

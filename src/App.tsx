@@ -68,7 +68,6 @@ function App() {
     updateEquipmentColor,
     updateEquipmentOpacity,
     updateEquipmentSpecs,
-    updateEquipmentSize,
     autoInstallCageNutsForUnit,
     installCageNut,
     removeCageNut,
@@ -80,6 +79,7 @@ function App() {
     removePdu,
     moveEquipment,
     toggleEquipmentHealth,
+    toggleEquipmentPower,
     isSharedDataLoaded,
   } = useRackState();
   // モーダル表示関数（メモ化）
@@ -389,6 +389,7 @@ function App() {
                         addPduToSlot(rack.id, side, top)
                       }
                       onPduRemove={(pduId) => removePdu(rack.id, pduId)}
+                      onPowerToggle={(equipmentId) => toggleEquipmentPower(rack.id, equipmentId)}
                     />
                   </div>
                 ))}
@@ -434,6 +435,7 @@ function App() {
                       addPduToSlot(selectedRack, side, top)
                     }
                     onPduRemove={(pduId) => removePdu(selectedRack, pduId)}
+                    onPowerToggle={(equipmentId) => toggleEquipmentPower(selectedRack, equipmentId)}
                   />
                 </div>
               </div>
@@ -482,14 +484,6 @@ function App() {
         onUpdateEquipmentSpecs={(equipmentId, field, value) =>
           updateEquipmentSpecs(selectedRack, equipmentId, field, value)
         }
-        onUpdateEquipmentSize={async (equipmentId, newHeight) => {
-          try {
-            await updateEquipmentSize(selectedRack, equipmentId, newHeight);
-          } catch (error) {
-            console.error('機器サイズ変更に失敗しました:', error);
-            showInfoModal('エラー', '機器サイズの変更に失敗しました。');
-          }
-        }}
         onToggleEquipmentHealth={(equipmentId) =>
           toggleEquipmentHealth(selectedRack, equipmentId)
         }
