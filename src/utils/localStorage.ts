@@ -5,7 +5,7 @@ export interface AppState {
   zoomLevel: number;
   selectedRack: string;
   activeViewMode: string | null;
-  rackViewPerspective: 'front' | 'rear' | 'left' | 'right';
+  rackViewPerspective: 'front' | 'rear';
   racks: Record<string, any>;
   floorSettings: {
     hasAccessFloor: boolean;

@@ -109,7 +109,7 @@ export const LeftSidebar: React.FC<LeftSidebarProps> = ({
         <div>
           <h3 className="text-sm font-semibold mb-2 mt-4 text-gray-100">ラック視点</h3>
           <div className="grid grid-cols-2 gap-2">
-            {(['front', 'rear', 'left', 'right'] as const).map((p) => (
+            {(['front', 'rear'] as const).map((p) => (
               <button
                 key={p}
                 onClick={() => onPerspectiveChange(p)}
@@ -117,7 +117,7 @@ export const LeftSidebar: React.FC<LeftSidebarProps> = ({
                   getButton(currentPerspective === p)
                 }`}
               >
-                {p === 'front' ? '前面' : p === 'rear' ? '背面' : p === 'left' ? '左面' : '右面'}
+                {p === 'front' ? '前面' : '背面'}
               </button>
             ))}
           </div>

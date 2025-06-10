@@ -11,7 +11,7 @@ import { ShareButton } from './components/ShareButton';
 import { calculateLayoutDimensions } from './utils';
 import { loadAppState, saveAppState } from './utils/localStorage';
 
-export type RackViewPerspective = 'front' | 'rear' | 'left' | 'right';
+export type RackViewPerspective = 'front' | 'rear';
 
 // メモ化されたコンポーネント
 const MemoizedLeftSidebar = React.memo(LeftSidebar);
@@ -29,9 +29,14 @@ function App() {
   const [showEquipmentModal, setShowEquipmentModal] = useState(false);
   const [showRackDetailsModal, setShowRackDetailsModal] = useState(false);
   
-  const [rackViewPerspective, setRackViewPerspective] = useState<RackViewPerspective>(() =>
-    loadedState.rackViewPerspective ?? 'front'
-  );
+  const [rackViewPerspective, setRackViewPerspective] = useState<RackViewPerspective>(() => {
+    const saved = loadedState.rackViewPerspective as string;
+    // 左右の視点が保存されている場合は前面にフォールバック
+    if (saved === 'left' || saved === 'right') {
+      return 'front';
+    }
+    return (saved as RackViewPerspective) ?? 'front';
+  });
   
   // アクティブなビューモードの状態 (単一選択)
   const [activeViewMode, setActiveViewMode] = useState<string | null>(() =>

@@ -561,7 +561,7 @@ export interface PlacementState {
   occupancy: RackOccupancy;
   lastModified: Date;
 }
-export type RackViewPerspective = 'front' | 'rear' | 'left' | 'right';
+export type RackViewPerspective = 'front' | 'rear';
 
 // 共有機能用の型定義
 export interface ShareableData {

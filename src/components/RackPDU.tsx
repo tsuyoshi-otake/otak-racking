@@ -1,11 +1,11 @@
 import React from 'react';
-import { Rack } from '../types';
+import { Rack, RackViewPerspective } from '../types';
 
 interface RackPDUProps {
   rack: Rack;
   zoomLevel: number;
   unitHeight: number;
-  perspective: 'front' | 'rear' | 'left' | 'right';
+  perspective: RackViewPerspective;
   rackWidth: number;
   onPduInstall?: (side: 'left' | 'right', top: number) => void;
   onPduRemove?: (pduId: string) => void;
