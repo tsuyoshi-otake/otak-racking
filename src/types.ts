@@ -519,6 +519,7 @@ export interface PlacementContext {
 
 export interface PlacementOptions {
   autoInstallCageNuts?: boolean;
+  autoInstallRails?: boolean;
   skipWarnings?: boolean;
   forceOverride?: boolean;
   validateOnly?: boolean;

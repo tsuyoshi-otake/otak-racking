@@ -237,12 +237,42 @@ export class EquipmentPlacementManager {
       for (let unit = position.startUnit; unit <= position.endUnit; unit++) {
         if (!this.hasCompleteCageNuts(rack, unit)) {
           rack.cageNuts[unit] = this.createCompleteCageNutConfig('m6');
-          
+
           changes.push({
             type: 'cagenut',
             action: 'add',
             target: unit.toString(),
             newValue: rack.cageNuts[unit]
+          });
+        }
+      }
+    }
+
+    // レール自動設置（レールが必要な機器のみ、下半分のユニットに設置）
+    if (options.autoInstallRails &&
+        (equipment.requiresRails || equipment.mountingMethod === 'rails')) {
+      const requiredRailUnits = Math.ceil(equipment.height / 2);
+      for (let unit = position.startUnit; unit < position.startUnit + requiredRailUnits; unit++) {
+        if (!this.hasRailForUnit(rack, unit)) {
+          const railPositionInfo = {
+            installed: true,
+            railType: '1u' as string,
+            startUnit: unit,
+            endUnit: unit,
+            railId: `auto-rail-${unit}-${Date.now()}`
+          };
+          rack.rails[unit] = {
+            frontLeft: { ...railPositionInfo },
+            frontRight: { ...railPositionInfo },
+            rearLeft: { ...railPositionInfo },
+            rearRight: { ...railPositionInfo }
+          };
+
+          changes.push({
+            type: 'rail',
+            action: 'add',
+            target: unit.toString(),
+            newValue: rack.rails[unit]
           });
         }
       }
@@ -750,11 +780,7 @@ export class EquipmentPlacementManager {
           return { isValid: true, errors: [], warnings: [] };
         }
 
-        console.log(`[Pro Mode Rail Constraint] Checking equipment: ${equipment.name}, requiresRails: ${equipment.requiresRails}, mountingMethod: ${equipment.mountingMethod}`);
-        console.log(`[Pro Mode Rail Constraint] Position: startUnit=${position.startUnit}, endUnit=${position.endUnit}`);
-
         if (equipment.requiresRails || equipment.mountingMethod === 'rails') {
-          // 複数ユニットにまたがる機器の場合、最初のユニットでのみチェックを行う
           const hasValidRails = this.hasRequiredRailForProMode(rack, position.startUnit, equipment);
           
           if (!hasValidRails) {
@@ -810,10 +836,11 @@ export class EquipmentPlacementManager {
         }
         
         if (equipment.requiresRails || equipment.mountingMethod === 'rails') {
-          // レールが設置されているかチェック
+          // レールは下半分のユニットにのみ必要
+          const requiredRailUnits = Math.ceil(equipment.height / 2);
           const missingRailUnits: number[] = [];
-          
-          for (let unit = position.startUnit; unit <= position.endUnit; unit++) {
+
+          for (let unit = position.startUnit; unit < position.startUnit + requiredRailUnits; unit++) {
             if (!this.hasRailForUnit(rack, unit)) {
               missingRailUnits.push(unit);
             }
@@ -972,67 +999,21 @@ export class EquipmentPlacementManager {
     return !!(frontLeftOk && frontRightOk);
   }
 
-  private hasRequiredRailForProMode(rack: Rack, unit: number, equipment: Equipment): boolean {
-    console.log(`[Pro Mode Rail Check] Unit ${unit}, Equipment: ${equipment.name} (${equipment.height}U)`);
-    
-    const railInfo = rack.rails[unit];
-    if (!railInfo) {
-      console.log(`[Pro Mode Rail Check] No rail info found for unit ${unit}`);
-      return false;
-    }
+  private hasRequiredRailForProMode(rack: Rack, startUnit: number, equipment: Equipment): boolean {
+    // レールは機器の下半分のユニットに必要
+    // 1U→1U, 2U→下1U, 4U→下2U (ceil(height/2))
+    const requiredRailUnits = Math.ceil(equipment.height / 2);
 
-    // 左右両方のレールが設置されているか
-    const isFrontRailInstalled = railInfo.frontLeft.installed && railInfo.frontRight.installed;
-    console.log(`[Pro Mode Rail Check] Front rails installed: ${isFrontRailInstalled} (Left: ${railInfo.frontLeft.installed}, Right: ${railInfo.frontRight.installed})`);
-    
-    if (!isFrontRailInstalled) return false;
-
-    // レールのタイプを取得
-    const railType = railInfo.frontLeft.railType;
-    const railHeight = railType === '1u' ? 1 :
-                      railType === '2u' ? 2 :
-                      railType === '4u' ? 4 : 0;
-
-    console.log(`[Pro Mode Rail Check] Rail type: ${railType}, Rail height: ${railHeight}U, Equipment height: ${equipment.height}U`);
-
-    // ケース1: レールの高さが機器の高さと一致する場合（理想的）
-    if (railHeight === equipment.height) {
-      console.log(`[Pro Mode Rail Check] Perfect match: Rail height matches equipment height`);
-      return true;
-    }
-
-    // ケース2: 単一ユニットレールが複数設置されている場合の対応
-    if (railType === '1u' && equipment.height > 1) {
-      console.log(`[Pro Mode Rail Check] Checking for multiple 1U rails for ${equipment.height}U equipment`);
-      
-      // 必要な全てのユニットに単一ユニットレールが設置されているかチェック
-      let allUnitsHaveRails = true;
-      const startUnit = unit;
-      const endUnit = unit + equipment.height - 1;
-      
-      console.log(`[Pro Mode Rail Check] Checking units ${startUnit} to ${endUnit} for 1U rails`);
-      
-      for (let checkUnit = startUnit; checkUnit <= endUnit; checkUnit++) {
-        const checkRailInfo = rack.rails[checkUnit];
-        if (!checkRailInfo ||
-            !checkRailInfo.frontLeft.installed ||
-            !checkRailInfo.frontRight.installed ||
-            checkRailInfo.frontLeft.railType !== '1u') {
-          console.log(`[Pro Mode Rail Check] Unit ${checkUnit} missing single unit rail`);
-          allUnitsHaveRails = false;
-          break;
-        }
-        console.log(`[Pro Mode Rail Check] Unit ${checkUnit} has single unit rail`);
-      }
-      
-      if (allUnitsHaveRails) {
-        console.log(`[Pro Mode Rail Check] All ${equipment.height} units have single unit rails - acceptable configuration`);
-        return true;
+    for (let checkUnit = startUnit; checkUnit < startUnit + requiredRailUnits; checkUnit++) {
+      const railInfo = rack.rails[checkUnit];
+      if (!railInfo ||
+          !railInfo.frontLeft.installed ||
+          !railInfo.frontRight.installed) {
+        return false;
       }
     }
 
-    console.log(`[Pro Mode Rail Check] Rail configuration not suitable for equipment`);
-    return false;
+    return true;
   }
 
   private createCompleteCageNutConfig(nutType: string) {

@@ -319,7 +319,8 @@ export const useRackState = () => {
     try {
       const rackCopy = JSON.parse(JSON.stringify(currentRack));
       const result = await placementManager.placeEquipment(rackCopy, startUnit, equipment, {
-        autoInstallCageNuts: !isProMode
+        autoInstallCageNuts: !isProMode,
+        autoInstallRails: !isProMode
       }, isProMode);
 
       if (result.success && result.updatedRack) {
@@ -782,6 +783,19 @@ export const useRackState = () => {
         if (!rack) return prev;
 
         const railUnits = parseInt(railType);
+
+        // バリデーション: 対象ユニット範囲に既存レール(同じ側)や設置済み機器がないか確認
+        for (let u = unit; u < unit + railUnits && u <= rack.units; u++) {
+          // 同じ側に既にレールが設置済みの場合はスキップ
+          const existingRail = rack.rails[u];
+          if (existingRail) {
+            if (side === 'left' && existingRail.frontLeft.installed) return prev;
+            if (side === 'right' && existingRail.frontRight.installed) return prev;
+          }
+          // 機器が設置済みのユニットにはレールを設置できない
+          if (rack.equipment[u]) return prev;
+        }
+
         const newRails = { ...rack.rails };
         const newCageNuts = { ...rack.cageNuts };
 
