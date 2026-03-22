@@ -36,7 +36,7 @@ function App() {
 
   // テーマ状態
   const [theme, setTheme] = useState<ThemeName>(() => {
-    return (localStorage.getItem('otak-racking-theme') as ThemeName) || 'claude';
+    return (localStorage.getItem('otak-racking-theme') as ThemeName) || 'default';
   });
 
   const cycleTheme = useCallback(() => {
