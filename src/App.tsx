@@ -16,7 +16,7 @@ import { generateRackMarkdown, exportRackJson, importRackJson, createShareableDa
 const MemoizedLeftSidebar = React.memo(LeftSidebar);
 const MemoizedRightSidebar = React.memo(RightSidebar);
 const MemoizedRackView = React.memo(RackView);
-const MemoizedModalsAndDialogs = React.memo(ModalsAndDialogs);
+const MemoizedModalsAndDialogs = ModalsAndDialogs;
 
 function App() {
   // LocalStorageから初期状態を読み込み
@@ -324,6 +324,22 @@ function App() {
     setSelectedEquipment(null);
   }, []);
 
+  // ラック削除（確認ダイアログ付き）
+  const handleRemoveRack = useCallback((rackId: string) => {
+    const rack = racks[rackId];
+    const equipCount = rack ? Object.values(rack.equipment).filter(e => e.isMainUnit !== false).length : 0;
+    const message = equipCount > 0
+      ? `「${rack?.name}」を削除しますか？\n設置済みの機器（${equipCount}台）もすべて削除されます。`
+      : `「${rack?.name}」を削除しますか？`;
+    showConfirmModal(
+      'ラックの削除',
+      message,
+      () => removeRack(rackId),
+      '削除する',
+      'キャンセル'
+    );
+  }, [racks, showConfirmModal, removeRack]);
+
   const handleShowRackManager = useCallback(() => setShowRackManager(true), []);
   const handleShowFloorSettings = useCallback(() => setShowFloorSettings(true), []);
   const handleShowCoolingConfig = useCallback(() => setShowCoolingConfig(true), []);
@@ -568,7 +584,7 @@ function App() {
             isProMode={isProMode}
             onRackSelect={setSelectedRack}
             onAddRack={addRack}
-            onRemoveRack={removeRack}
+            onRemoveRack={handleRemoveRack}
             onDuplicateRack={duplicateRack}
             onShowRackManager={handleShowRackManager}
             onShowFloorSettings={handleShowFloorSettings}

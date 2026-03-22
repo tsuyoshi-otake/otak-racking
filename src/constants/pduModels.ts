@@ -12,6 +12,36 @@ export interface PDUModel {
 }
 
 export const pduModels: Record<string, PDUModel> = {
+  'compact-8': {
+    id: 'compact-8',
+    name: 'Compact PDU (8 Outlets)',
+    outletCount: 8,
+    outletType: 'IEC C13',
+    height: 8,
+    power: 0,
+    description: 'コンパクト8口PDU。壁掛けラックや小型ラック向け。',
+    specifications: {
+      outlets: 'IEC C13×8',
+      input: '単相100V 15A',
+      monitoring: 'なし',
+      mounting: '垂直設置'
+    }
+  },
+  'basic-12': {
+    id: 'basic-12',
+    name: 'Basic PDU (12 Outlets)',
+    outletCount: 12,
+    outletType: 'IEC C13',
+    height: 20,
+    power: 0,
+    description: '基本的な12口PDU。ハーフラックや小規模ラック向け。',
+    specifications: {
+      outlets: 'IEC C13×12',
+      input: '単相200V 20A',
+      monitoring: '基本監視機能',
+      mounting: '垂直設置'
+    }
+  },
   'basic-24': {
     id: 'basic-24',
     name: 'Basic PDU (24 Outlets)',

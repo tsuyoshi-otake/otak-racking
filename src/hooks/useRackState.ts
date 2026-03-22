@@ -16,104 +16,132 @@ const createPduOutlets = (count: number, type: string): PowerOutlet[] => {
   }));
 };
 
+// ラックサイズに応じたPDU設定を取得
+const getPduConfigForRack = (units: number): { modelId: string; outletCount: number; height: number; weight: number } => {
+  if (units <= 8) {
+    return { modelId: 'compact-8', outletCount: 8, height: units, weight: 2 };
+  } else if (units <= 20) {
+    return { modelId: 'basic-12', outletCount: 12, height: units, weight: 4 };
+  } else if (units <= 36) {
+    return { modelId: 'basic-24', outletCount: 24, height: units, weight: 6 };
+  }
+  return { modelId: 'high-density-42', outletCount: 42, height: units, weight: 8 };
+};
+
+// ラックサイズに応じたファン設定を取得
+const getFanConfigForRack = (units: number): { count: number; rpm: number } => {
+  if (units <= 8) {
+    return { count: 0, rpm: 0 };
+  } else if (units <= 20) {
+    return { count: 2, rpm: 2500 };
+  }
+  return { count: 4, rpm: 3000 };
+};
+
 // 初期ラック設定
-const createInitialRack = (id: string, name: string, rackCount: number): Rack => ({
-  id,
-  name,
-  type: '42u-standard',
-  units: 42,
-  depth: 1000,
-  width: 600,
-  equipment: {},
-  powerConnections: {},
-  mountingOptions: {},
-  labels: {},
-  cageNuts: {},
-  rails: {},
-  partInventory: {},
-  fans: { count: 4, rpm: 3000 },
-  position: { row: 'A', column: rackCount + 1 },
-  cabling: {
-    external: {},
-    overhead: {},
-    underfloor: {}
-  },
-  housing: {
-    type: 'full',
-    startUnit: 1,
-    endUnit: 42,
-    frontPanel: 'perforated',
-    rearPanel: 'perforated'
-  },
-  environment: {
-    ambientTemp: 22,
-    humidity: 45,
-    pressureDiff: 0.2
-  },
-  pduPlacements: [
-    {
-      id: `pdu-left-${id}`,
-      equipment: {
-        id: `pdu-equipment-left-${id}`,
-        name: 'PDU A系統',
-        height: 42,
-        depth: 100,
-        power: 0,
-        heat: 0,
-        weight: 8,
-        type: 'pdu',
-        role: 'power-distribution',
-        color: '#374151',
-        opacity: 100,
-        dualPower: false,
-        airflow: 'natural',
-        cfm: 0,
-        heatGeneration: 0,
-        description: 'ラックの左側に設置されたPDU A系統',
-        powerOutlets: createPduOutlets(42, 'IEC C13'), // デフォルトで42口に変更
-        isPdu: true,
-        outletCount: 42,
-        pduModelId: 'high-density-42'
-      },
-      position: 'left',
-      offset: 0, // renderPDUsで再計算するため、仮の値
-      orientation: 'vertical',
-      modelId: 'high-density-42',
-      outletCount: 42
+const createInitialRack = (id: string, name: string, rackCount: number): Rack => {
+  const units = 42;
+  const pduConfig = getPduConfigForRack(units);
+  const fanConfig = getFanConfigForRack(units);
+
+  return {
+    id,
+    name,
+    type: '42u-standard',
+    units,
+    depth: 1000,
+    width: 600,
+    equipment: {},
+    powerConnections: {},
+    mountingOptions: {},
+    labels: {},
+    cageNuts: {},
+    rails: {},
+    partInventory: {},
+    fans: fanConfig,
+    position: { row: 'A', column: rackCount + 1 },
+    cabling: {
+      external: {},
+      overhead: {},
+      underfloor: {}
     },
-    {
-      id: `pdu-right-${id}`,
-      equipment: {
-        id: `pdu-equipment-right-${id}`,
-        name: 'PDU B系統',
-        height: 42,
-        depth: 100,
-        power: 0,
-        heat: 0,
-        weight: 8,
-        type: 'pdu',
-        role: 'power-distribution',
-        color: '#374151',
-        opacity: 100,
-        dualPower: false,
-        airflow: 'natural',
-        cfm: 0,
-        heatGeneration: 0,
-        description: 'ラックの右側に設置されたPDU B系統',
-        powerOutlets: createPduOutlets(42, 'IEC C13'), // デフォルトで42口に変更
-        isPdu: true,
-        outletCount: 42,
-        pduModelId: 'high-density-42'
+    housing: {
+      type: 'full',
+      startUnit: 1,
+      endUnit: units,
+      frontPanel: 'perforated',
+      rearPanel: 'perforated'
+    },
+    environment: {
+      ambientTemp: 22,
+      humidity: 45,
+      pressureDiff: 0.2
+    },
+    pduPlacements: [
+      {
+        id: `pdu-left-${id}`,
+        equipment: {
+          id: `pdu-equipment-left-${id}`,
+          name: 'PDU A系統',
+          height: pduConfig.height,
+          depth: 100,
+          power: 0,
+          heat: 0,
+          weight: pduConfig.weight,
+          type: 'pdu',
+          role: 'power-distribution',
+          color: '#374151',
+          opacity: 100,
+          dualPower: false,
+          airflow: 'natural',
+          cfm: 0,
+          heatGeneration: 0,
+          description: 'ラックの左側に設置されたPDU A系統',
+          powerOutlets: createPduOutlets(pduConfig.outletCount, 'IEC C13'),
+          isPdu: true,
+          outletCount: pduConfig.outletCount,
+          pduModelId: pduConfig.modelId
+        },
+        position: 'left',
+        offset: 0,
+        orientation: 'vertical',
+        modelId: pduConfig.modelId,
+        outletCount: pduConfig.outletCount
       },
-      position: 'right',
-      offset: 0, // renderPDUsで再計算するため、仮の値
-      orientation: 'vertical',
-      modelId: 'high-density-42',
-      outletCount: 42
-    }
-  ],
-  physicalStructure: createDefaultPhysicalStructure()
-});
+      {
+        id: `pdu-right-${id}`,
+        equipment: {
+          id: `pdu-equipment-right-${id}`,
+          name: 'PDU B系統',
+          height: pduConfig.height,
+          depth: 100,
+          power: 0,
+          heat: 0,
+          weight: pduConfig.weight,
+          type: 'pdu',
+          role: 'power-distribution',
+          color: '#374151',
+          opacity: 100,
+          dualPower: false,
+          airflow: 'natural',
+          cfm: 0,
+          heatGeneration: 0,
+          description: 'ラックの右側に設置されたPDU B系統',
+          powerOutlets: createPduOutlets(pduConfig.outletCount, 'IEC C13'),
+          isPdu: true,
+          outletCount: pduConfig.outletCount,
+          pduModelId: pduConfig.modelId
+        },
+        position: 'right',
+        offset: 0,
+        orientation: 'vertical',
+        modelId: pduConfig.modelId,
+        outletCount: pduConfig.outletCount
+      }
+    ],
+    physicalStructure: createDefaultPhysicalStructure()
+  };
+};
 
 // 初期フロア設定
 const initialFloorSettings: FloorSettings = {

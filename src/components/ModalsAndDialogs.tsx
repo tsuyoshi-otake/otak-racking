@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { Equipment, Rack, FloorSettings } from '../types';
 import { getPowerSources } from '../utils';
+import { rackTypes } from '../constants';
 
 // +++ 新しい InfoModal 用の Props (簡易版) +++
 export interface InfoModalProps { // export を追加
@@ -128,6 +129,15 @@ export const ModalsAndDialogs: React.FC<ModalsAndDialogsProps> = ({
   
   // ラック詳細モーダル用の一時的な状態
   const [tempRackDetails, setTempRackDetails] = useState<Partial<Rack> | null>(null);
+
+  // 冷却設定モーダル用の一時的な状態
+  const [tempCoolingConfig, setTempCoolingConfig] = useState<{
+    ambientTemp: number;
+    humidity: number;
+    pressureDiff: number;
+    fanCount: number;
+    fanRpm: number;
+  } | null>(null);
 
   // 機器設定モーダル
   const renderEquipmentModal = () => {
@@ -966,30 +976,157 @@ export const ModalsAndDialogs: React.FC<ModalsAndDialogsProps> = ({
   // 冷却設定モーダル
   const renderCoolingConfigModal = () => {
     if (!showCoolingConfig) return null;
+    if (!currentRack) return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="bg-gray-800 text-gray-200 rounded-lg p-4">
+          <p>ラックが選択されていません</p>
+          <button onClick={onCloseCoolingConfig} className="mt-2 p-2 bg-gray-600 rounded">閉じる</button>
+        </div>
+      </div>
+    );
 
     const modalBg = 'bg-gray-800 text-gray-200';
+    const inputBg = 'bg-gray-700 border-gray-600 text-gray-200';
+
+    const config = tempCoolingConfig || {
+      ambientTemp: currentRack.environment.ambientTemp,
+      humidity: currentRack.environment.humidity,
+      pressureDiff: currentRack.environment.pressureDiff,
+      fanCount: currentRack.fans.count,
+      fanRpm: currentRack.fans.rpm,
+    };
+
+    // 現在の冷却統計
+    const equipmentList = Object.values(currentRack.equipment).filter(e => e.isMainUnit !== false);
+    const totalHeat = equipmentList.reduce((sum, e) => sum + (e.heatGeneration || 0), 0);
+    const totalCfm = equipmentList.reduce((sum, e) => sum + (e.cfm || 0), 0);
+    const totalPower = equipmentList.reduce((sum, e) => sum + (e.power || 0), 0);
 
     return (
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div className={`${modalBg} rounded-lg shadow-xl w-96 max-w-full max-h-[90vh] overflow-hidden`}>
+        <div className={`${modalBg} rounded-lg shadow-xl w-96 max-w-full max-h-[90vh] overflow-y-auto custom-scrollbar`}>
           <div className="p-4 border-b flex items-center justify-between border-custom-gray">
             <h3 className="text-lg font-bold flex items-center gap-2">
               <Snowflake size={20} />
-              冷却・空调設定
+              冷却・空調設定
             </h3>
             <button
-              onClick={onCloseCoolingConfig}
+              onClick={() => { setTempCoolingConfig(null); onCloseCoolingConfig?.(); }}
               className="p-1 rounded hover:bg-opacity-10 hover:bg-custom-gray"
             >
               <X size={20} />
             </button>
           </div>
 
-          <div className="p-4">
-            <div className="text-center text-custom-gray">
-              <Snowflake size={48} className="mx-auto mb-4 opacity-50" />
-              <p>冷却・空调設定機能は開発中です</p>
-              <p className="text-sm mt-2">温度管理、エアフロー最適化、<br />冷却効率計算機能を実装予定</p>
+          <div className="p-4 space-y-4">
+            {/* 現在の熱負荷サマリー */}
+            <div className="p-3 bg-gray-700 rounded">
+              <h4 className="font-medium mb-2 text-sm">熱負荷サマリー（{currentRack.name}）</h4>
+              <div className="grid grid-cols-2 gap-2 text-xs">
+                <div>総発熱量: <span className="font-mono">{totalHeat} BTU/h</span></div>
+                <div>総消費電力: <span className="font-mono">{totalPower}W</span></div>
+                <div>必要風量: <span className="font-mono">{totalCfm} CFM</span></div>
+                <div>機器数: <span className="font-mono">{equipmentList.length}台</span></div>
+              </div>
+            </div>
+
+            {/* 環境設定 */}
+            <div>
+              <h4 className="font-medium mb-2 text-sm">環境設定</h4>
+              <div className="space-y-3">
+                <div>
+                  <label className="block text-xs text-gray-400 mb-1">室温 (°C)</label>
+                  <input
+                    type="number"
+                    value={config.ambientTemp}
+                    onChange={(e) => setTempCoolingConfig({ ...config, ambientTemp: Number(e.target.value) })}
+                    min={10} max={40} step={0.5}
+                    className={`w-full p-2 border rounded text-sm ${inputBg}`}
+                  />
+                  <p className="text-xs text-gray-500 mt-1">推奨: 18〜27°C（ASHRAE A1クラス）</p>
+                </div>
+                <div>
+                  <label className="block text-xs text-gray-400 mb-1">湿度 (%RH)</label>
+                  <input
+                    type="number"
+                    value={config.humidity}
+                    onChange={(e) => setTempCoolingConfig({ ...config, humidity: Number(e.target.value) })}
+                    min={8} max={80} step={1}
+                    className={`w-full p-2 border rounded text-sm ${inputBg}`}
+                  />
+                  <p className="text-xs text-gray-500 mt-1">推奨: 20〜80%RH（結露しないこと）</p>
+                </div>
+                <div>
+                  <label className="block text-xs text-gray-400 mb-1">差圧 (Pa)</label>
+                  <input
+                    type="number"
+                    value={config.pressureDiff}
+                    onChange={(e) => setTempCoolingConfig({ ...config, pressureDiff: Number(e.target.value) })}
+                    min={0} max={2} step={0.05}
+                    className={`w-full p-2 border rounded text-sm ${inputBg}`}
+                  />
+                  <p className="text-xs text-gray-500 mt-1">推奨: 0.05〜0.3Pa（ホットアイル/コールドアイル間）</p>
+                </div>
+              </div>
+            </div>
+
+            {/* ファン設定 */}
+            <div>
+              <h4 className="font-medium mb-2 text-sm">ラックファン設定</h4>
+              <div className="space-y-3">
+                <div>
+                  <label className="block text-xs text-gray-400 mb-1">ファン数</label>
+                  <input
+                    type="number"
+                    value={config.fanCount}
+                    onChange={(e) => setTempCoolingConfig({ ...config, fanCount: Number(e.target.value) })}
+                    min={0} max={8} step={1}
+                    className={`w-full p-2 border rounded text-sm ${inputBg}`}
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs text-gray-400 mb-1">ファン回転数 (RPM)</label>
+                  <input
+                    type="number"
+                    value={config.fanRpm}
+                    onChange={(e) => setTempCoolingConfig({ ...config, fanRpm: Number(e.target.value) })}
+                    min={0} max={6000} step={100}
+                    className={`w-full p-2 border rounded text-sm ${inputBg}`}
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* 保存・キャンセル */}
+            <div className="flex gap-2 pt-2">
+              <button
+                onClick={() => {
+                  if (tempCoolingConfig && selectedRackForDetails && onUpdateRackDetails) {
+                    onUpdateRackDetails(selectedRackForDetails, {
+                      environment: {
+                        ambientTemp: tempCoolingConfig.ambientTemp,
+                        humidity: tempCoolingConfig.humidity,
+                        pressureDiff: tempCoolingConfig.pressureDiff,
+                      },
+                      fans: {
+                        count: tempCoolingConfig.fanCount,
+                        rpm: tempCoolingConfig.fanRpm,
+                      },
+                    });
+                  }
+                  setTempCoolingConfig(null);
+                  onCloseCoolingConfig?.();
+                }}
+                className="flex-1 p-2 rounded text-sm font-medium bg-gray-600 hover:bg-custom-gray text-gray-200"
+              >
+                保存
+              </button>
+              <button
+                onClick={() => { setTempCoolingConfig(null); onCloseCoolingConfig?.(); }}
+                className="flex-1 p-2 rounded text-sm bg-gray-600 hover:bg-gray-700 text-gray-200"
+              >
+                キャンセル
+              </button>
             </div>
           </div>
         </div>
@@ -1000,16 +1137,49 @@ export const ModalsAndDialogs: React.FC<ModalsAndDialogsProps> = ({
   // 電源設定モーダル
   const renderPowerConfigModal = () => {
     if (!showPowerConfig) return null;
+    if (!currentRack) return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="bg-gray-800 text-gray-200 rounded-lg p-4">
+          <p>ラックが選択されていません</p>
+          <button onClick={onClosePowerConfig} className="mt-2 p-2 bg-gray-600 rounded">閉じる</button>
+        </div>
+      </div>
+    );
 
     const modalBg = 'bg-gray-800 text-gray-200';
 
+    const equipmentList = Object.values(currentRack.equipment).filter(e => e.isMainUnit !== false);
+    const totalPower = equipmentList.reduce((sum, e) => sum + (e.power || 0), 0);
+    const dualPowerCount = equipmentList.filter(e => e.dualPower).length;
+    const singlePowerCount = equipmentList.length - dualPowerCount;
+
+    // PDU情報
+    const pduA = currentRack.pduPlacements?.find(p => p.position === 'left');
+    const pduB = currentRack.pduPlacements?.find(p => p.position === 'right');
+    const pduAOutlets = pduA?.outletCount || 0;
+    const pduBOutlets = pduB?.outletCount || 0;
+    const pduAUsed = pduA?.equipment?.powerOutlets?.filter(o => o.inUse).length || 0;
+    const pduBUsed = pduB?.equipment?.powerOutlets?.filter(o => o.inUse).length || 0;
+
+    // UPS情報
+    const upsList = equipmentList.filter(e => e.type === 'ups');
+    const totalUpsCapacity = upsList.reduce((sum, u) => {
+      const match = u.specifications?.capacity?.match(/(\d+)VA/);
+      return sum + (match ? parseInt(match[1]) : 0);
+    }, 0);
+
+    // 電源使用率
+    const powerUsagePercent = totalUpsCapacity > 0
+      ? Math.round((totalPower / (totalUpsCapacity * 0.8)) * 100) // UPSは80%負荷が推奨上限
+      : 0;
+
     return (
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div className={`${modalBg} rounded-lg shadow-xl w-96 max-w-full max-h-[90vh] overflow-hidden`}>
+        <div className={`${modalBg} rounded-lg shadow-xl w-96 max-w-full max-h-[90vh] overflow-y-auto custom-scrollbar`}>
           <div className="p-4 border-b flex items-center justify-between border-custom-gray">
             <h3 className="text-lg font-bold flex items-center gap-2">
               <Zap size={20} />
-              電源・UPS設定
+              電源・PDU設定
             </h3>
             <button
               onClick={onClosePowerConfig}
@@ -1019,11 +1189,109 @@ export const ModalsAndDialogs: React.FC<ModalsAndDialogsProps> = ({
             </button>
           </div>
 
-          <div className="p-4">
-            <div className="text-center text-custom-gray">
-              <Zap size={48} className="mx-auto mb-4 opacity-50" />
-              <p>電源・UPS設定機能は開発中です</p>
-              <p className="text-sm mt-2">電源容量計算、UPS設定、<br />冗長電源管理機能を実装予定</p>
+          <div className="p-4 space-y-4">
+            {/* 消費電力サマリー */}
+            <div className="p-3 bg-gray-700 rounded">
+              <h4 className="font-medium mb-2 text-sm">消費電力（{currentRack.name}）</h4>
+              <div className="space-y-2 text-xs">
+                <div className="flex justify-between">
+                  <span>総消費電力:</span>
+                  <span className="font-mono font-medium">{totalPower}W</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>冗長電源対応機器:</span>
+                  <span className="font-mono">{dualPowerCount}台</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>単一電源機器:</span>
+                  <span className="font-mono">{singlePowerCount}台</span>
+                </div>
+              </div>
+            </div>
+
+            {/* PDUステータス */}
+            <div>
+              <h4 className="font-medium mb-2 text-sm">PDUステータス</h4>
+              <div className="space-y-2">
+                {pduA && (
+                  <div className="p-3 bg-gray-700 rounded">
+                    <div className="flex justify-between items-center mb-1">
+                      <span className="text-sm font-medium">A系統（左）</span>
+                      <span className="text-xs text-gray-400">{pduA.modelId}</span>
+                    </div>
+                    <div className="w-full bg-gray-600 rounded-full h-2 mb-1">
+                      <div
+                        className={`h-2 rounded-full ${pduAUsed / pduAOutlets > 0.8 ? 'bg-red-500' : 'bg-blue-500'}`}
+                        style={{ width: `${pduAOutlets > 0 ? (pduAUsed / pduAOutlets) * 100 : 0}%` }}
+                      />
+                    </div>
+                    <div className="text-xs text-gray-400">{pduAUsed} / {pduAOutlets}口 使用中</div>
+                  </div>
+                )}
+                {pduB && (
+                  <div className="p-3 bg-gray-700 rounded">
+                    <div className="flex justify-between items-center mb-1">
+                      <span className="text-sm font-medium">B系統（右）</span>
+                      <span className="text-xs text-gray-400">{pduB.modelId}</span>
+                    </div>
+                    <div className="w-full bg-gray-600 rounded-full h-2 mb-1">
+                      <div
+                        className={`h-2 rounded-full ${pduBUsed / pduBOutlets > 0.8 ? 'bg-red-500' : 'bg-blue-500'}`}
+                        style={{ width: `${pduBOutlets > 0 ? (pduBUsed / pduBOutlets) * 100 : 0}%` }}
+                      />
+                    </div>
+                    <div className="text-xs text-gray-400">{pduBUsed} / {pduBOutlets}口 使用中</div>
+                  </div>
+                )}
+                {!pduA && !pduB && (
+                  <p className="text-xs text-gray-400">PDUが設置されていません</p>
+                )}
+              </div>
+            </div>
+
+            {/* UPSステータス */}
+            <div>
+              <h4 className="font-medium mb-2 text-sm">UPSステータス</h4>
+              {upsList.length > 0 ? (
+                <div className="space-y-2">
+                  {upsList.map((ups, i) => (
+                    <div key={ups.id || i} className="p-3 bg-gray-700 rounded text-xs">
+                      <div className="font-medium text-sm mb-1">{ups.name}</div>
+                      <div className="text-gray-400">{ups.specifications?.capacity || '不明'}</div>
+                    </div>
+                  ))}
+                  <div className="p-3 bg-gray-700 rounded">
+                    <div className="flex justify-between text-xs mb-1">
+                      <span>UPS合計容量:</span>
+                      <span className="font-mono">{totalUpsCapacity}VA</span>
+                    </div>
+                    <div className="flex justify-between text-xs mb-1">
+                      <span>負荷率（80%上限）:</span>
+                      <span className={`font-mono ${powerUsagePercent > 100 ? 'text-red-400' : powerUsagePercent > 80 ? 'text-yellow-400' : ''}`}>
+                        {powerUsagePercent}%
+                      </span>
+                    </div>
+                    <div className="w-full bg-gray-600 rounded-full h-2">
+                      <div
+                        className={`h-2 rounded-full ${powerUsagePercent > 100 ? 'bg-red-500' : powerUsagePercent > 80 ? 'bg-yellow-500' : 'bg-green-500'}`}
+                        style={{ width: `${Math.min(powerUsagePercent, 100)}%` }}
+                      />
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <p className="text-xs text-gray-400">UPSが設置されていません</p>
+              )}
+            </div>
+
+            {/* 閉じる */}
+            <div className="pt-2">
+              <button
+                onClick={onClosePowerConfig}
+                className="w-full p-2 rounded text-sm bg-gray-600 hover:bg-gray-700 text-gray-200"
+              >
+                閉じる
+              </button>
             </div>
           </div>
         </div>
@@ -1163,23 +1431,27 @@ export const ModalsAndDialogs: React.FC<ModalsAndDialogsProps> = ({
             <div>
               <label className="block text-sm font-medium mb-1">ラックタイプ</label>
               <select
-                value={details.type || '42U'}
+                value={details.type || '42u-standard'}
                 onChange={(e) => {
                   const type = e.target.value;
-                  const units = parseInt(type);
+                  const rackType = rackTypes[type];
                   setTempRackDetails({
                     ...details,
                     type,
-                    units
+                    units: rackType?.units ?? 42,
+                    width: rackType?.width ?? 600,
+                    depth: rackType?.depth ?? 1000,
                   });
                 }}
                 className={`w-full p-2 border rounded ${inputBg}`}
               >
-                <option value="47U">47U (高密度)</option>
-                <option value="42U">42U (標準)</option>
-                <option value="36U">36U (コンパクト)</option>
-                <option value="20U">20U (ハーフラック)</option>
-                <option value="8U">8U (壁掛け)</option>
+                <option value="45u-standard">45U (高密度)</option>
+                <option value="42u-standard">42U (標準)</option>
+                <option value="42u-deep">42U (深型)</option>
+                <option value="42u-wide">42U (ワイド)</option>
+                <option value="36u-compact">36U (コンパクト)</option>
+                <option value="20u-half">20U (ハーフラック)</option>
+                <option value="8u-wall">8U (壁掛け)</option>
               </select>
             </div>
             
