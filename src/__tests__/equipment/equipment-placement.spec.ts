@@ -40,7 +40,6 @@ describe('機器配置ロジック', () => {
     requiresRails: true,
     airflow: 'front-to-rear',
     cfm: 120,
-    heatGeneration: 1707,
     description: '2Uサーバーテスト用'
   });
 
@@ -58,7 +57,6 @@ describe('機器配置ロジック', () => {
     requiresRails: true,
     airflow: 'front-to-rear',
     cfm: 65,
-    heatGeneration: 1024,
     description: '1Uサーバーテスト用'
   });
 
@@ -243,7 +241,6 @@ describe('機器配置ロジック', () => {
         requiresRails: false,
         airflow: 'natural',
         cfm: 0,
-        heatGeneration: 0,
         description: '棚板'
       };
       
@@ -261,7 +258,6 @@ describe('機器配置ロジック', () => {
         requiresRails: false,
         airflow: 'natural',
         cfm: 20,
-        heatGeneration: 170,
         description: 'モニター'
       };
       

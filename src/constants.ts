@@ -92,7 +92,6 @@ export const serverEquipment: Equipment[] = [
     dualPower: true,
     airflow: 'front-to-rear',
     cfm: 65,
-    heatGeneration: 1024,
     healthStatus: 'normal',
     description: '汎用的な1Uラックマウントサーバー。Webサーバーやアプリケーションサーバーとして広く使用される。前面から背面へのエアフローで効率的な冷却を実現。',
     specifications: {
@@ -113,7 +112,6 @@ export const serverEquipment: Equipment[] = [
         heat: 1024,
         weight: 15,
         cfm: 65,
-        heatGeneration: 1024,
         specifications: {
           cpu: '最大2ソケット',
           memory: '最大512GB',
@@ -128,7 +126,6 @@ export const serverEquipment: Equipment[] = [
         heat: 2048,
         weight: 28,
         cfm: 120,
-        heatGeneration: 2048,
         specifications: {
           cpu: '最大4ソケット',
           memory: '最大1TB',
@@ -143,7 +140,6 @@ export const serverEquipment: Equipment[] = [
         heat: 4096,
         weight: 55,
         cfm: 240,
-        heatGeneration: 4096,
         specifications: {
           cpu: '最大8ソケット',
           memory: '最大2TB',
@@ -170,7 +166,6 @@ export const serverEquipment: Equipment[] = [
     dualPower: true,
     airflow: 'front-to-rear',
     cfm: 120,
-    heatGeneration: 2048,
     healthStatus: 'normal',
     description: '高性能2Uラックマウントサーバー。データベースサーバーや仮想化基盤として使用される。拡張性と冷却性能を重視した設計。',
     specifications: {
@@ -200,7 +195,6 @@ export const serverEquipment: Equipment[] = [
     dualPower: true,
     airflow: 'front-to-rear',
     cfm: 240,
-    heatGeneration: 4096,
     healthStatus: 'normal',
     description: '最高性能4Uラックマウントサーバー。ミッションクリティカルなアプリケーションや大規模仮想化環境向け。最大拡張性と冗長性を提供。',
     specifications: {
@@ -230,7 +224,6 @@ export const serverEquipment: Equipment[] = [
     dualPower: true,
     airflow: 'front-to-rear',
     cfm: 800,
-    heatGeneration: 10240,
     healthStatus: 'normal',
     description: '10Uブレードサーバーシャーシ。最大16枚のブレードサーバーを収容可能。高密度仮想化環境やクラウド基盤向け。',
     specifications: {
@@ -266,7 +259,6 @@ export const networkEquipment: Equipment[] = [
     dualPower: true,
     airflow: 'side-to-side',
     cfm: 45,
-    heatGeneration: 512,
     healthStatus: 'normal',
     description: '1Uアクセススイッチ。24-48ポートのGigabitEthernetを提供。小規模から中規模ネットワーク向け。',
     specifications: {
@@ -296,7 +288,6 @@ export const networkEquipment: Equipment[] = [
     dualPower: true,
     airflow: 'front-to-rear',
     cfm: 90,
-    heatGeneration: 1024,
     healthStatus: 'normal',
     description: '2U高密度スイッチ。48-96ポートのGigabitEthernet + 高速アップリンクを提供。大規模ネットワーク向け。',
     specifications: {
@@ -326,7 +317,6 @@ export const networkEquipment: Equipment[] = [
     dualPower: true,
     airflow: 'front-to-rear',
     cfm: 180,
-    heatGeneration: 2048,
     healthStatus: 'normal',
     description: '4Uモジュラースイッチ。最大384ポートのGigabitEthernet + 超高速アップリンクを提供。データセンター向け。',
     specifications: {
@@ -356,7 +346,6 @@ export const networkEquipment: Equipment[] = [
     dualPower: true,
     airflow: 'front-to-rear',
     cfm: 55,
-    heatGeneration: 614,
     healthStatus: 'normal',
     description: '1U次世代ファイアウォール。アプリケーション制御、IPS、アンチウイルス機能を統合。中小規模向け。',
     specifications: {
@@ -386,7 +375,6 @@ export const networkEquipment: Equipment[] = [
     dualPower: true,
     airflow: 'front-to-rear',
     cfm: 110,
-    heatGeneration: 1195,
     healthStatus: 'normal',
     description: '2U高性能次世代ファイアウォール。高スループット処理とアドバンスドセキュリティ機能を提供。大規模企業向け。',
     specifications: {
@@ -416,7 +404,6 @@ export const networkEquipment: Equipment[] = [
     dualPower: true,
     airflow: 'front-to-rear',
     cfm: 60,
-    heatGeneration: 683,
     healthStatus: 'normal',
     description: '1U F5 BIG-IP アプリケーション配信コントローラ。高度な負荷分散、SSL処理、アプリケーションファイアウォール機能を統合。中規模向け。',
     specifications: {
@@ -449,7 +436,6 @@ export const networkEquipment: Equipment[] = [
     dualPower: true,
     airflow: 'front-to-rear',
     cfm: 120,
-    heatGeneration: 1365,
     healthStatus: 'normal',
     description: '2U F5 BIG-IP 高性能アプリケーション配信コントローラ。超高スループット処理とエンタープライズ機能を提供。大規模向け。',
     specifications: {
@@ -482,7 +468,6 @@ export const networkEquipment: Equipment[] = [
     dualPower: true,
     airflow: 'front-to-rear',
     cfm: 450,
-    heatGeneration: 5120,
     healthStatus: 'normal',
     description: '6U基幹スイッチ。データセンターのコア層を担う高性能スイッチ。超高速スループットと高可用性を提供。',
     specifications: {
@@ -514,7 +499,6 @@ export const networkEquipment: Equipment[] = [
     dualPower: true,
     airflow: 'front-to-rear',
     cfm: 1200,
-    heatGeneration: 11946,
     healthStatus: 'normal',
     description: '14U大型基幹スイッチ。Cisco Catalyst 6509相当。データセンターのコア・ディストリビューション層を担う超高性能モジュラースイッチ。',
     specifications: {
@@ -548,7 +532,6 @@ export const networkEquipment: Equipment[] = [
     dualPower: true,
     airflow: 'front-to-rear',
     cfm: 2000,
-    heatGeneration: 20480,
     healthStatus: 'normal',
     description: '21U超大型基幹スイッチ。データセンター向け最大級のモジュラースイッチ。超高密度ポート実装と最高性能を提供。',
     specifications: {
@@ -582,7 +565,6 @@ export const networkEquipment: Equipment[] = [
     dualPower: true,
     airflow: 'front-to-rear',
     cfm: 60,
-    heatGeneration: 683,
     healthStatus: 'normal',
     description: 'アプリケーション配信コントローラ。高度な負荷分散、SSL処理機能を統合。',
     specifications: {
@@ -610,7 +592,6 @@ export const networkEquipment: Equipment[] = [
     dualPower: true,
     airflow: 'front-to-rear',
     cfm: 50,
-    heatGeneration: 512,
     healthStatus: 'normal',
     description: 'A high-performance Fibre Channel switch for Storage Area Networks (SAN).',
     specifications: {
@@ -642,7 +623,6 @@ export const storageEquipment: Equipment[] = [
     dualPower: true,
     airflow: 'front-to-rear',
     cfm: 45,
-    heatGeneration: 512,
     healthStatus: 'normal',
     description: '1Uストレージアレイ。小規模から中規模向け。SSD/HDD対応。',
     specifications: {
@@ -671,7 +651,6 @@ export const storageEquipment: Equipment[] = [
     dualPower: true,
     airflow: 'front-to-rear',
     cfm: 90,
-    heatGeneration: 1024,
     healthStatus: 'normal',
     description: '2Uストレージアレイ。中規模から大規模向け。高性能SSD/HDD対応。',
     specifications: {
@@ -700,7 +679,6 @@ export const storageEquipment: Equipment[] = [
     dualPower: true,
     airflow: 'front-to-rear',
     cfm: 135,
-    heatGeneration: 1536,
     healthStatus: 'normal',
     description: '3Uストレージアレイ。大規模向け。オールフラッシュ対応。',
     specifications: {
@@ -729,7 +707,6 @@ export const storageEquipment: Equipment[] = [
     dualPower: true,
     airflow: 'front-to-rear',
     cfm: 180,
-    heatGeneration: 2048,
     healthStatus: 'normal',
     description: '4Uストレージアレイ。エンタープライズ向け。高性能・高可用性。',
     specifications: {
@@ -758,7 +735,6 @@ export const storageEquipment: Equipment[] = [
     dualPower: true,
     airflow: 'front-to-rear',
     cfm: 270,
-    heatGeneration: 3072,
     healthStatus: 'normal',
     description: '6Uストレージアレイ。大規模エンタープライズ向け。最高性能・可用性。',
     specifications: {
@@ -787,7 +763,6 @@ export const storageEquipment: Equipment[] = [
     dualPower: true,
     airflow: 'front-to-rear',
     cfm: 55,
-    heatGeneration: 614,
     healthStatus: 'normal',
     description: '2U LTOテープライブラリ。自動バックアップとアーカイブ用。長期保存に最適。',
     specifications: {
@@ -817,7 +792,6 @@ export const storageEquipment: Equipment[] = [
     dualPower: true,
     airflow: 'front-to-rear',
     cfm: 110,
-    heatGeneration: 1195,
     healthStatus: 'normal',
     description: '4U LTOテープライブラリ。大容量バックアップとアーカイブ用。エンタープライズ向け。',
     specifications: {
@@ -847,7 +821,6 @@ export const storageEquipment: Equipment[] = [
     dualPower: true,
     airflow: 'front-to-rear',
     cfm: 150,
-    heatGeneration: 1707,
     healthStatus: 'normal',
     description: '6U LTOテープライブラリ。超大容量バックアップとアーカイブ用。データセンター向け。',
     specifications: {
@@ -881,7 +854,6 @@ export const powerEquipment: Equipment[] = [
     dualPower: false,
     airflow: 'front-to-rear',
     cfm: 80,
-    heatGeneration: 171,
     description: '1U無停電電源装置。停電時の電力供給とサージ保護を提供。小規模から中規模機器向け。Smart-UPS相当。',
     specifications: {
       capacity: '3000VA/2700W',
@@ -912,7 +884,6 @@ export const powerEquipment: Equipment[] = [
     dualPower: false,
     airflow: 'front-to-rear',
     cfm: 140,
-    heatGeneration: 273,
     description: '2U高容量無停電電源装置。長時間バックアップと高出力を提供。中規模から大規模機器向け。',
     specifications: {
       capacity: '5000VA/4500W',
@@ -943,7 +914,6 @@ export const powerEquipment: Equipment[] = [
     dualPower: false,
     airflow: 'front-to-rear',
     cfm: 280,
-    heatGeneration: 512,
     description: '4U超高容量無停電電源装置。最長バックアップ時間と最高出力を提供。大規模データセンター向け。',
     specifications: {
       capacity: '10000VA/9000W',
@@ -978,7 +948,6 @@ export const mountingEquipment: Equipment[] = [
     dualPower: false,
     airflow: 'natural',
     cfm: 0,
-    heatGeneration: 0,
     description: 'M6ネジ用ゲージナット。ラック柱への機器取り付けに必須。ドラッグでユニットに一括設置。',
     specifications: {
       thread: 'M6×1.0',
@@ -1012,7 +981,6 @@ export const otherEquipment: Equipment[] = [
     dualPower: false,
     airflow: 'front-to-rear',
     cfm: 20,
-    heatGeneration: 154,
     description: 'KVM機能付きLCDコンソール。引き出し式でキーボード・マウス一体型。サーバー管理とメンテナンス作業用。',
     specifications: {
       display: '17インチ TFT液晶',
@@ -1043,7 +1011,6 @@ export const otherEquipment: Equipment[] = [
     dualPower: false,
     airflow: 'blocking',
     cfm: 0,
-    heatGeneration: 0,
     description: '1U空きユニット封鎖用パネル。エアフロー制御と外観統一のため必須。ゲージナット取り付け。',
     specifications: {
       material: 'アルミ製',
@@ -1072,7 +1039,6 @@ export const otherEquipment: Equipment[] = [
     dualPower: false,
     airflow: 'natural',
     cfm: 0,
-    heatGeneration: 0,
     description: '1U汎用ラック棚板。軽量機器や小型機器の設置用。19インチラック標準対応。ゲージナット取り付け。',
     specifications: {
       material: 'スチール製（粉体塗装）',
@@ -1101,7 +1067,6 @@ export const otherEquipment: Equipment[] = [
     dualPower: false,
     airflow: 'intake',
     cfm: 15,
-    heatGeneration: 0,
     description: '1U通気孔付きラック棚板。エアフロー確保が必要な機器用。冷却効率向上。ゲージナット取り付け。',
     specifications: {
       material: 'アルミ製（アルマイト処理）',
@@ -1130,7 +1095,6 @@ export const otherEquipment: Equipment[] = [
     dualPower: false,
     airflow: 'natural',
     cfm: 0,
-    heatGeneration: 0,
     description: '1Uケーブル整理パネル。前面にケーブル通し穴とベルクロストラップ付き。ケーブル配線の整理整頓用。',
     specifications: {
       material: 'スチール製（粉体塗装）',
@@ -1159,7 +1123,6 @@ export const otherEquipment: Equipment[] = [
     dualPower: false,
     airflow: 'natural',
     cfm: 0,
-    heatGeneration: 0,
     description: '2U大容量ケーブル整理パネル。多数のケーブル通し穴とケーブルガイド付き。大規模配線向け。',
     specifications: {
       material: 'スチール製（粉体塗装）',
@@ -1188,7 +1151,6 @@ export const otherEquipment: Equipment[] = [
     dualPower: false,
     airflow: 'natural',
     cfm: 0,
-    heatGeneration: 0,
     description: '1Uケーブルトレイ。水平ケーブル配線用。パッチケーブルや電源ケーブルの整理に最適。',
     specifications: {
       material: 'アルミ製（アルマイト処理）',
@@ -1217,7 +1179,6 @@ export const otherEquipment: Equipment[] = [
     dualPower: false,
     airflow: 'natural',
     cfm: 10,
-    heatGeneration: 85,
     description: '1U環境監視装置。温度・湿度・煙検知センサー内蔵。SNMP対応でネットワーク監視システムと連携。',
     specifications: {
       sensors: '温度・湿度・煙検知・振動',
@@ -1246,7 +1207,6 @@ export const otherEquipment: Equipment[] = [
     dualPower: false,
     airflow: 'natural',
     cfm: 15,
-    heatGeneration: 119,
     description: '1U KVMスイッチ。複数サーバーの集中管理用。デジタル/アナログ両対応。リモートアクセス機能付き。',
     specifications: {
       ports: '最大16台接続',
@@ -1275,7 +1235,6 @@ export const otherEquipment: Equipment[] = [
     dualPower: true,
     airflow: 'front-to-rear',
     cfm: 25,
-    heatGeneration: 273,
     healthStatus: 'normal',
     description: '1U NTPサーバー。GPS対応高精度時刻同期。ネットワーク全体の時刻統一用。Stratum 1対応。',
     specifications: {
@@ -1305,7 +1264,6 @@ export const otherEquipment: Equipment[] = [
     dualPower: false,
     airflow: 'natural',
     cfm: 0,
-    heatGeneration: 0,
     description: '1U引き出し。工具や小物の収納用。スライドレール付きで前面からアクセス可能。',
     specifications: {
       capacity: '約5L',
@@ -1334,7 +1292,6 @@ export const otherEquipment: Equipment[] = [
     dualPower: false,
     airflow: 'natural',
     cfm: 0,
-    heatGeneration: 0,
     description: '2U大容量引き出し。工具や部品の収納用。仕切り板付きで整理整頓が容易。',
     specifications: {
       capacity: '約12L',

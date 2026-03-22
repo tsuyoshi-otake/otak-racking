@@ -95,7 +95,6 @@ export const createPDUEquipment = (model: PDUModel, name: string, side: 'left' |
     dualPower: false,
     airflow: 'natural',
     cfm: 0,
-    heatGeneration: 0,
     description: model.description,
     isPdu: true,
     outletCount: model.outletCount,

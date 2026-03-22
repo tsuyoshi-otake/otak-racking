@@ -69,7 +69,6 @@ describe('新しい機器設置システム統合テスト', () => {
     requiresCageNuts: false,
     airflow: 'front-to-rear',
     cfm: 65,
-    heatGeneration: 1024,
     description: '1Uサーバー統合テスト用'
   });
 

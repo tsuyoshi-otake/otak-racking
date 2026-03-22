@@ -998,7 +998,7 @@ export const ModalsAndDialogs: React.FC<ModalsAndDialogsProps> = ({
 
     // 現在の冷却統計
     const equipmentList = Object.values(currentRack.equipment).filter(e => e.isMainUnit !== false);
-    const totalHeat = equipmentList.reduce((sum, e) => sum + (e.heatGeneration || 0), 0);
+    const totalHeat = equipmentList.reduce((sum, e) => sum + (e.heat || 0), 0);
     const totalCfm = equipmentList.reduce((sum, e) => sum + (e.cfm || 0), 0);
     const totalPower = equipmentList.reduce((sum, e) => sum + (e.power || 0), 0);
 

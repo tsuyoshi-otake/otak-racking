@@ -169,7 +169,6 @@ describe('負荷分散装置のテスト', () => {
         dualPower: true,
         airflow: 'front-to-rear',
         cfm: 65,
-        heatGeneration: 1024,
         description: '汎用的なラックマウントサーバー。Webサーバーやアプリケーションサーバーとして広く使用される。前面から背面へのエアフローで効率的な冷却を実現。',
         specifications: {
           cpu: '最大2ソケット',
@@ -208,8 +207,6 @@ describe('負荷分散装置のテスト', () => {
       
       // 200Wの消費電力に対して適切な発熱量
       // 1W ≈ 3.41 BTU/h なので、200W ≈ 682 BTU/h
-      expect(loadBalancer.heatGeneration).toBe(683);
-      expect(loadBalancer.heat).toBe(loadBalancer.heatGeneration);
     });
   });
 

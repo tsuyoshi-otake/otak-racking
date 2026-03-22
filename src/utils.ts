@@ -114,7 +114,7 @@ export const calculateCoolingStats = (rack: Rack): CoolingStats => {
       if (item.type === 'panel' && item.airflow === 'blocking') {
         blankedUnits += item.height || 1;
       }
-      if (item.isMainUnit !== false && (item.heatGeneration || 0) > 0) {
+      if (item.isMainUnit !== false && (item.heat || 0) > 0) {
         const dir = item.airflow;
         if (dir === 'front-to-rear' || dir === 'rear-to-front' || dir === 'side-to-side') {
           airflowDirections[dir] = (airflowDirections[dir] || 0) + 1;
@@ -132,18 +132,18 @@ export const calculateCoolingStats = (rack: Rack): CoolingStats => {
   for (let unit = 1; unit <= rack.units; unit++) {
     const item = rack.equipment[unit];
     if (item && item.isMainUnit) {
-      totalHeatGeneration += item.heatGeneration || 0;
+      totalHeatGeneration += item.heat || 0;
       totalCFM += item.cfm || 0;
 
       if (item.type === 'cooling') {
-        totalCoolingCapacity += Math.abs(item.heatGeneration || 0);
+        totalCoolingCapacity += Math.abs(item.heat || 0);
       }
 
-      const heatDensity = (item.heatGeneration || 0) / (item.cfm || 100);
+      const heatDensity = (item.heat || 0) / (item.cfm || 100);
       const tempRise = heatDensity * 0.1;
       currentTemp += tempRise;
 
-      if (item.airflow === 'front-to-rear' && item.cfm < (item.heatGeneration || 0) / 10) {
+      if (item.airflow === 'front-to-rear' && item.cfm < (item.heat || 0) / 10) {
         airflowIssues.push({
           unit,
           item: item.name,

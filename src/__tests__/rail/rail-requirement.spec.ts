@@ -63,7 +63,6 @@ describe('レール要求制約のテスト', () => {
       dualPower: true,
       airflow: 'front-to-rear',
       cfm: 65,
-      heatGeneration: 1024,
       description: 'テスト用1Uサーバー',
       mountingMethod: 'rails',
       requiresRails: true,

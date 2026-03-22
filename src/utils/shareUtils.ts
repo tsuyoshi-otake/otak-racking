@@ -54,7 +54,6 @@ function optimizeDataForCompression(data: ShareableData): ShareableData {
       if (equipment.dualPower) optimizedEquipment.dualPower = equipment.dualPower;
       if (equipment.airflow !== 'front-to-rear') optimizedEquipment.airflow = equipment.airflow;
       if (equipment.cfm !== 0) optimizedEquipment.cfm = equipment.cfm;
-      if (equipment.heatGeneration !== 0) optimizedEquipment.heatGeneration = equipment.heatGeneration;
       if (equipment.description) optimizedEquipment.description = equipment.description;
       if (equipment.specifications) optimizedEquipment.specifications = equipment.specifications;
       if (equipment.mountingNotes) optimizedEquipment.mountingNotes = equipment.mountingNotes;
@@ -253,7 +252,6 @@ function restoreDataFromOptimized(optimized: any): ShareableData {
         dualPower: equipment.dualPower || false,
         airflow: equipment.airflow || 'front-to-rear',
         cfm: equipment.cfm || 0,
-        heatGeneration: equipment.heatGeneration || 0,
         description: equipment.description || '',
         specifications: equipment.specifications,
         mountingNotes: equipment.mountingNotes,

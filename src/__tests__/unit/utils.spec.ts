@@ -27,7 +27,6 @@ describe('ラック統計計算', () => {
         isMainUnit: true,
         startUnit: 1,
         endUnit: 1,
-        heatGeneration: 1024,
         cfm: 65
       } as Equipment
     },

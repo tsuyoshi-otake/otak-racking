@@ -62,7 +62,6 @@ describe('EquipmentPlacementManager', () => {
     requiresCageNuts: false,
     airflow: 'front-to-rear',
     cfm: 120,
-    heatGeneration: 1707,
     description: '2Uサーバーテスト用'
   });
 
@@ -82,7 +81,6 @@ describe('EquipmentPlacementManager', () => {
     requiresCageNuts: false,
     airflow: 'natural',
     cfm: 0,
-    heatGeneration: 0,
     description: '2U機器用レールキット'
   });
 
@@ -102,7 +100,6 @@ describe('EquipmentPlacementManager', () => {
     requiresCageNuts: false,
     airflow: 'front-to-rear',
     cfm: 65,
-    heatGeneration: 1024,
     description: '1Uサーバーテスト用'
   });
 
@@ -122,7 +119,6 @@ describe('EquipmentPlacementManager', () => {
     requiresCageNuts: true,
     airflow: 'natural',
     cfm: 0,
-    heatGeneration: 0,
     description: '棚板'
   });
 
@@ -424,7 +420,6 @@ describe('EquipmentPlacementManager', () => {
       requiresCageNuts: true,
       airflow: 'front-to-rear',
       cfm: 50,
-      heatGeneration: 700,
       description: 'ケージナット固定サーバー'
     });
 

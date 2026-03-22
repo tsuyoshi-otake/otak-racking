@@ -14,7 +14,6 @@ export interface Equipment {
   useSecondaryPower?: boolean; // セカンダリ電源の使用有無（dualPower: trueの場合のみ有効）
   airflow: string;
   cfm: number;
-  heatGeneration: number;
   description: string;
   specifications?: Record<string, string>;
   mountingNotes?: string;
@@ -64,7 +63,6 @@ export interface EquipmentSize {
   heat: number;
   weight: number;
   cfm: number;
-  heatGeneration: number;
   specifications?: Record<string, string>;
   priceMultiplier?: number; // 基本価格からの倍率
 }

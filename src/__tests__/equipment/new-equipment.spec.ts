@@ -57,7 +57,6 @@ describe('新規追加機器のテスト', () => {
     requiresRails: false,
     airflow: 'natural',
     cfm: 0,
-    heatGeneration: 0,
     description: '軽量機器や小型装置の設置用棚板。最大荷重20kg。モニターなどの設置台として使用。',
     specifications: {
       material: 'スチール製',
@@ -84,7 +83,6 @@ describe('新規追加機器のテスト', () => {
     requiresRails: false,
     airflow: 'front-to-rear',
     cfm: 60,
-    heatGeneration: 683,
     description: 'アプリケーション負荷分散装置。L4-L7負荷分散、SSL処理、ヘルスチェック機能を提供。',
     specifications: {
       throughput: '最大2Gbps',
@@ -110,7 +108,6 @@ describe('新規追加機器のテスト', () => {
     requiresRails: true,
     airflow: 'front-to-rear',
     cfm: 120,
-    heatGeneration: 1365,
     description: '高性能負荷分散装置。大規模環境対応。ADC機能とWAF機能を統合。',
     specifications: {
       throughput: '最大10Gbps',
@@ -136,7 +133,6 @@ describe('新規追加機器のテスト', () => {
     requiresRails: false,
     airflow: 'natural',
     cfm: 20,
-    heatGeneration: 170,
     description: 'ラックマウント型液晶モニター。サーバー管理用コンソール表示。',
     specifications: {
       screen: '17インチ液晶',
