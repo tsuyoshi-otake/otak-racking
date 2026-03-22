@@ -138,8 +138,14 @@ export const calculateCoolingStats = (rack: Rack): CoolingStats => {
     }
   }
   
-  const coolingEfficiency = totalCoolingCapacity > 0 ?
-    Math.min((totalCoolingCapacity / totalHeatGeneration) * 100, 100) : 0;
+  // ラックファンの冷却寄与を加算（1ファンあたり約50CFM × RPM比率で概算）
+  const fanCoolingCfm = rack.fans.count * (rack.fans.rpm / 3000) * 50;
+  // ファンCFMを冷却能力（BTU/h相当）に変換（1CFM ≈ 2 BTU/h の排熱支援）
+  const fanCoolingCapacity = fanCoolingCfm * 2;
+  const effectiveCoolingCapacity = totalCoolingCapacity + fanCoolingCapacity;
+
+  const coolingEfficiency = (totalHeatGeneration > 0 && effectiveCoolingCapacity > 0) ?
+    Math.min((effectiveCoolingCapacity / totalHeatGeneration) * 100, 100) : 0;
   
   const tempValues = Object.values(temperatureMap);
   const maxTemp = Math.max(...tempValues);
@@ -149,7 +155,7 @@ export const calculateCoolingStats = (rack: Rack): CoolingStats => {
   const stats = {
     totalHeatGeneration,
     totalCFM,
-    totalCoolingCapacity,
+    totalCoolingCapacity: effectiveCoolingCapacity,
     coolingEfficiency: Math.round(coolingEfficiency),
     maxTemp: Math.round(maxTemp * 10) / 10,
     minTemp: Math.round(minTemp * 10) / 10,
