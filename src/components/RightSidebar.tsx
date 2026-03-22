@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   Plus,
   Copy,
@@ -61,10 +61,10 @@ export const RightSidebar: React.FC<RightSidebarProps> = ({ // コンポーネ�
   // const [showEquipmentLibrary, setShowEquipmentLibrary] = useState(true); // 削除
   // const [showViewModes, setShowViewModes] = useState(true); // 削除
 
-  const totalStats = calculateTotalStats(racks);
+  const totalStats = useMemo(() => calculateTotalStats(racks), [racks]);
   const currentRack = racks[selectedRack];
-  const currentRackStats = currentRack ? calculateRackStats(currentRack) : null;
-  const currentCoolingStats = currentRack ? calculateCoolingStats(currentRack) : null;
+  const currentRackStats = useMemo(() => currentRack ? calculateRackStats(currentRack) : null, [currentRack]);
+  const currentCoolingStats = useMemo(() => currentRack ? calculateCoolingStats(currentRack) : null, [currentRack]);
 
   const sidebarStyle = getSidebarStyle();
   const getButton = (isActive: boolean = false) => getButtonStyle(isActive);

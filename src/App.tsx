@@ -25,9 +25,9 @@ const MemoizedModalsAndDialogs = ModalsAndDialogs;
 function App() {
   const isMobile = useIsMobile();
 
-  // LocalStorageから初期状態を読み込み
-  const loadedState = loadAppState();
-  
+  // LocalStorageから初期状態を読み込み（初回のみ実行）
+  const [loadedState] = useState(() => loadAppState());
+
   // 基本状態
   const [zoomLevel, setZoomLevel] = useState(() => loadedState.zoomLevel ?? 100);
   const [selectedEquipment, setSelectedEquipment] = useState<Equipment | null>(null);
@@ -169,11 +169,11 @@ function App() {
       const updatedEquipment = Object.values(currentRack.equipment).find(
         (e) => e.id === selectedEquipment.id
       );
-      if (updatedEquipment) {
+      if (updatedEquipment && updatedEquipment !== selectedEquipment) {
         setSelectedEquipment(updatedEquipment);
       }
     }
-  }, [racks, selectedEquipment, currentRack]);
+  }, [racks, currentRack]);
 
   // ドラッグ&ドロップ
   const {

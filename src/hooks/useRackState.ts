@@ -156,9 +156,12 @@ const initialFloorSettings: FloorSettings = {
 };
 
 export const useRackState = () => {
-  // URLからの共有データを優先的に読み込み
-  const sharedData = loadDataFromUrl();
-  const loadedState = sharedData || loadAppState();
+  // URLからの共有データを優先的に読み込み（初回のみ実行）
+  const [initialData] = useState(() => {
+    const shared = loadDataFromUrl();
+    return { sharedData: shared, loadedState: shared || loadAppState() };
+  });
+  const { sharedData, loadedState } = initialData;
   const [isSharedDataLoaded] = useState(() => !!sharedData);
   
   const [racks, setRacks] = useState<Record<string, Rack>>(() => {
