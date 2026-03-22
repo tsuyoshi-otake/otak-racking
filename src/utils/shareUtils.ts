@@ -444,3 +444,84 @@ export function createShareableData(
     zoomLevel
   };
 }
+
+/**
+ * ラックデータからマークダウン文字列を生成
+ */
+export function generateRackMarkdown(racks: Record<string, Rack>): string {
+  const lines: string[] = [];
+  lines.push(`# otak-racking`);
+  lines.push('');
+  lines.push(`> ${new Date().toLocaleString('ja-JP')}`);
+  lines.push('');
+
+  Object.values(racks).forEach(rack => {
+    lines.push(`## ${rack.name}`);
+    lines.push('');
+    lines.push(`- ${rack.units}U / ${rack.width}mm x ${rack.depth}mm`);
+    lines.push('');
+
+    const equipmentList = Object.entries(rack.equipment)
+      .filter(([, eq]) => eq.isMainUnit || !eq.startUnit)
+      .sort(([a], [b]) => Number(b) - Number(a));
+
+    if (equipmentList.length === 0) {
+      lines.push('*No items installed*');
+      lines.push('');
+      return;
+    }
+
+    lines.push('| U | Name | Height | Power | Weight | Mount |');
+    lines.push('|---|------|--------|-------|--------|-------|');
+
+    equipmentList.forEach(([unit, eq]) => {
+      const endU = eq.endUnit ? `${unit}-${eq.endUnit}` : unit;
+      lines.push(`| ${endU} | ${eq.name} | ${eq.height}U | ${eq.power}W | ${eq.weight}kg | ${eq.mountingMethod || '-'} |`);
+    });
+
+    lines.push('');
+
+    const totalPower = equipmentList.reduce((s, [, e]) => s + (e.power || 0), 0);
+    const totalWeight = equipmentList.reduce((s, [, e]) => s + (e.weight || 0), 0);
+    const usedUnits = equipmentList.reduce((s, [, e]) => s + (e.height || 0), 0);
+
+    lines.push(`**Total:** ${totalPower}W / ${totalWeight}kg / ${usedUnits}U used / ${rack.units - usedUnits}U free`);
+    lines.push('');
+  });
+
+  return lines.join('\n');
+}
+
+/**
+ * ラックデータをJSONファイルとしてダウンロード
+ */
+export function exportRackJson(data: ShareableData): void {
+  const json = JSON.stringify(data, null, 2);
+  const blob = new Blob([json], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `otak-racking-${new Date().toISOString().slice(0, 10)}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+/**
+ * JSONファイルからラックデータを読み込み
+ */
+export function importRackJson(file: File): Promise<ShareableData> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const parsed = JSON.parse(e.target?.result as string);
+        const restored = restoreDataFromOptimized(parsed);
+        resolve(restored);
+      } catch (error) {
+        reject(new Error('JSONファイルの読み込みに失敗しました'));
+      }
+    };
+    reader.onerror = () => reject(new Error('ファイルの読み込みに失敗しました'));
+    reader.readAsText(file);
+  });
+}

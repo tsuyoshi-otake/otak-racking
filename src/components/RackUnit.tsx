@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState, useCallback, useRef, useEffect } from 'react';
 import { CheckCircle, AlertCircle, XCircle, Thermometer, Move } from 'lucide-react';
 import { Rack, Equipment, CoolingStats, RackViewPerspective } from '../types';
 import {
@@ -39,6 +39,7 @@ interface RackUnitProps {
   onRailInstall?: (unit: number, side: 'left' | 'right', railType: string) => void;
   onRailRemove?: (unit: number, side: 'left' | 'right') => void;
   onPowerToggle?: (equipmentId: string) => void;
+  onUpdateLabel?: (equipmentId: string, field: string, value: string) => void;
 }
 
 
@@ -63,11 +64,48 @@ export const RackUnit: React.FC<RackUnitProps> = React.memo(({
   showConfirmModal,
   onRailInstall,
   onRailRemove,
-  onPowerToggle
+  onPowerToggle,
+  onUpdateLabel
 }) => {
   const item = rack.equipment[unit];
   const isEmpty = !item;
   const isMainUnit = item?.isMainUnit;
+
+  // インライン編集状態
+  const [isEditing, setIsEditing] = useState(false);
+  const [editValue, setEditValue] = useState('');
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (isEditing && inputRef.current) {
+      inputRef.current.focus();
+      inputRef.current.select();
+    }
+  }, [isEditing]);
+
+  // 名前テキストクリック → インライン編集（モーダルは開かない）
+  const handleNameClick = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
+    if (!item || !isMainUnit || selectedRack === 'all') return;
+    const labels = rack.labels?.[item.id] || {};
+    setEditValue((labels as any).customName || item.name);
+    setIsEditing(true);
+  }, [item, isMainUnit, selectedRack, rack.labels]);
+
+  const handleEditCommit = useCallback(() => {
+    if (!item || !onUpdateLabel) return;
+    const trimmed = editValue.trim();
+    // 元の機器名と同じなら customName をクリア
+    const newName = trimmed === item.name ? '' : trimmed;
+    onUpdateLabel(item.id, 'customName', newName);
+    setIsEditing(false);
+  }, [item, editValue, onUpdateLabel]);
+
+  const handleEditKeyDown = useCallback((e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') { handleEditCommit(); }
+    if (e.key === 'Escape') { setIsEditing(false); }
+  }, [handleEditCommit]);
   
   // メモ化された計算値
   const cageNutStatus = useMemo(() => getCageNutStatus(unit, rack), [unit, rack]);
@@ -231,6 +269,7 @@ export const RackUnit: React.FC<RackUnitProps> = React.memo(({
             boxShadow: '0 2px 4px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1)'
           }}
           onClick={() => {
+            if (isEditing) return;
             if (item && isMainUnit && selectedRack !== 'all') {
               onEquipmentClick?.(item);
             }
@@ -238,7 +277,22 @@ export const RackUnit: React.FC<RackUnitProps> = React.memo(({
         >
           {/* 機器名ラベル */}
           <div className="relative z-10 text-gray-300 font-normal text-xs truncate flex-1 text-center flex items-center justify-center gap-1 [text-shadow:0_1px_2px_rgba(0,0,0,0.5)]">
-            <span>{displayName}</span>
+            {isEditing ? (
+              <input
+                ref={inputRef}
+                type="text"
+                value={editValue}
+                onChange={(e) => setEditValue(e.target.value)}
+                onBlur={handleEditCommit}
+                onKeyDown={handleEditKeyDown}
+                onClick={(e) => e.stopPropagation()}
+                onDragStart={(e) => e.stopPropagation()}
+                className="bg-transparent border-b border-gray-400 text-gray-200 text-xs text-center outline-none w-full max-w-[200px]"
+                style={{ textShadow: 'none' }}
+              />
+            ) : (
+              <span onClick={handleNameClick} className="cursor-text px-2 py-1">{displayName}</span>
+            )}
             {powerStatus && <span className="ml-1">{powerStatus}</span>}
             {mountingStatus && <span className="ml-1">{mountingStatus}</span>}
             {airflowStatus && <span className="ml-1">{airflowStatus}</span>}

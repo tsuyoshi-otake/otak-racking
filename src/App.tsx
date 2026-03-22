@@ -1,15 +1,16 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { Maximize, Minimize } from 'lucide-react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import { Maximize, Minimize, Upload, Download, FileText } from 'lucide-react';
 import { Equipment, PhysicalStructure, Rack } from './types';
 import { useRackState } from './hooks/useRackState';
 import { useDragAndDrop, DraggedItem } from './hooks/useDragAndDrop';
-import { LeftSidebar } from './components/LeftSidebar'; // Sidebar を LeftSidebar に変更
-import { RightSidebar } from './components/RightSidebar'; // RightSidebar を追加
+import { LeftSidebar } from './components/LeftSidebar';
+import { RightSidebar } from './components/RightSidebar';
 import { RackView } from './components/RackView';
 import { ModalsAndDialogs, InfoModalProps, ConfirmModalProps } from './components/ModalsAndDialogs';
 import { ShareButton } from './components/ShareButton';
 import { calculateLayoutDimensions } from './utils';
 import { loadAppState, saveAppState } from './utils/localStorage';
+import { generateRackMarkdown, exportRackJson, importRackJson, createShareableData } from './utils/shareUtils';
 
 export type RackViewPerspective = 'front' | 'rear';
 
@@ -257,6 +258,51 @@ function App() {
     }
   }, []);
 
+  // ファイルインポート用ref
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // マークダウンコピー
+  const handleCopyMarkdown = useCallback(async () => {
+    const md = generateRackMarkdown(racks);
+    await navigator.clipboard.writeText(md);
+    showInfoModal('マークダウンをコピーしました', 'クリップボードにラック構成のマークダウンをコピーしました。');
+  }, [racks, showInfoModal]);
+
+  // JSONエクスポート
+  const handleExportJson = useCallback(() => {
+    const data = createShareableData(racks, floorSettings, selectedRack, activeViewMode, rackViewPerspective, isProMode, zoomLevel);
+    exportRackJson(data);
+  }, [racks, floorSettings, selectedRack, activeViewMode, rackViewPerspective, isProMode, zoomLevel]);
+
+  // JSONインポート
+  const handleImportJson = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    try {
+      const data = await importRackJson(file);
+      if (data.racks && Object.keys(data.racks).length > 0) {
+        // useRackStateのsetRacksにアクセスするため、updateRackではなくページリロードで復元
+        // localStorageに保存してリロード
+        saveAppState({
+          zoomLevel: data.zoomLevel,
+          selectedRack: data.selectedRack,
+          activeViewMode: data.activeViewMode,
+          rackViewPerspective: data.rackViewPerspective,
+          racks: data.racks,
+          floorSettings: data.floorSettings,
+          isProMode: data.isProMode,
+        });
+        window.location.reload();
+      } else {
+        showInfoModal('インポートエラー', 'ラックデータが見つかりませんでした。');
+      }
+    } catch (error) {
+      showInfoModal('インポートエラー', error instanceof Error ? error.message : 'ファイルの読み込みに失敗しました。');
+    }
+    // input をリセットして同じファイルを再選択可能にする
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  }, [showInfoModal]);
+
   // モーダル関連のコールバック（メモ化）
   const handleCloseEquipmentModal = useCallback(() => {
     setShowEquipmentModal(false);
@@ -278,6 +324,34 @@ function App() {
     <div className="min-h-screen dark">
       <div className="min-h-screen bg-gray-800 text-gray-100">
         <div className="fixed top-4 right-4 z-50 flex items-center gap-2">
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".json"
+            className="hidden"
+            onChange={handleImportJson}
+          />
+          <button
+            onClick={() => fileInputRef.current?.click()}
+            className="p-2 rounded-full bg-gray-700 text-gray-300 hover:bg-gray-600 focus:outline-none"
+            title="JSONインポート"
+          >
+            <Upload size={20} />
+          </button>
+          <button
+            onClick={handleExportJson}
+            className="p-2 rounded-full bg-gray-700 text-gray-300 hover:bg-gray-600 focus:outline-none"
+            title="JSONエクスポート"
+          >
+            <Download size={20} />
+          </button>
+          <button
+            onClick={handleCopyMarkdown}
+            className="p-2 rounded-full bg-gray-700 text-gray-300 hover:bg-gray-600 focus:outline-none"
+            title="マークダウンをコピー"
+          >
+            <FileText size={20} />
+          </button>
           <ShareButton
             racks={racks}
             floorSettings={floorSettings}
@@ -395,6 +469,7 @@ function App() {
                       }
                       onPduRemove={(pduId) => removePdu(rack.id, pduId)}
                       onPowerToggle={(equipmentId) => toggleEquipmentPower(rack.id, equipmentId)}
+                      onUpdateLabel={(equipmentId, field, value) => updateLabel(rack.id, equipmentId, field, value)}
                     />
                   </div>
                 ))}
@@ -441,6 +516,7 @@ function App() {
                     }
                     onPduRemove={(pduId) => removePdu(selectedRack, pduId)}
                     onPowerToggle={(equipmentId) => toggleEquipmentPower(selectedRack, equipmentId)}
+                    onUpdateLabel={(equipmentId, field, value) => updateLabel(selectedRack, equipmentId, field, value)}
                   />
                 </div>
               </div>
