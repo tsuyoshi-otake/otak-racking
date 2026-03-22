@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import {
   Plus,
   Copy,
+  Trash2,
   Settings,
   Zap,
   Square,
@@ -131,6 +132,15 @@ export const RightSidebar: React.FC<RightSidebarProps> = ({ // コンポーネ�
                 >
                   <Copy size={14} />
                   複製
+                </button>
+                <button
+                  onClick={() => onRemoveRack(selectedRack)}
+                  className={`flex-1 p-2 rounded text-sm flex items-center justify-center gap-1 ${getButton()} hover:bg-red-900 hover:text-red-300`}
+                  title="ラック削除"
+                  disabled={Object.keys(racks).length <= 1}
+                >
+                  <Trash2 size={14} />
+                  削除
                 </button>
               </div>
             </div>

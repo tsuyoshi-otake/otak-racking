@@ -1175,10 +1175,11 @@ export const ModalsAndDialogs: React.FC<ModalsAndDialogsProps> = ({
                 }}
                 className={`w-full p-2 border rounded ${inputBg}`}
               >
-                <option value="42U">42U (標準)</option>
                 <option value="47U">47U (高密度)</option>
+                <option value="42U">42U (標準)</option>
                 <option value="36U">36U (コンパクト)</option>
-                <option value="24U">24U (小型)</option>
+                <option value="20U">20U (ハーフラック)</option>
+                <option value="8U">8U (壁掛け)</option>
               </select>
             </div>
             

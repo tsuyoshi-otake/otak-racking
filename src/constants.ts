@@ -55,14 +55,23 @@ export const rackTypes: Record<string, RackType> = {
     price: 200000, 
     description: '幅広機器や特殊用途向け。通常より200mm幅が広い特殊ラック' 
   },
-  '24u-wall': { 
-    name: '24U 壁掛け', 
-    units: 24, 
-    depth: 600, 
-    width: 600, 
-    maxWeight: 800, 
-    price: 80000, 
-    description: '壁面設置用の小型ラック。軽量機器や小規模環境向け' 
+  '8u-wall': {
+    name: '8U 壁掛け',
+    units: 8,
+    depth: 450,
+    width: 600,
+    maxWeight: 60,
+    price: 30000,
+    description: '壁面設置用の小型ラック。ネットワーク機器やパッチパネル向け'
+  },
+  '20u-half': {
+    name: '20U ハーフラック',
+    units: 20,
+    depth: 800,
+    width: 600,
+    maxWeight: 600,
+    price: 70000,
+    description: 'オフィスやサーバールーム端に設置しやすい半分サイズのラック。ネットワーク機器やスモールサーバー向け'
   },
 };
 
