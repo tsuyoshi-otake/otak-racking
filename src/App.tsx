@@ -11,6 +11,7 @@ import { ModalsAndDialogs, InfoModalProps, ConfirmModalProps } from './component
 import { ShareButton } from './components/ShareButton';
 import { MobileBottomNav } from './components/MobileBottomNav';
 import { MobileEquipmentPicker } from './components/MobileEquipmentPicker';
+import { MobileContextMenu } from './components/MobileContextMenu';
 import { calculateLayoutDimensions } from './utils';
 import { loadAppState, saveAppState, clearAppState } from './utils/localStorage';
 import { generateRackMarkdown, exportRackJson, importRackJson, createShareableData, generateShareUrl } from './utils/shareUtils';
@@ -60,6 +61,10 @@ function App() {
   const [tappedUnit, setTappedUnit] = useState<number>(0);
   const [tappedRackId, setTappedRackId] = useState<string>('');
   const pickerClosedAt = useRef<number>(0);
+  const [contextMenuEquipment, setContextMenuEquipment] = useState<Equipment | null>(null);
+  const [contextMenuUnit, setContextMenuUnit] = useState<number>(0);
+  const [contextMenuRackId, setContextMenuRackId] = useState<string>('');
+  const [showContextMenu, setShowContextMenu] = useState(false);
 
   // 通知・確認モーダル用 state
   const [infoModal, setInfoModal] = useState<InfoModalProps | null>(null);
@@ -390,6 +395,39 @@ function App() {
     }
   }, [tappedRackId, tappedUnit, addEquipment, showInfoModal]);
 
+  // モバイル: 長押しコンテキストメニュー
+  const handleMobileLongPress = useCallback((equipment: Equipment, unit: number, rackId: string) => {
+    setContextMenuEquipment(equipment);
+    setContextMenuUnit(unit);
+    setContextMenuRackId(rackId);
+    setShowContextMenu(true);
+  }, []);
+
+  const handleContextMenuEdit = useCallback(() => {
+    if (contextMenuEquipment) {
+      handleEquipmentClick(contextMenuEquipment);
+    }
+  }, [contextMenuEquipment, handleEquipmentClick]);
+
+  const handleContextMenuDelete = useCallback(() => {
+    if (contextMenuRackId && contextMenuUnit) {
+      handleEquipmentRemove(contextMenuUnit, contextMenuRackId);
+    }
+  }, [contextMenuRackId, contextMenuUnit, handleEquipmentRemove]);
+
+  const handleContextMenuPowerToggle = useCallback(() => {
+    if (contextMenuEquipment && contextMenuRackId) {
+      toggleEquipmentPower(contextMenuRackId, contextMenuEquipment.id);
+    }
+  }, [contextMenuEquipment, contextMenuRackId, toggleEquipmentPower]);
+
+  const handleContextMenuRename = useCallback(() => {
+    // 名前変更は詳細モーダル経由で行う（インライン編集はデスクトップ向き）
+    if (contextMenuEquipment) {
+      handleEquipmentClick(contextMenuEquipment);
+    }
+  }, [contextMenuEquipment, handleEquipmentClick]);
+
   // モバイル: 共有URL生成
   const handleMobileShare = useCallback(async () => {
     const shareableData = createShareableData(racks, floorSettings, selectedRack, activeViewMode, rackViewPerspective, isProMode, zoomLevel);
@@ -589,6 +627,7 @@ function App() {
                       onPowerToggle={(equipmentId) => toggleEquipmentPower(rack.id, equipmentId)}
                       onUpdateLabel={(equipmentId, field, value) => updateLabel(rack.id, equipmentId, field, value)}
                       onMobileUnitTap={isMobile ? (unit: number) => handleMobileUnitTap(unit, rack.id) : undefined}
+                      onMobileLongPress={isMobile ? (equipment: Equipment, unit: number) => handleMobileLongPress(equipment, unit, rack.id) : undefined}
                       isMobile={isMobile}
                       maxWidth={isMobile ? window.innerWidth - 32 : undefined}
                     />
@@ -639,6 +678,7 @@ function App() {
                     onPowerToggle={(equipmentId) => toggleEquipmentPower(selectedRack, equipmentId)}
                     onUpdateLabel={(equipmentId, field, value) => updateLabel(selectedRack, equipmentId, field, value)}
                     onMobileUnitTap={isMobile ? (unit: number) => handleMobileUnitTap(unit, selectedRack) : undefined}
+                    onMobileLongPress={isMobile ? (equipment: Equipment, unit: number) => handleMobileLongPress(equipment, unit, selectedRack) : undefined}
                     isMobile={isMobile}
                     maxWidth={isMobile ? window.innerWidth - 32 : undefined}
                   />
@@ -751,6 +791,16 @@ function App() {
               onCopyMarkdown={handleCopyMarkdown}
               onShare={handleMobileShare}
               onFullscreen={toggleFullscreen}
+            />
+            <MobileContextMenu
+              isOpen={showContextMenu}
+              equipment={contextMenuEquipment}
+              unit={contextMenuUnit}
+              onClose={() => setShowContextMenu(false)}
+              onEdit={handleContextMenuEdit}
+              onDelete={handleContextMenuDelete}
+              onPowerToggle={handleContextMenuPowerToggle}
+              onRename={handleContextMenuRename}
             />
             <MobileEquipmentPicker
               isOpen={showEquipmentPicker}

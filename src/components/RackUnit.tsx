@@ -41,6 +41,7 @@ interface RackUnitProps {
   onPowerToggle?: (equipmentId: string) => void;
   onUpdateLabel?: (equipmentId: string, field: string, value: string) => void;
   onMobileUnitTap?: (unit: number) => void;
+  onMobileLongPress?: (equipment: Equipment, unit: number) => void;
   isMobile?: boolean;
 }
 
@@ -69,6 +70,7 @@ export const RackUnit: React.FC<RackUnitProps> = React.memo(({
   onPowerToggle,
   onUpdateLabel,
   onMobileUnitTap,
+  onMobileLongPress,
   isMobile
 }) => {
   const item = rack.equipment[unit];
@@ -79,6 +81,33 @@ export const RackUnit: React.FC<RackUnitProps> = React.memo(({
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
+
+  // モバイル長押し検出
+  const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const longPressTriggered = useRef(false);
+
+  const handleTouchStart = useCallback(() => {
+    if (!isMobile || !item || !isMainUnit || !onMobileLongPress) return;
+    longPressTriggered.current = false;
+    longPressTimer.current = setTimeout(() => {
+      longPressTriggered.current = true;
+      onMobileLongPress(item, unit);
+    }, 500);
+  }, [isMobile, item, isMainUnit, unit, onMobileLongPress]);
+
+  const handleTouchEnd = useCallback(() => {
+    if (longPressTimer.current) {
+      clearTimeout(longPressTimer.current);
+      longPressTimer.current = null;
+    }
+  }, []);
+
+  const handleTouchMove = useCallback(() => {
+    if (longPressTimer.current) {
+      clearTimeout(longPressTimer.current);
+      longPressTimer.current = null;
+    }
+  }, []);
 
   useEffect(() => {
     if (isEditing && inputRef.current) {
@@ -264,6 +293,9 @@ export const RackUnit: React.FC<RackUnitProps> = React.memo(({
               e.dataTransfer.effectAllowed = 'move';
             }
           }}
+          onTouchStart={handleTouchStart}
+          onTouchEnd={handleTouchEnd}
+          onTouchMove={handleTouchMove}
           className={`absolute top-0 left-0 w-full flex items-center justify-between px-2 cursor-move border-2 border-solid rounded-sm ${
             ['showPowerView', 'showMountingView', 'showLabelView', 'showCablingView', 'showCageNutView', 'showRailView'].includes(activeViewMode ?? '')
               ? 'border-gray-400 border-dashed'
@@ -277,6 +309,7 @@ export const RackUnit: React.FC<RackUnitProps> = React.memo(({
             boxShadow: '0 2px 4px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1)'
           }}
           onClick={() => {
+            if (longPressTriggered.current) return;
             if (isEditing) return;
             if (item && isMainUnit && selectedRack !== 'all') {
               onEquipmentClick?.(item);

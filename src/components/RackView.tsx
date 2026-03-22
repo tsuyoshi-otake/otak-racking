@@ -41,6 +41,7 @@ interface RackViewProps {
   onPowerToggle?: (equipmentId: string) => void;
   onUpdateLabel?: (equipmentId: string, field: string, value: string) => void;
   onMobileUnitTap?: (unit: number) => void;
+  onMobileLongPress?: (equipment: Equipment, unit: number) => void;
   isMobile?: boolean;
   maxWidth?: number;
 }
@@ -71,6 +72,7 @@ export const RackView: React.FC<RackViewProps> = React.memo(({
   onPowerToggle,
   onUpdateLabel,
   onMobileUnitTap,
+  onMobileLongPress,
   isMobile,
   maxWidth
 }) => {
@@ -167,6 +169,7 @@ export const RackView: React.FC<RackViewProps> = React.memo(({
             onPowerToggle={onPowerToggle}
             onUpdateLabel={onUpdateLabel}
             onMobileUnitTap={onMobileUnitTap}
+            onMobileLongPress={onMobileLongPress}
             isMobile={isMobile}
           />
         ))}
