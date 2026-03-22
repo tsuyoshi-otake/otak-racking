@@ -64,11 +64,11 @@ export const MountingHoles: React.FC<MountingHolesProps> = ({
           width: `${slotWidth}px`,
           height: `${slotHeight}px`,
           backgroundColor: hasRail
-            ? 'rgba(71, 85, 105, 0.95)' // ダークスチール（設置済み）
+            ? 'rgb(var(--gray-600) / 0.95)' // ダークスチール（設置済み）
             : 'transparent', // 未使用時は透過
           border: hasRail
-            ? '1px solid rgba(51, 65, 85, 1)'
-            : '1px dashed rgba(71, 85, 105, 0.4)',
+            ? '1px solid rgb(var(--gray-700))'
+            : '1px dashed rgb(var(--gray-600) / 0.4)',
           borderRadius: '2px',
           boxShadow: hasRail ? 'inset 0 2px 4px rgba(0,0,0,0.5), 0 1px 2px rgba(255,255,255,0.1)' : 'none',
           zIndex: 5,
@@ -88,7 +88,7 @@ export const MountingHoles: React.FC<MountingHolesProps> = ({
           <div
             className="absolute inset-0 flex items-center justify-center"
             style={{
-              background: 'linear-gradient(180deg, rgba(100, 116, 139, 0.3) 0%, rgba(71, 85, 105, 0.5) 50%, rgba(51, 65, 85, 0.3) 100%)',
+              background: 'linear-gradient(180deg, rgb(var(--gray-500) / 0.3) 0%, rgb(var(--gray-600) / 0.5) 50%, rgb(var(--gray-700) / 0.3) 100%)',
               borderRadius: '1px',
               margin: '1px',
             }}
@@ -136,7 +136,7 @@ export const MountingHoles: React.FC<MountingHolesProps> = ({
             width: cageNutSize,
             height: cageNutSize,
             borderRadius: '2px',
-            backgroundColor: isRailFixed ? '#242d40' : undefined,
+            backgroundColor: isRailFixed ? 'rgb(var(--gray-800))' : undefined,
             boxShadow: isRailFixed
               ? 'inset 0 2px 4px rgba(0,0,0,0.6), 0 1px 2px rgba(255,255,255,0.05)'
               : nut

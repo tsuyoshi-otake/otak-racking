@@ -41,13 +41,13 @@ export const RackPDU: React.FC<RackPDUProps> = ({
       } else if (pdu.position === 'right') {
         positionStyle.left = '620px';
       }
-      positionStyle.border = '1px solid #181c23'; // 設置後の枠線
+      positionStyle.border = '1px solid rgb(var(--gray-900))'; // 設置後の枠線
 
       return (
         <div
           key={`pdu-${index}`}
           className="absolute rounded-sm shadow-lg cursor-pointer hover:border-red-500"
-          style={{...positionStyle, backgroundColor: '#181c23'}}
+          style={{...positionStyle, backgroundColor: 'rgb(var(--gray-900))'}}
           title={`${pdu.equipment.name} - クリックして削除`}
           onClick={() => onPduRemove?.(pdu.id)}
         >
@@ -79,7 +79,7 @@ export const RackPDU: React.FC<RackPDUProps> = ({
             width: `${slotWidth}px`,
             height: `${slotHeight}px`,
             zIndex: 2,
-            border: '1px dashed #3c4656', // 設置前の枠線
+            border: '1px dashed rgb(var(--gray-600) / 0.6)', // 設置前の枠線
             opacity: 0.05
           }}
           title="PDUスロット (左)"
@@ -103,7 +103,7 @@ export const RackPDU: React.FC<RackPDUProps> = ({
             width: `${slotWidth}px`,
             height: `${slotHeight}px`,
             zIndex: 2,
-            border: '1px dashed #3c4656', // 設置前の枠線
+            border: '1px dashed rgb(var(--gray-600) / 0.6)', // 設置前の枠線
             opacity: 0.05
           }}
           title="PDUスロット (右)"

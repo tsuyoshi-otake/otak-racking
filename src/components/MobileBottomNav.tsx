@@ -16,7 +16,8 @@ import {
   Snowflake,
   Zap,
   ZoomIn,
-  ZoomOut
+  ZoomOut,
+  Palette
 } from 'lucide-react';
 import { Rack, RackViewPerspective } from '../types';
 
@@ -40,6 +41,8 @@ interface MobileBottomNavProps {
   onCopyMarkdown: () => void;
   onShare: () => void;
   onFullscreen: () => void;
+  themeLabel: string;
+  onCycleTheme: () => void;
 }
 
 const viewModes = [
@@ -74,7 +77,9 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
   onExport,
   onCopyMarkdown,
   onShare,
-  onFullscreen
+  onFullscreen,
+  themeLabel,
+  onCycleTheme
 }) => {
   const [activePanel, setActivePanel] = useState<string | null>(null);
 
@@ -149,6 +154,11 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
                 </button>
                 <button onClick={() => { onShowPowerConfig(); setActivePanel(null); }} className="w-full p-3 rounded-lg text-left text-sm hover:bg-gray-700 text-gray-200 flex items-center gap-2">
                   <Zap size={14} /> 電源・PDU設定
+                </button>
+                <div className="border-t border-gray-700 my-2" />
+                <h4 className="text-xs font-semibold text-gray-400 mb-2">テーマ</h4>
+                <button onClick={() => { onCycleTheme(); }} className="w-full p-3 rounded-lg text-left text-sm hover:bg-gray-700 text-gray-200 flex items-center gap-2">
+                  <Palette size={14} /> {themeLabel}
                 </button>
                 <div className="border-t border-gray-700 my-2" />
                 <h4 className="text-xs font-semibold text-gray-400 mb-2">ズーム</h4>

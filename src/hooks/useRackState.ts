@@ -370,7 +370,7 @@ export const useRackState = () => {
     if (!currentRack) return;
 
     try {
-      const result = await placementManager.removeEquipment(currentRack, unit);
+      const result = await placementManager.removeEquipment(currentRack, unit, isProMode);
 
       if (result.success && result.updatedRack) {
         const newRack = result.updatedRack;
@@ -384,7 +384,7 @@ export const useRackState = () => {
     } catch (error) {
       console.error('機器削除中にエラーが発生しました:', error);
     }
-  }, [racks]);
+  }, [racks, isProMode]);
 
   // 機器移動（新しいEquipmentPlacementManagerを使用）
   const moveEquipment = useCallback(async (rackId: string, fromUnit: number, toUnit: number) => {

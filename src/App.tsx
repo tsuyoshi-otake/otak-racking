@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
-import { Maximize, Minimize, Upload, Download, FileText, PanelLeftClose, PanelLeftOpen, PanelRightClose, PanelRightOpen, FilePlus } from 'lucide-react';
+import { Maximize, Minimize, Upload, Download, FileText, PanelLeftClose, PanelLeftOpen, PanelRightClose, PanelRightOpen, FilePlus, Palette } from 'lucide-react';
 import { Equipment, PhysicalStructure, Rack, RackViewPerspective } from './types';
 import { useRackState } from './hooks/useRackState';
 import { useIsMobile } from './hooks/useIsMobile';
@@ -16,6 +16,15 @@ import { calculateLayoutDimensions } from './utils';
 import { loadAppState, saveAppState, clearAppState } from './utils/localStorage';
 import { generateRackMarkdown, exportRackJson, importRackJson, createShareableData, generateShareUrl } from './utils/shareUtils';
 
+// テーマ定義
+type ThemeName = 'default' | 'claude' | 'light-gray';
+const THEMES: ThemeName[] = ['default', 'claude', 'light-gray'];
+const THEME_LABELS: Record<ThemeName, string> = {
+  default: 'Cool',
+  claude: 'Claude',
+  'light-gray': 'Light Gray',
+};
+
 // メモ化されたコンポーネント
 const MemoizedLeftSidebar = React.memo(LeftSidebar);
 const MemoizedRightSidebar = React.memo(RightSidebar);
@@ -24,6 +33,20 @@ const MemoizedModalsAndDialogs = ModalsAndDialogs;
 
 function App() {
   const isMobile = useIsMobile();
+
+  // テーマ状態
+  const [theme, setTheme] = useState<ThemeName>(() => {
+    return (localStorage.getItem('otak-racking-theme') as ThemeName) || 'claude';
+  });
+
+  const cycleTheme = useCallback(() => {
+    setTheme(prev => {
+      const idx = THEMES.indexOf(prev);
+      const next = THEMES[(idx + 1) % THEMES.length];
+      localStorage.setItem('otak-racking-theme', next);
+      return next;
+    });
+  }, []);
 
   // LocalStorageから初期状態を読み込み（初回のみ実行）
   const [loadedState] = useState(() => loadAppState());
@@ -457,7 +480,7 @@ function App() {
   }, [setSelectedRack]);
 
   return (
-    <div className="min-h-screen dark">
+    <div className="min-h-screen dark" data-theme={theme}>
       <div className="min-h-screen bg-gray-800 text-gray-100">
         <div className="fixed top-4 right-4 z-50 hidden md:flex items-center gap-2">
           <button
@@ -519,6 +542,13 @@ function App() {
             zoomLevel={zoomLevel}
             onShowModal={showInfoModal}
           />
+          <button
+            onClick={cycleTheme}
+            className="p-2 rounded-full bg-gray-700 text-gray-300 hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 focus:ring-offset-gray-800"
+            title={`テーマ: ${THEME_LABELS[theme]}`}
+          >
+            <Palette size={20} />
+          </button>
           <button
             onClick={toggleFullscreen}
             className="p-2 rounded-full bg-gray-700 text-gray-300 hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 focus:ring-offset-gray-800"
@@ -791,6 +821,8 @@ function App() {
               onCopyMarkdown={handleCopyMarkdown}
               onShare={handleMobileShare}
               onFullscreen={toggleFullscreen}
+              themeLabel={THEME_LABELS[theme]}
+              onCycleTheme={cycleTheme}
             />
             <MobileContextMenu
               isOpen={showContextMenu}

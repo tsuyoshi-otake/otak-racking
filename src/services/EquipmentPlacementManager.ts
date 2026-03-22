@@ -284,7 +284,7 @@ export class EquipmentPlacementManager {
   /**
    * 機器の削除
    */
-  async removeEquipment(rack: Rack, unit: number): Promise<PlacementResult> {
+  async removeEquipment(rack: Rack, unit: number, isProMode: boolean = false): Promise<PlacementResult> {
     // 不変性を保つためにラックのディープコピーを作成
     const rackCopy = JSON.parse(JSON.stringify(rack));
     const equipment = rackCopy.equipment[unit];
@@ -368,6 +368,35 @@ export class EquipmentPlacementManager {
         oldValue: oldLabel
       }
     );
+
+    // 非Proモード: 該当ユニットのレール・ケージナットを自動撤去（他の機器が使用していないもののみ）
+    if (!isProMode) {
+      for (let u = equipment.startUnit!; u <= equipment.endUnit!; u++) {
+        const unitOccupied = !!rackCopy.equipment[u];
+        if (!unitOccupied) {
+          if (rackCopy.rails[u]) {
+            const oldRail = rackCopy.rails[u];
+            delete rackCopy.rails[u];
+            changes.push({
+              type: 'rail',
+              action: 'remove',
+              target: u.toString(),
+              oldValue: oldRail
+            });
+          }
+          if (rackCopy.cageNuts[u]) {
+            const oldCageNut = rackCopy.cageNuts[u];
+            delete rackCopy.cageNuts[u];
+            changes.push({
+              type: 'cagenut',
+              action: 'remove',
+              target: u.toString(),
+              oldValue: oldCageNut
+            });
+          }
+        }
+      }
+    }
 
     return {
       success: true,
