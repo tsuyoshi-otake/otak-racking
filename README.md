@@ -4,13 +4,13 @@
 
 データセンター・サーバールーム向けのラック管理システム。機器の配置、電源管理、冷却計算、ケーブル管理などの包括的な機能を提供します。
 
-## 🌐 ライブデモ
+## ライブデモ
 
 **[https://tsuyoshi-otake.github.io/otak-racking](https://tsuyoshi-otake.github.io/otak-racking)**
 
 GitHub Pages経由で自動デプロイされています。
 
-## ✨ 主な機能
+## 主な機能
 
 ### 基本機能
 - **ラック管理**: 42Uラックの視覚化と機器配置
@@ -33,7 +33,7 @@ GitHub Pages経由で自動デプロイされています。
 - **アクセシビリティ**: キーボード操作とスクリーンリーダー対応
 - **ローカルストレージ**: 設定の自動保存
 
-## 🛠️ 技術スタック
+## 技術スタック
 
 - **React** 18.2.0 - UIフレームワーク
 - **TypeScript** 4.9.5 - 型安全性
@@ -42,7 +42,7 @@ GitHub Pages経由で自動デプロイされています。
 - **Jest** - テストフレームワーク
 - **GitHub Actions** - CI/CDパイプライン
 
-## 🚀 インストールと起動
+## インストールと起動
 
 ### 必要な環境
 - Node.js 18.x以上
@@ -84,7 +84,7 @@ npm test -- --coverage
 npm run eject
 ```
 
-## 📖 使用方法
+## 使用方法
 
 ### 基本操作
 
@@ -123,7 +123,7 @@ npm run eject
 - 取り付け要件（レール、ケージナット、シェルフ）
 - 電源要件（単電源/冗長電源）
 
-## 🏗️ プロジェクト構成
+## プロジェクト構成
 
 ```
 otak-racking/
@@ -162,7 +162,7 @@ otak-racking/
 └── README.md
 ```
 
-## 🧪 テスト
+## テスト
 
 プロジェクトには包括的なテストスイートが含まれています:
 
@@ -183,7 +183,7 @@ npm test -- --coverage
 - **Equipment Tests**: 機器配置ロジックのテスト
 - **Rail Tests**: レール・マウント機能のテスト
 
-## 🚀 デプロイ
+## デプロイ
 
 ### GitHub Pages（自動デプロイ）
 
@@ -203,7 +203,7 @@ npm run build
 # buildフォルダの内容を任意のWebサーバーにデプロイ
 ```
 
-## 🏛️ アーキテクチャ
+## アーキテクチャ
 
 ### 設計パターン
 - **コンポーネント構成**: プレゼンテーション層とビジネスロジック層の分離
@@ -216,7 +216,7 @@ npm run build
 - **LocalStorageUtils**: 設定の永続化
 - **RackIcons**: アイコン管理
 
-## 🤝 コントリビューション
+## コントリビューション
 
 1. このリポジトリをフォーク
 2. 機能ブランチを作成 (`git checkout -b feature/amazing-feature`)
@@ -230,18 +230,18 @@ npm run build
 - コミットメッセージは`.commit_template`に従う
 - ESLintとPrettierの設定に従う
 
-## 📄 ライセンス
+## ライセンス
 
 このプロジェクトはプライベートプロジェクトです。
 
-## 👨‍💻 作者
+## 作者
 
 **tsuyoshi-otake**
 
 - GitHub: [@tsuyoshi-otake](https://github.com/tsuyoshi-otake)
 - Project Link: [https://github.com/tsuyoshi-otake/otak-racking](https://github.com/tsuyoshi-otake/otak-racking)
 
-## 🙏 謝辞
+## 謝辞
 
 - React チーム - 素晴らしいフレームワークの提供
 - Tailwind CSS チーム - 効率的なスタイリングシステム

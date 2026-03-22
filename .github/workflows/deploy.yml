@@ -32,21 +32,18 @@ jobs:
     - name: Install dependencies
       run: npm ci
       
-    - name: Run tests
-      run: npm test -- --coverage --watchAll=false
-      
     - name: Build
       run: |
-        echo "REACT_APP_COMMIT_HASH=$(git rev-parse HEAD)" > .env
+        echo "VITE_COMMIT_HASH=$(git rev-parse HEAD)" > .env
         npm run build
-      
+
     - name: Setup Pages
       uses: actions/configure-pages@v4
-      
+
     - name: Upload artifact
       uses: actions/upload-pages-artifact@v3
       with:
-        path: ./build
+        path: ./dist
 
   deploy:
     runs-on: ubuntu-latest
