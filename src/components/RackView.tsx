@@ -40,6 +40,9 @@ interface RackViewProps {
   onPduRemove?: (pduId: string) => void;
   onPowerToggle?: (equipmentId: string) => void;
   onUpdateLabel?: (equipmentId: string, field: string, value: string) => void;
+  onMobileUnitTap?: (unit: number) => void;
+  isMobile?: boolean;
+  maxWidth?: number;
 }
 
 export const RackView: React.FC<RackViewProps> = React.memo(({
@@ -66,13 +69,19 @@ export const RackView: React.FC<RackViewProps> = React.memo(({
   onPduInstall,
   onPduRemove,
   onPowerToggle,
-  onUpdateLabel
+  onUpdateLabel,
+  onMobileUnitTap,
+  isMobile,
+  maxWidth
 }) => {
   // メモ化された計算値
   const unitHeight = useMemo(() => getZoomedUnitHeight(zoomLevel), [zoomLevel]);
   const fontSize = useMemo(() => getZoomedFontSize(zoomLevel), [zoomLevel]);
   const coolingStats = useMemo(() => calculateCoolingStats(rack), [rack]);
-  const rackWidth = useMemo(() => 600 * (zoomLevel / 100), [zoomLevel]);
+  const rackWidth = useMemo(() => {
+    const base = 600 * (zoomLevel / 100);
+    return maxWidth ? Math.min(base, maxWidth) : base;
+  }, [zoomLevel, maxWidth]);
 
   // メモ化されたヘッダーレンダリング関数
   const renderRackHeader = useMemo(() => {
@@ -157,6 +166,8 @@ export const RackView: React.FC<RackViewProps> = React.memo(({
             perspective={perspective}
             onPowerToggle={onPowerToggle}
             onUpdateLabel={onUpdateLabel}
+            onMobileUnitTap={onMobileUnitTap}
+            isMobile={isMobile}
           />
         ))}
       </div>

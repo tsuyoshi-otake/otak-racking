@@ -40,6 +40,8 @@ interface RackUnitProps {
   onRailRemove?: (unit: number, side: 'left' | 'right') => void;
   onPowerToggle?: (equipmentId: string) => void;
   onUpdateLabel?: (equipmentId: string, field: string, value: string) => void;
+  onMobileUnitTap?: (unit: number) => void;
+  isMobile?: boolean;
 }
 
 
@@ -65,7 +67,9 @@ export const RackUnit: React.FC<RackUnitProps> = React.memo(({
   onRailInstall,
   onRailRemove,
   onPowerToggle,
-  onUpdateLabel
+  onUpdateLabel,
+  onMobileUnitTap,
+  isMobile
 }) => {
   const item = rack.equipment[unit];
   const isEmpty = !item;
@@ -192,13 +196,14 @@ export const RackUnit: React.FC<RackUnitProps> = React.memo(({
     <div
       key={unit}
       className={`relative border flex items-center justify-between px-2 ${unitBorderClass} ${
-        isEmpty ? emptyUnitClass : ''
+        isEmpty ? `${emptyUnitClass}${onMobileUnitTap ? ' active:bg-gray-600 cursor-pointer' : ''}` : ''
       } ${
         item && !isMainUnit ? 'border-t-0' : ''
       }`}
       style={{ height: unitHeight }}
       onDragOver={isEmpty && selectedRack !== 'all' ? (e) => { e.preventDefault(); onDragOver?.(e, unit); } : undefined}
       onDrop={isEmpty && selectedRack !== 'all' ? (e) => onDrop?.(e, unit) : undefined}
+      onClick={isEmpty && onMobileUnitTap && selectedRack !== 'all' ? () => onMobileUnitTap(unit) : undefined}
     >
       <div className="flex items-center gap-1">
         <span
@@ -252,7 +257,7 @@ export const RackUnit: React.FC<RackUnitProps> = React.memo(({
       
       {item && isMainUnit && (
         <div
-          draggable={selectedRack !== 'all'}
+          draggable={!isMobile && selectedRack !== 'all'}
           onDragStart={(e) => {
             if (selectedRack !== 'all') {
               onEquipmentDragStart?.(item, unit, e);

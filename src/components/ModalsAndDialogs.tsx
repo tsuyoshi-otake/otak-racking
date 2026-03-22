@@ -156,7 +156,7 @@ export const ModalsAndDialogs: React.FC<ModalsAndDialogsProps> = ({
     const tabInactiveClass = 'bg-gray-700 text-gray-300 hover:bg-gray-600';
 
     return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className={`${modalBg} rounded-lg shadow-xl w-96 max-w-full max-h-[90vh] overflow-hidden`}>
         {/* ヘッダー */}
         <div className="p-4 border-b flex items-center justify-between border-custom-gray">
@@ -687,7 +687,7 @@ export const ModalsAndDialogs: React.FC<ModalsAndDialogsProps> = ({
     const modalBg = 'bg-gray-800 text-gray-200';
 
     return (
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
         <div className={`${modalBg} rounded-lg shadow-xl w-96 max-w-full max-h-[90vh] overflow-hidden`}>
           <div className="p-4 border-b flex items-center justify-between border-custom-gray">
             <h3 className="text-lg font-bold flex items-center gap-2">
@@ -791,7 +791,7 @@ export const ModalsAndDialogs: React.FC<ModalsAndDialogsProps> = ({
     const settings = tempFloorSettings || floorSettings;
 
     return (
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
         <div className={`${modalBg} rounded-lg shadow-xl w-96 max-w-full max-h-[90vh] overflow-hidden`}>
           <div className="p-4 border-b flex items-center justify-between border-custom-gray">
             <h3 className="text-lg font-bold flex items-center gap-2">
@@ -977,7 +977,7 @@ export const ModalsAndDialogs: React.FC<ModalsAndDialogsProps> = ({
   const renderCoolingConfigModal = () => {
     if (!showCoolingConfig) return null;
     if (!currentRack) return (
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
         <div className="bg-gray-800 text-gray-200 rounded-lg p-4">
           <p>ラックが選択されていません</p>
           <button onClick={onCloseCoolingConfig} className="mt-2 p-2 bg-gray-600 rounded">閉じる</button>
@@ -1003,7 +1003,7 @@ export const ModalsAndDialogs: React.FC<ModalsAndDialogsProps> = ({
     const totalPower = equipmentList.reduce((sum, e) => sum + (e.power || 0), 0);
 
     return (
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
         <div className={`${modalBg} rounded-lg shadow-xl w-96 max-w-full max-h-[90vh] overflow-y-auto custom-scrollbar`}>
           <div className="p-4 border-b flex items-center justify-between border-custom-gray">
             <h3 className="text-lg font-bold flex items-center gap-2">
@@ -1138,7 +1138,7 @@ export const ModalsAndDialogs: React.FC<ModalsAndDialogsProps> = ({
   const renderPowerConfigModal = () => {
     if (!showPowerConfig) return null;
     if (!currentRack) return (
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
         <div className="bg-gray-800 text-gray-200 rounded-lg p-4">
           <p>ラックが選択されていません</p>
           <button onClick={onClosePowerConfig} className="mt-2 p-2 bg-gray-600 rounded">閉じる</button>
@@ -1174,7 +1174,7 @@ export const ModalsAndDialogs: React.FC<ModalsAndDialogsProps> = ({
       : 0;
 
     return (
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
         <div className={`${modalBg} rounded-lg shadow-xl w-96 max-w-full max-h-[90vh] overflow-y-auto custom-scrollbar`}>
           <div className="p-4 border-b flex items-center justify-between border-custom-gray">
             <h3 className="text-lg font-bold flex items-center gap-2">
@@ -1395,7 +1395,7 @@ export const ModalsAndDialogs: React.FC<ModalsAndDialogsProps> = ({
     };
     
     return (
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
         <div className={`${modalBg} rounded-lg shadow-xl w-96 max-w-full max-h-[90vh] overflow-hidden`}>
           <div className="p-4 border-b flex items-center justify-between border-custom-gray">
             <h3 className="text-lg font-bold flex items-center gap-2">
