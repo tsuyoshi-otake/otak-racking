@@ -113,8 +113,9 @@ export const RackUnit: React.FC<RackUnitProps> = React.memo(({
   const marginLeft = useMemo(() => getZoomedMarginLeft(zoomLevel), [zoomLevel]);
 
   // メモ化された表示要素
-  const { displayName, powerStatus, mountingStatus, airflowStatus, temperatureStatus, cageNutDisplay, railDisplay } = useMemo(() => {
+  const { displayName, powerStatus, powerStatusString, mountingStatus, airflowStatus, temperatureStatus, cageNutDisplay, railDisplay } = useMemo(() => {
     let powerStatus = null;
+    let powerStatusString = '';
     let mountingStatus = null;
     let airflowStatus = null;
     let temperatureStatus = null;
@@ -136,6 +137,7 @@ export const RackUnit: React.FC<RackUnitProps> = React.memo(({
       
       if (activeViewMode === 'showPowerView') {
         const status = getPowerStatus(item, rack.powerConnections);
+        powerStatusString = status.status;
         powerStatus = React.createElement(
           status.icon === 'CircleCheck' ? CheckCircle :
           status.icon === 'AlertCircle' ? AlertCircle : XCircle,
@@ -178,7 +180,7 @@ export const RackUnit: React.FC<RackUnitProps> = React.memo(({
       }
     }
 
-    return { displayName, powerStatus, mountingStatus, airflowStatus, temperatureStatus, cageNutDisplay, railDisplay };
+    return { displayName, powerStatus, powerStatusString, mountingStatus, airflowStatus, temperatureStatus, cageNutDisplay, railDisplay };
   }, [item, isMainUnit, activeViewMode, rack.labels, rack.powerConnections, rack.mountingOptions, coolingStats.temperatureMap, unit, rack.environment.ambientTemp, cageNutStatus, railStatus]);
 
   // スタイルクラスをメモ化
@@ -195,7 +197,7 @@ export const RackUnit: React.FC<RackUnitProps> = React.memo(({
         item && !isMainUnit ? 'border-t-0' : ''
       }`}
       style={{ height: unitHeight }}
-      onDragOver={isEmpty && selectedRack !== 'all' ? (e) => onDragOver?.(e, unit) : undefined}
+      onDragOver={isEmpty && selectedRack !== 'all' ? (e) => { e.preventDefault(); onDragOver?.(e, unit); } : undefined}
       onDrop={isEmpty && selectedRack !== 'all' ? (e) => onDrop?.(e, unit) : undefined}
     >
       <div className="flex items-center gap-1">
@@ -240,6 +242,7 @@ export const RackUnit: React.FC<RackUnitProps> = React.memo(({
           zoomLevel={zoomLevel}
           unitHeight={unitHeight}
           perspective={perspective}
+          isInteractive={activeViewMode === 'showCageNutView' || activeViewMode === 'showRailView'}
           onCageNutInstall={onCageNutInstall}
           onCageNutRemove={onCageNutRemove}
           onRailInstall={onRailInstall}
@@ -275,8 +278,11 @@ export const RackUnit: React.FC<RackUnitProps> = React.memo(({
             }
           }}
         >
-          {/* 機器名ラベル */}
-          <div className="relative z-10 text-gray-300 font-normal text-xs truncate flex-1 text-center flex items-center justify-center gap-1 [text-shadow:0_1px_2px_rgba(0,0,0,0.5)]">
+          {/* 機器名ラベル — div全体でクリックをキャッチしインライン編集を開始 */}
+          <div
+            className="relative z-10 text-gray-300 font-normal text-xs truncate flex-1 text-center flex items-center justify-center gap-1 [text-shadow:0_1px_2px_rgba(0,0,0,0.5)] cursor-text"
+            onClick={handleNameClick}
+          >
             {isEditing ? (
               <input
                 ref={inputRef}
@@ -291,7 +297,7 @@ export const RackUnit: React.FC<RackUnitProps> = React.memo(({
                 style={{ textShadow: 'none' }}
               />
             ) : (
-              <span onClick={handleNameClick} className="cursor-text px-2 py-1">{displayName}</span>
+              <span className="px-2 py-1">{displayName}</span>
             )}
             {powerStatus && <span className="ml-1">{powerStatus}</span>}
             {mountingStatus && <span className="ml-1">{mountingStatus}</span>}
@@ -311,10 +317,7 @@ export const RackUnit: React.FC<RackUnitProps> = React.memo(({
               }}
             >
               <StatusLEDs
-                powerStatus={(() => {
-                  const status = getPowerStatus(item, rack.powerConnections);
-                  return status.status;
-                })()}
+                powerStatus={powerStatusString || getPowerStatus(item, rack.powerConnections).status}
                 healthStatus={item.healthStatus || 'normal'}
                 powerOn={item.powerOn !== false}
                 onPowerToggle={onPowerToggle ? () => onPowerToggle(item.id) : undefined}

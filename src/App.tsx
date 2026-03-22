@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
-import { Maximize, Minimize, Upload, Download, FileText } from 'lucide-react';
-import { Equipment, PhysicalStructure, Rack } from './types';
+import { Maximize, Minimize, Upload, Download, FileText, PanelLeftClose, PanelLeftOpen, PanelRightClose, PanelRightOpen } from 'lucide-react';
+import { Equipment, PhysicalStructure, Rack, RackViewPerspective } from './types';
 import { useRackState } from './hooks/useRackState';
 import { useDragAndDrop, DraggedItem } from './hooks/useDragAndDrop';
 import { LeftSidebar } from './components/LeftSidebar';
@@ -11,8 +11,6 @@ import { ShareButton } from './components/ShareButton';
 import { calculateLayoutDimensions } from './utils';
 import { loadAppState, saveAppState } from './utils/localStorage';
 import { generateRackMarkdown, exportRackJson, importRackJson, createShareableData } from './utils/shareUtils';
-
-export type RackViewPerspective = 'front' | 'rear';
 
 // メモ化されたコンポーネント
 const MemoizedLeftSidebar = React.memo(LeftSidebar);
@@ -49,6 +47,8 @@ function App() {
   const [showFloorSettings, setShowFloorSettings] = useState(false);
   const [showCoolingConfig, setShowCoolingConfig] = useState(false);
   const [showPowerConfig, setShowPowerConfig] = useState(false);
+  const [leftSidebarOpen, setLeftSidebarOpen] = useState(true);
+  const [rightSidebarOpen, setRightSidebarOpen] = useState(true);
 
   // 通知・確認モーダル用 state
   const [infoModal, setInfoModal] = useState<InfoModalProps | null>(null);
@@ -87,6 +87,7 @@ function App() {
     toggleEquipmentHealth,
     toggleEquipmentPower,
     isSharedDataLoaded,
+    restoreState,
   } = useRackState();
   // モーダル表示関数（メモ化）
   const showInfoModal = useCallback((title: string, message: string) => {
@@ -281,18 +282,17 @@ function App() {
     try {
       const data = await importRackJson(file);
       if (data.racks && Object.keys(data.racks).length > 0) {
-        // useRackStateのsetRacksにアクセスするため、updateRackではなくページリロードで復元
-        // localStorageに保存してリロード
-        saveAppState({
-          zoomLevel: data.zoomLevel,
-          selectedRack: data.selectedRack,
-          activeViewMode: data.activeViewMode,
-          rackViewPerspective: data.rackViewPerspective,
+        // 状態を直接復元（リロード不要）
+        restoreState({
           racks: data.racks,
+          selectedRack: data.selectedRack,
           floorSettings: data.floorSettings,
           isProMode: data.isProMode,
         });
-        window.location.reload();
+        if (data.activeViewMode !== undefined) setActiveViewMode(data.activeViewMode);
+        if (data.rackViewPerspective) setRackViewPerspective(data.rackViewPerspective as RackViewPerspective);
+        if (data.zoomLevel !== undefined) setZoomLevel(data.zoomLevel);
+        showInfoModal('インポート完了', 'ラック構成を復元しました。');
       } else {
         showInfoModal('インポートエラー', 'ラックデータが見つかりませんでした。');
       }
@@ -301,7 +301,7 @@ function App() {
     }
     // input をリセットして同じファイルを再選択可能にする
     if (fileInputRef.current) fileInputRef.current.value = '';
-  }, [showInfoModal]);
+  }, [showInfoModal, restoreState, setActiveViewMode, setRackViewPerspective, setZoomLevel]);
 
   // モーダル関連のコールバック（メモ化）
   const handleCloseEquipmentModal = useCallback(() => {
@@ -324,6 +324,20 @@ function App() {
     <div className="min-h-screen dark">
       <div className="min-h-screen bg-gray-800 text-gray-100">
         <div className="fixed top-4 right-4 z-50 flex items-center gap-2">
+          <button
+            onClick={() => setLeftSidebarOpen(prev => !prev)}
+            className="p-2 rounded-full bg-gray-700 text-gray-300 hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 focus:ring-offset-gray-800"
+            title={leftSidebarOpen ? '左サイドバーを閉じる' : '左サイドバーを開く'}
+          >
+            {leftSidebarOpen ? <PanelLeftClose size={20} /> : <PanelLeftOpen size={20} />}
+          </button>
+          <button
+            onClick={() => setRightSidebarOpen(prev => !prev)}
+            className="p-2 rounded-full bg-gray-700 text-gray-300 hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 focus:ring-offset-gray-800"
+            title={rightSidebarOpen ? '右サイドバーを閉じる' : '右サイドバーを開く'}
+          >
+            {rightSidebarOpen ? <PanelRightClose size={20} /> : <PanelRightOpen size={20} />}
+          </button>
           <input
             ref={fileInputRef}
             type="file"
@@ -333,21 +347,21 @@ function App() {
           />
           <button
             onClick={() => fileInputRef.current?.click()}
-            className="p-2 rounded-full bg-gray-700 text-gray-300 hover:bg-gray-600 focus:outline-none"
+            className="p-2 rounded-full bg-gray-700 text-gray-300 hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 focus:ring-offset-gray-800"
             title="JSONインポート"
           >
             <Upload size={20} />
           </button>
           <button
             onClick={handleExportJson}
-            className="p-2 rounded-full bg-gray-700 text-gray-300 hover:bg-gray-600 focus:outline-none"
+            className="p-2 rounded-full bg-gray-700 text-gray-300 hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 focus:ring-offset-gray-800"
             title="JSONエクスポート"
           >
             <Download size={20} />
           </button>
           <button
             onClick={handleCopyMarkdown}
-            className="p-2 rounded-full bg-gray-700 text-gray-300 hover:bg-gray-600 focus:outline-none"
+            className="p-2 rounded-full bg-gray-700 text-gray-300 hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 focus:ring-offset-gray-800"
             title="マークダウンをコピー"
           >
             <FileText size={20} />
@@ -364,7 +378,7 @@ function App() {
           />
           <button
             onClick={toggleFullscreen}
-            className="p-2 rounded-full bg-gray-700 text-gray-300 hover:bg-gray-600 focus:outline-none"
+            className="p-2 rounded-full bg-gray-700 text-gray-300 hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 focus:ring-offset-gray-800"
             title={isFullscreen ? 'フルスクリーン解除' : 'フルスクリーン'}
           >
             {isFullscreen ? <Minimize size={20} /> : <Maximize size={20} />}
@@ -380,10 +394,7 @@ function App() {
                 {import.meta.env.VITE_COMMIT_HASH && ` - ${(import.meta.env.VITE_COMMIT_HASH as string).substring(0, 7)}`}
               </p>
             </div>
-            
-            <div className="flex items-center gap-4">
-              {/* ズーム表示 */}
-            </div>
+
           </div>
         </header>
 
@@ -394,17 +405,19 @@ function App() {
         onDrop={handleDropOutside}
       >
         {/* 左サイドバー */}
-        <MemoizedLeftSidebar
-          zoomLevel={zoomLevel}
-          activeViewMode={activeViewMode}
-          onZoomChange={setZoomLevel}
-          onActiveViewModeChange={handleActiveViewModeChange}
-          onDragStart={handleDragStart}
-          currentPerspective={rackViewPerspective}
-          onPerspectiveChange={setRackViewPerspective}
-          isProMode={isProMode}
-          onToggleProMode={toggleProMode}
-        />
+        {leftSidebarOpen && (
+          <MemoizedLeftSidebar
+            zoomLevel={zoomLevel}
+            activeViewMode={activeViewMode}
+            onZoomChange={setZoomLevel}
+            onActiveViewModeChange={handleActiveViewModeChange}
+            onDragStart={handleDragStart}
+            currentPerspective={rackViewPerspective}
+            onPerspectiveChange={setRackViewPerspective}
+            isProMode={isProMode}
+            onToggleProMode={toggleProMode}
+          />
+        )}
 
         {/* ラック表示エリア */}
         <main className="flex-1 overflow-auto p-4 custom-scrollbar">
@@ -525,20 +538,22 @@ function App() {
         </main>
 
         {/* 右サイドバー */}
-        <MemoizedRightSidebar
-          racks={racks}
-          selectedRack={selectedRack}
-          floorSettings={floorSettings}
-          isProMode={isProMode}
-          onRackSelect={setSelectedRack}
-          onAddRack={addRack}
-          onRemoveRack={removeRack}
-          onDuplicateRack={duplicateRack}
-          onShowRackManager={handleShowRackManager}
-          onShowFloorSettings={handleShowFloorSettings}
-          onShowCoolingConfig={handleShowCoolingConfig}
-          onShowPowerConfig={handleShowPowerConfig}
-        />
+        {rightSidebarOpen && (
+          <MemoizedRightSidebar
+            racks={racks}
+            selectedRack={selectedRack}
+            floorSettings={floorSettings}
+            isProMode={isProMode}
+            onRackSelect={setSelectedRack}
+            onAddRack={addRack}
+            onRemoveRack={removeRack}
+            onDuplicateRack={duplicateRack}
+            onShowRackManager={handleShowRackManager}
+            onShowFloorSettings={handleShowFloorSettings}
+            onShowCoolingConfig={handleShowCoolingConfig}
+            onShowPowerConfig={handleShowPowerConfig}
+          />
+        )}
       </div>
 
       {/* モーダル・ダイアログ */}

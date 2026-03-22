@@ -8,6 +8,7 @@ interface MountingHolesProps {
   zoomLevel: number;
   unitHeight: number;
   perspective: 'front' | 'rear';
+  isInteractive?: boolean;
   onCageNutInstall?: (unit: number, side: string, position: string, nutType: string) => void;
   onCageNutRemove?: (unit: number, side: string, position: string) => void;
   onRailInstall?: (unit: number, side: 'left' | 'right', railType: string) => void;
@@ -20,6 +21,7 @@ export const MountingHoles: React.FC<MountingHolesProps> = ({
   zoomLevel,
   unitHeight,
   perspective,
+  isInteractive = true,
   onCageNutInstall,
   onCageNutRemove,
   onRailInstall,
@@ -50,8 +52,8 @@ export const MountingHoles: React.FC<MountingHolesProps> = ({
 
     return (
       <div
-        className={`absolute cursor-pointer transition-all ${
-          hasRail ? 'hover:scale-105' : 'hover:opacity-80'
+        className={`absolute transition-all ${
+          isInteractive ? `cursor-pointer ${hasRail ? 'hover:scale-105' : 'hover:opacity-80'}` : ''
         }`}
         style={{
           ...(position === 'left'
@@ -70,16 +72,17 @@ export const MountingHoles: React.FC<MountingHolesProps> = ({
           borderRadius: '2px',
           boxShadow: hasRail ? 'inset 0 2px 4px rgba(0,0,0,0.5), 0 1px 2px rgba(255,255,255,0.1)' : 'none',
           zIndex: 5,
+          pointerEvents: isInteractive ? 'auto' : 'none',
         }}
-        title={`${position === 'left' ? '左' : '右'}レールスロット: ${hasRail ? 'レール設置済み（クリックで削除）' : 'クリックでレール設置'}`}
-        onClick={(e) => {
+        title={isInteractive ? `${position === 'left' ? '左' : '右'}レールスロット: ${hasRail ? 'レール設置済み（クリックで削除）' : 'クリックでレール設置'}` : undefined}
+        onClick={isInteractive ? (e) => {
           e.stopPropagation();
           if (hasRail) {
             onRailRemove?.(unit, position);
           } else {
             onRailInstall?.(unit, position, '1u');
           }
-        }}
+        } : undefined}
       >
         {hasRail && (
           <div
@@ -117,11 +120,12 @@ export const MountingHoles: React.FC<MountingHolesProps> = ({
           bottom: vertical === 'bottom' ? '2px' : undefined,
           transform: vertical === 'middle' ? 'translateY(-50%)' : undefined,
           zIndex: 5,
+          pointerEvents: isInteractive ? 'auto' : 'none',
         }}
       >
         {/* ケージナット穴 */}
         <div
-          className={`relative border ${isRailFixed ? '' : 'cursor-pointer'} ${
+          className={`relative border ${isRailFixed || !isInteractive ? '' : 'cursor-pointer'} ${
             isRailFixed
               ? 'border-gray-600'
               : nut

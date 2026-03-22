@@ -1,7 +1,7 @@
 import React from 'react';
 import { Eye, Grid, Lock, Unlock, DoorOpen, DoorClosed } from 'lucide-react';
 import { Rack, PhysicalStructure } from '../types';
-import { RackViewPerspective } from '../App';
+import { RackViewPerspective } from '../types';
 
 interface RackStructureProps {
   rack: Rack;
@@ -90,7 +90,7 @@ export const RackStructure: React.FC<RackStructureProps> = ({
       {/* 前面扉 */}
       {structure.frontDoor.type !== 'none' && (
         <div
-          className={`absolute cursor-pointer transition-all duration-300 ${
+          className={`absolute transition-all duration-300 ${
             structure.frontDoor.opened ? 'transform -translate-x-full' : ''
           }`}
           style={{
@@ -100,15 +100,9 @@ export const RackStructure: React.FC<RackStructureProps> = ({
             height: `${rackHeight}px`,
             backgroundColor: structure.frontDoor.color,
             opacity: structure.frontDoor.transparency / 100,
-            zIndex: 20
+            zIndex: 20,
+            pointerEvents: 'none'
           }}
-          onClick={() => onUpdatePhysicalStructure?.({
-            frontDoor: {
-              ...structure.frontDoor,
-              opened: !structure.frontDoor.opened
-            }
-          })}
-          title={`前面扉 (${structure.frontDoor.type}) - クリックで開閉`}
         >
           {/* 扉のタイプに応じた表現 */}
           {structure.frontDoor.type === 'mesh' && (
@@ -157,8 +151,18 @@ export const RackStructure: React.FC<RackStructureProps> = ({
             )}
           </div>
 
-          {/* 開閉状態アイコン */}
-          <div className="absolute bottom-4 right-4">
+          {/* 開閉ボタン — pointer-events: auto で操作可能 */}
+          <div
+            className="absolute bottom-4 right-4 cursor-pointer hover:scale-110 transition-transform"
+            style={{ pointerEvents: 'auto' }}
+            onClick={() => onUpdatePhysicalStructure?.({
+              frontDoor: {
+                ...structure.frontDoor,
+                opened: !structure.frontDoor.opened
+              }
+            })}
+            title={`前面扉 (${structure.frontDoor.type}) - クリックで開閉`}
+          >
             {structure.frontDoor.opened ? (
               <DoorOpen size={16} className="text-gray-600" />
             ) : (
@@ -171,7 +175,7 @@ export const RackStructure: React.FC<RackStructureProps> = ({
       {/* 背面扉 */}
       {structure.rearDoor.type !== 'none' && perspective === 'rear' && (
         <div
-          className={`absolute cursor-pointer transition-all duration-300 opacity-80 ${
+          className={`absolute transition-all duration-300 opacity-80 ${
             structure.rearDoor.opened ? 'transform translate-x-full' : ''
           }`}
           style={{
@@ -181,15 +185,9 @@ export const RackStructure: React.FC<RackStructureProps> = ({
             height: `${rackHeight}px`,
             backgroundColor: structure.rearDoor.color,
             opacity: structure.rearDoor.transparency / 100,
-            zIndex: 20
+            zIndex: 20,
+            pointerEvents: 'none'
           }}
-          onClick={() => onUpdatePhysicalStructure?.({
-            rearDoor: {
-              ...structure.rearDoor,
-              opened: !structure.rearDoor.opened
-            }
-          })}
-          title={`背面扉 (${structure.rearDoor.type}) - クリックで開閉`}
         >
           {/* 背面扉の表現（前面と同様） */}
           {structure.rearDoor.type === 'mesh' && (
@@ -199,12 +197,31 @@ export const RackStructure: React.FC<RackStructureProps> = ({
               ))}
             </div>
           )}
-          
+
           <div className="absolute top-4 left-4">
             {structure.rearDoor.locked ? (
               <Lock size={16} className="text-gray-700" />
             ) : (
               <Unlock size={16} className="text-custom-gray" />
+            )}
+          </div>
+
+          {/* 開閉ボタン */}
+          <div
+            className="absolute bottom-4 left-4 cursor-pointer hover:scale-110 transition-transform"
+            style={{ pointerEvents: 'auto' }}
+            onClick={() => onUpdatePhysicalStructure?.({
+              rearDoor: {
+                ...structure.rearDoor,
+                opened: !structure.rearDoor.opened
+              }
+            })}
+            title={`背面扉 (${structure.rearDoor.type}) - クリックで開閉`}
+          >
+            {structure.rearDoor.opened ? (
+              <DoorOpen size={16} className="text-gray-600" />
+            ) : (
+              <DoorClosed size={16} className="text-gray-600" />
             )}
           </div>
         </div>

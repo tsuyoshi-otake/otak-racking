@@ -50,7 +50,6 @@ export const loadAppState = (): Partial<AppState> => {
   try {
     const stored = localStorage.getItem(STORAGE_KEY);
     if (!stored) {
-      console.log('アプリ状態が見つかりません。デフォルト状態を使用します。');
       return DEFAULT_APP_STATE;
     }
 
@@ -58,7 +57,6 @@ export const loadAppState = (): Partial<AppState> => {
     
     // バージョンチェック
     if (parsed.version !== STORAGE_VERSION) {
-      console.log(`アプリ状態のバージョンが異なります (保存済み: ${parsed.version}, 現在: ${STORAGE_VERSION})。デフォルト状態を使用します。`);
       return DEFAULT_APP_STATE;
     }
 
@@ -81,7 +79,6 @@ export const loadAppState = (): Partial<AppState> => {
       });
     }
 
-    console.log('アプリ状態を正常に読み込みました。');
     return {
       ...DEFAULT_APP_STATE,
       ...parsed.data
@@ -121,7 +118,6 @@ export const saveAppState = (state: Partial<AppState>): void => {
 
       localStorage.setItem(STORAGE_KEY, dataString);
       lastSavedData = dataString;
-      console.log('アプリ状態を正常に保存しました。');
     } catch (error) {
       console.error('アプリ状態の保存中にエラーが発生しました:', error);
       
@@ -138,7 +134,6 @@ export const saveAppState = (state: Partial<AppState>): void => {
           };
           localStorage.setItem(STORAGE_KEY, JSON.stringify(minimalData));
           lastSavedData = JSON.stringify(minimalData);
-          console.log('容量不足後の再保存が成功しました。');
         } catch (retryError) {
           console.error('再保存も失敗しました:', retryError);
         }
@@ -176,7 +171,6 @@ export const clearAppState = (): void => {
     }
     localStorage.removeItem(STORAGE_KEY);
     lastSavedData = null;
-    console.log('アプリ状態を削除しました。');
   } catch (error) {
     console.error('アプリ状態の削除中にエラーが発生しました:', error);
   }

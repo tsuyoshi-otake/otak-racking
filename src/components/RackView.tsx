@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { Rack, Equipment, PhysicalStructure } from '../types';
-import { RackViewPerspective } from '../App';
+import { RackViewPerspective } from '../types';
 import {
   calculateCoolingStats,
   getZoomedUnitHeight,

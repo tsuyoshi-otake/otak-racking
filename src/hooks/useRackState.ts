@@ -198,24 +198,9 @@ export const useRackState = () => {
     }
   }, [sharedData]);
 
-  // 状態変更時にLocalStorageに保存
-  useEffect(() => {
-    // saveAppState処理はApp.tsxに移動したため、このeffectは不要
-    // const stateToSave = {
-    //   racks,
-    //   selectedRack,
-    //   floorSettings,
-    //   isProMode,
-    // };
-    // saveAppState(stateToSave); // App.tsx に移動したためコメントアウト
-  }, [racks, selectedRack, floorSettings, isProMode]);
 
   const toggleProMode = () => {
-    setIsProMode(prev => {
-      const newValue = !prev;
-      console.log('Pro Mode toggled:', newValue);
-      return newValue;
-    });
+    setIsProMode(prev => !prev);
   };
 
   // ラック追加
@@ -395,7 +380,8 @@ export const useRackState = () => {
     try {
       const rackCopy = JSON.parse(JSON.stringify(currentRack));
       const result = await placementManager.moveEquipment(rackCopy, fromUnit, toUnit, {
-        autoInstallCageNuts: !isProMode
+        autoInstallCageNuts: !isProMode,
+        autoInstallRails: !isProMode
       }, isProMode);
 
       if (result.success && result.updatedRack) {
@@ -1011,6 +997,19 @@ export const useRackState = () => {
     });
   }, []);
 
+  // インポート等による状態一括復元
+  const restoreState = useCallback((data: {
+    racks: Record<string, Rack>;
+    selectedRack?: string;
+    floorSettings?: FloorSettings;
+    isProMode?: boolean;
+  }) => {
+    if (data.racks) setRacks(data.racks);
+    if (data.selectedRack) setSelectedRack(data.selectedRack);
+    if (data.floorSettings) setFloorSettings(data.floorSettings);
+    if (data.isProMode !== undefined) setIsProMode(data.isProMode);
+  }, []);
+
   // 計算値をメモ化
   const currentRack = useMemo(() =>
     racks[selectedRack] || racks[Object.keys(racks)[0]],
@@ -1135,7 +1134,8 @@ export const useRackState = () => {
     removePdu,
     toggleEquipmentHealth,
     toggleEquipmentPower,
-    
+    restoreState,
+
     // Computed
     currentRack
   };

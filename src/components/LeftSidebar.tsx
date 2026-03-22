@@ -11,7 +11,7 @@ import {
   ChevronRight,
   Move
 } from 'lucide-react';
-import { RackViewPerspective } from '../App'; // App.tsx から型をインポート
+import { RackViewPerspective } from '../types';
 import {
   getSidebarStyle,
   getButtonStyle
@@ -153,8 +153,7 @@ export const LeftSidebar: React.FC<LeftSidebarProps> = ({
                 name="pro-mode-toggle"
                 id="pro-mode-toggle"
                 checked={isProMode}
-                onChange={(e) => {
-                  console.log('Pro Mode toggle clicked, current value:', isProMode, 'new value:', e.target.checked);
+                onChange={() => {
                   onToggleProMode();
                 }}
                 className="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer"
