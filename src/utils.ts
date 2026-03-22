@@ -78,9 +78,9 @@ const coolingStatsCache = new WeakMap<Rack, { stats: CoolingStats; version: stri
 
 export const calculateCoolingStats = (rack: Rack): CoolingStats => {
   // キャッシュチェック
-  const cacheKey = `${Object.keys(rack.equipment).length}-${rack.environment.ambientTemp}`;
+  const cacheKey = `${Object.keys(rack.equipment).length}-${rack.environment.ambientTemp}-${rack.fans.count}-${rack.fans.rpm}`;
   const cached = coolingStatsCache.get(rack);
-  
+
   if (cached && cached.version === cacheKey) {
     return cached.stats;
   }
@@ -94,24 +94,55 @@ export const calculateCoolingStats = (rack: Rack): CoolingStats => {
     issue: string;
     severity: 'low' | 'medium' | 'high';
   }> = [];
-  
+
   const temperatureMap: Record<number, number> = {};
   let currentTemp = rack.environment.ambientTemp;
-  
+
+  // プレスキャン: ブランクパネル・エアフロー方向・占有率を集計
+  let occupiedUnits = 0;
+  let blankedUnits = 0;
+  let trulyEmptyUnits = 0;
+  const airflowDirections: Record<string, number> = {};
+  let rearToFrontCount = 0;
+
+  for (let unit = 1; unit <= rack.units; unit++) {
+    const item = rack.equipment[unit];
+    if (item) {
+      if (item.isMainUnit !== false) {
+        occupiedUnits += item.height || 1;
+      }
+      if (item.type === 'panel' && item.airflow === 'blocking') {
+        blankedUnits += item.height || 1;
+      }
+      if (item.isMainUnit !== false && (item.heatGeneration || 0) > 0) {
+        const dir = item.airflow;
+        if (dir === 'front-to-rear' || dir === 'rear-to-front' || dir === 'side-to-side') {
+          airflowDirections[dir] = (airflowDirections[dir] || 0) + 1;
+        }
+        if (dir === 'rear-to-front') {
+          rearToFrontCount++;
+        }
+      }
+    } else {
+      trulyEmptyUnits++;
+    }
+  }
+
+  // メインループ: 発熱量・CFM集計、温度マップ、個別機器の警告
   for (let unit = 1; unit <= rack.units; unit++) {
     const item = rack.equipment[unit];
     if (item && item.isMainUnit) {
       totalHeatGeneration += item.heatGeneration || 0;
       totalCFM += item.cfm || 0;
-      
+
       if (item.type === 'cooling') {
         totalCoolingCapacity += Math.abs(item.heatGeneration || 0);
       }
-      
+
       const heatDensity = (item.heatGeneration || 0) / (item.cfm || 100);
       const tempRise = heatDensity * 0.1;
       currentTemp += tempRise;
-      
+
       if (item.airflow === 'front-to-rear' && item.cfm < (item.heatGeneration || 0) / 10) {
         airflowIssues.push({
           unit,
@@ -120,39 +151,91 @@ export const calculateCoolingStats = (rack: Rack): CoolingStats => {
           severity: 'high'
         });
       }
-      
+
       if (item.airflow === 'blocking') {
-        airflowIssues.push({
-          unit,
-          item: item.name,
-          issue: 'エアフロー阻害',
-          severity: 'medium'
-        });
+        // ブランクパネル: 気流分離で微小冷却
+        currentTemp = Math.max(currentTemp - 0.1, rack.environment.ambientTemp);
       }
     }
-    
-    temperatureMap[unit] = Math.round(currentTemp * 10) / 10;
-    
-    if (!item) {
-      currentTemp = Math.max(currentTemp - 0.1, rack.environment.ambientTemp);
-    }
-  }
-  
-  // ラックファンのCFM（1ファンあたり約100CFM × RPM比率）
-  const fanCfm = rack.fans.count * (rack.fans.rpm / 3000) * 100;
-  const availableCfm = totalCFM + fanCfm;
 
-  // 冷却効率 = エアフロー充足率（必要CFM ≈ 総発熱量 / 10）
-  // cooling機器がある場合はその冷却能力も加味
-  const requiredCfm = totalHeatGeneration / 10;
-  const coolingEfficiency = requiredCfm > 0 ?
-    Math.min(((availableCfm + totalCoolingCapacity / 10) / requiredCfm) * 100, 100) : 0;
-  
+    if (!item) {
+      // 空きU: ブランクパネル無しで熱気再循環
+      currentTemp += 0.05;
+    }
+
+    temperatureMap[unit] = Math.round(currentTemp * 10) / 10;
+  }
+
+  // === 多因子冷却効率計算（ASHRAE TC 9.9準拠） ===
+  let coolingEfficiency = 0;
+
+  if (totalHeatGeneration > 0) {
+    // Factor 1: ブランクパネル充填率（最重要）
+    const emptyUnits = rack.units - occupiedUnits;
+    const blankableUnits = emptyUnits + blankedUnits;
+    const blankingCoverage = blankableUnits > 0 ? blankedUnits / blankableUnits : 1.0;
+    const blankingFactor = 0.60 + (0.40 * blankingCoverage);
+
+    // Factor 2: エアフロー方向一貫性
+    const directionValues = Object.values(airflowDirections);
+    const totalDirectional = directionValues.reduce((a, b) => a + b, 0);
+    const dominantCount = directionValues.length > 0 ? Math.max(...directionValues) : 0;
+    let airflowConsistencyFactor = 1.0;
+    if (totalDirectional > 1) {
+      const consistencyRatio = dominantCount / totalDirectional;
+      airflowConsistencyFactor = 0.70 + (0.30 * consistencyRatio);
+      airflowConsistencyFactor -= (rearToFrontCount / totalDirectional) * 0.10;
+      airflowConsistencyFactor = Math.max(airflowConsistencyFactor, 0.60);
+    }
+
+    // Factor 3: CFM充足率
+    const fanCfm = rack.fans.count * (rack.fans.rpm / 3000) * 100;
+    const availableCfm = totalCFM + fanCfm;
+    const requiredCfm = totalHeatGeneration * 0.05;
+    const cfmRatio = requiredCfm > 0 ? availableCfm / requiredCfm : 1.0;
+    const cfmAdequacyFactor = Math.min(Math.max(0.30 + 0.70 * (cfmRatio / 1.5), 0.30), 1.0);
+
+    // Factor 4: ラックファン有無
+    const fanBoostFactor = (rack.fans.count > 0 && rack.fans.rpm > 0) ? 1.0 : 0.90;
+
+    coolingEfficiency = 95 * blankingFactor * airflowConsistencyFactor * cfmAdequacyFactor * fanBoostFactor;
+    coolingEfficiency = Math.min(Math.max(coolingEfficiency, 0), 100);
+  }
+
+  // === ラックレベルのエアフロー警告 ===
+  if (trulyEmptyUnits > 0 && totalHeatGeneration > 0) {
+    const emptyRatio = trulyEmptyUnits / rack.units;
+    airflowIssues.push({
+      unit: 0,
+      item: 'ラック',
+      issue: `ブランクパネル未設置 (${trulyEmptyUnits}U空き)`,
+      severity: emptyRatio > 0.5 ? 'high' : emptyRatio > 0.25 ? 'medium' : 'low'
+    });
+  }
+
+  if (rearToFrontCount > 0 && totalHeatGeneration > 0) {
+    airflowIssues.push({
+      unit: 0,
+      item: 'ラック',
+      issue: `逆方向エアフロー機器あり (${rearToFrontCount}台)`,
+      severity: 'high'
+    });
+  }
+
+  if (rack.fans.count === 0 && totalHeatGeneration > 0) {
+    airflowIssues.push({
+      unit: 0,
+      item: 'ラック',
+      issue: 'ラックファン未設置',
+      severity: 'medium'
+    });
+  }
+
   const tempValues = Object.values(temperatureMap);
   const maxTemp = Math.max(...tempValues);
   const minTemp = Math.min(...tempValues);
   const avgTemp = tempValues.reduce((a, b) => a + b, 0) / tempValues.length;
-  
+
   const stats = {
     totalHeatGeneration,
     totalCFM,
@@ -169,7 +252,7 @@ export const calculateCoolingStats = (rack: Rack): CoolingStats => {
 
   // キャッシュに保存
   coolingStatsCache.set(rack, { stats, version: cacheKey });
-  
+
   return stats;
 };
 
