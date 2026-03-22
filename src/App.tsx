@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
-import { Maximize, Minimize, Upload, Download, FileText, PanelLeftClose, PanelLeftOpen, PanelRightClose, PanelRightOpen } from 'lucide-react';
+import { Maximize, Minimize, Upload, Download, FileText, PanelLeftClose, PanelLeftOpen, PanelRightClose, PanelRightOpen, FilePlus } from 'lucide-react';
 import { Equipment, PhysicalStructure, Rack, RackViewPerspective } from './types';
 import { useRackState } from './hooks/useRackState';
 import { useDragAndDrop, DraggedItem } from './hooks/useDragAndDrop';
@@ -9,7 +9,7 @@ import { RackView } from './components/RackView';
 import { ModalsAndDialogs, InfoModalProps, ConfirmModalProps } from './components/ModalsAndDialogs';
 import { ShareButton } from './components/ShareButton';
 import { calculateLayoutDimensions } from './utils';
-import { loadAppState, saveAppState } from './utils/localStorage';
+import { loadAppState, saveAppState, clearAppState } from './utils/localStorage';
 import { generateRackMarkdown, exportRackJson, importRackJson, createShareableData } from './utils/shareUtils';
 
 // メモ化されたコンポーネント
@@ -259,6 +259,21 @@ function App() {
     }
   }, []);
 
+  // 新規作成
+  const handleNew = useCallback(() => {
+    showConfirmModal(
+      '新規作成',
+      '現在の設計データをすべて破棄して、新しい設計を開始しますか？',
+      () => {
+        clearAppState();
+        window.location.hash = '';
+        window.location.reload();
+      },
+      '新規作成',
+      'キャンセル'
+    );
+  }, [showConfirmModal]);
+
   // ファイルインポート用ref
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -324,6 +339,13 @@ function App() {
     <div className="min-h-screen dark">
       <div className="min-h-screen bg-gray-800 text-gray-100">
         <div className="fixed top-4 right-4 z-50 flex items-center gap-2">
+          <button
+            onClick={handleNew}
+            className="p-2 rounded-full bg-gray-700 text-gray-300 hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 focus:ring-offset-gray-800"
+            title="新規作成"
+          >
+            <FilePlus size={20} />
+          </button>
           <button
             onClick={() => setLeftSidebarOpen(prev => !prev)}
             className="p-2 rounded-full bg-gray-700 text-gray-300 hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 focus:ring-offset-gray-800"
